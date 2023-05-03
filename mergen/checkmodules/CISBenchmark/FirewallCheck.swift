@@ -15,7 +15,7 @@ class FirewallCheck: Vulnerability {
             name: "Check Firewall Status",
             description: "The firewall helps protect your device from unauthorized access. This check verifies if the firewall is enabled and configured correctly.",
             category: "CIS Benchmark",
-            remediation: "To enable and configure the firewall, go to System Preferences -> Security & Privacy -> Firewall, click 'Turn On Firewall', and 'Firewall Options...' to block incoming connections.",
+            remediation: "To enable and configure the firewall, go to System Settings... -> Network -> Firewall, enable the firewall, and configure it using the 'Options...' button.",
             severity: "High",
             documentation: "For more information on configuring your firewall, visit: https://support.apple.com/en-us/HT201642",
             mitigation: "Enabling and configuring the firewall helps prevent unauthorized access to your device and increases overall security. A properly configured firewall can block incoming connections and minimize the risk of unauthorized access.",
