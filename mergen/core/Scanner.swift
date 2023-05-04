@@ -16,6 +16,7 @@ class Scanner {
     func loadModules(category: String? = nil) {
         modules = []
         modules.append(GatekeeperBypassCheck())
+//        modules.append(Crashtest())
         modules.append(FileVaultCheck())
         modules.append(SIPStatusCheck())
 //        modules.append(XProtectAndMRTCheck())  # Disabled.
@@ -60,7 +61,7 @@ class Scanner {
         modules.append(MediaSharingDisabledCheck())
         modules.append(BluetoothSharingDisabledCheck())
         modules.append(TimeMachineEnabledCheck())
-        modules.append(TimeMachineVolumesEncryptedCheck())
+//        modules.append(TimeMachineVolumesEncryptedCheck())  // Bad pipe usage.  NSFileHandleOperationException.
         modules.append(ShowWiFiStatusCheck())
         modules.append(BluetoothMenuBarCheck())
         modules.append(LocationServicesCheck())
