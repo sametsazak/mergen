@@ -52,6 +52,7 @@
 		BC876C1429DDC204002127F2 /* ColoredGroupedListStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */; };
 		BC876C1629E0307E002127F2 /* HTMLReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */; };
 		BC876C1829E0322D002127F2 /* JSONReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */; };
+		BC9B6A172A03E18200F672EE /* Crashtest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC9B6A162A03E18200F672EE /* Crashtest.swift */; };
 		BCA6498629D96F9E002FB952 /* FileHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498529D96F9E002FB952 /* FileHelpers.swift */; };
 		BCA6498829DACD37002FB952 /* FileSharingCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498729DACD37002FB952 /* FileSharingCheck.swift */; };
 		BCA6498A29DACE72002FB952 /* PrinterSharingDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498929DACE72002FB952 /* PrinterSharingDisabledCheck.swift */; };
@@ -135,6 +136,7 @@
 		BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColoredGroupedListStyle.swift; sourceTree = "<group>"; };
 		BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLReportGenerator.swift; sourceTree = "<group>"; };
 		BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONReportGenerator.swift; sourceTree = "<group>"; };
+		BC9B6A162A03E18200F672EE /* Crashtest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Crashtest.swift; sourceTree = "<group>"; };
 		BCA6498529D96F9E002FB952 /* FileHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHelpers.swift; sourceTree = "<group>"; };
 		BCA6498729DACD37002FB952 /* FileSharingCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSharingCheck.swift; sourceTree = "<group>"; };
 		BCA6498929DACE72002FB952 /* PrinterSharingDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrinterSharingDisabledCheck.swift; sourceTree = "<group>"; };
@@ -231,6 +233,7 @@
 				BC876C0B29DC51EC002127F2 /* ScreenSaverIntervalCheck.swift */,
 				BC876C0D29DC53D1002127F2 /* PasswordOnWakeCheck.swift */,
 				BC876C0F29DC5BDB002127F2 /* CheckAuditDisEnabled.swift */,
+				BC9B6A162A03E18200F672EE /* Crashtest.swift */,
 			);
 			path = CISBenchmark;
 			sourceTree = "<group>";
@@ -409,6 +412,7 @@
 				BC876C1829E0322D002127F2 /* JSONReportGenerator.swift in Sources */,
 				BC6C519229D78A6700B85797 /* AirPlayReceiverDisabledCheck.swift in Sources */,
 				BC6C516929D3934500B85797 /* SecureKernelExtensionLoadingCheck.swift in Sources */,
+				BC9B6A172A03E18200F672EE /* Crashtest.swift in Sources */,
 				BC6C518729D782EA00B85797 /* AppStoreUpdateCheck.swift in Sources */,
 				BC876BFC29DC263F002127F2 /* PersonalizedAds.swift in Sources */,
 				BCD734E529CF137C00C0B779 /* Vulnerability.swift in Sources */,

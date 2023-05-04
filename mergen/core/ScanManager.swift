@@ -67,12 +67,9 @@ class ScanManager: ObservableObject {
     }
 
 
-
-
     func scanningComplete() {
         DispatchQueue.main.async {
             self.scanning = false
-            // Process the results or update the UI as needed.
         }
     }
     func resetScan() {

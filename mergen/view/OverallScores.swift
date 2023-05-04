@@ -45,7 +45,7 @@ struct ScanResultSegment: View {
         }
         .padding(.bottom, 0)
         .frame(minWidth: 100, minHeight: 100) // Adding fixed frame
-        .background(Color.grayish.opacity(0.5))
+//        .background(Color.grayish.opacity(0.5))
     }
 }
 
