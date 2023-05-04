@@ -89,7 +89,7 @@ Once you have installed Mergen, you can launch the application and start checkin
 
 - Choose a category and press the scan button to start the security check.
 
-![Screenshot](img/category.png)
+![Screenshot](img/darkmode.png)
 
 - Once the security check is complete, you can see the reporting options and statistics. 
 
