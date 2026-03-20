@@ -70,7 +70,7 @@ Examples:
 			if sec == "" {
 				sec = "—"
 			}
-			output.PrintSectionHeader(sec, name)
+			output.PrintSectionHeader(sec, name, len(items))
 			fmt.Println()
 
 			for _, c := range items {

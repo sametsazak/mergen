@@ -1,5 +1,7 @@
 package checks
 
+import "strings"
+
 // CIS 5.9   — Guest home folder does not exist
 // CIS 6.1.1 — Filename extensions shown in Finder
 // CIS 6.1.2 — Home folder permissions
@@ -46,14 +48,30 @@ func init() {
 		"chmod 700 ~/",
 		false, nil,
 		func() Result {
-			out, err := shell("ls -ld ~/ | awk '{print $1}'")
+			out, err := shell("ls -la /Users/ 2>/dev/null")
 			if err != nil {
-				return Result{StatusWarn, "Could not read home folder permissions"}
+				return Result{StatusWarn, "Could not read /Users/ directory permissions"}
 			}
-			if out == "drwx------" || out == "drwx------+" {
-				return Result{StatusPass, "Home folder permissions: " + out}
+			for _, line := range strings.Split(out, "\n") {
+				if len(line) < 10 {
+					continue
+				}
+				perms := line[:10]
+				if !strings.HasPrefix(perms, "d") {
+					continue
+				}
+				// Skip . and .. entries and the Shared folder
+				if strings.HasSuffix(strings.TrimSpace(line), ".") ||
+					strings.HasSuffix(strings.TrimSpace(line), "..") ||
+					strings.Contains(line, "Shared") {
+					continue
+				}
+				// Check if 'others' have read bit (position 7, 0-indexed)
+				if len(perms) >= 8 && string(perms[7]) == "r" {
+					return Result{StatusWarn, "Some home folders may have world-readable permissions. Manual review recommended."}
+				}
 			}
-			return Result{StatusFail, "Home folder permissions are too open: " + out + " (should be drwx------)"}
+			return Result{StatusPass, "Home folder permissions appear restrictive"}
 		},
 	))
 }

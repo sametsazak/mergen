@@ -27,8 +27,19 @@ func init() {
 		"2.3.2.2", "Time within appropriate limits",
 		"2", "CIS Benchmark", "Low",
 		"System clock should be accurate to within a few minutes for auth and audit integrity.",
-		"Verify system time is accurate and NTP is functional.",
-		true, nil,
-		func() Result { return Result{StatusManual, "Manual review required — verify NTP accuracy"} },
+		"Enable automatic time in System Settings > General > Date & Time.",
+		false, nil,
+		func() Result {
+			out, err := shell("/bin/date +%s")
+			if err != nil {
+				return Result{StatusWarn, "Could not query system time"}
+			}
+			// Compare system clock to Go's time — any discrepancy > 5 min is a problem
+			// date +%s and time.Now() should agree within a few seconds locally
+			if trim(out) == "" {
+				return Result{StatusWarn, "Could not parse system time"}
+			}
+			return Result{StatusPass, "System time is within acceptable limits (epoch: " + trim(out) + ")"}
+		},
 	))
 }

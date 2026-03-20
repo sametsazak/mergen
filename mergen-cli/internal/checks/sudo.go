@@ -38,8 +38,11 @@ func init() {
 			"sudo authentication will be scoped per terminal window (TTY tickets).",
 		),
 		func() Result {
-			out, err := shell("grep -r 'timestamp_type' /etc/sudoers /etc/sudoers.d/ 2>/dev/null")
-			if err == nil && contains(out, "tty") {
+			out, err := run("/usr/bin/sudo", "-V")
+			if err != nil {
+				return Result{StatusWarn, "Could not read sudo configuration"}
+			}
+			if contains(out, "Type of authentication timestamp record: tty") {
 				return Result{StatusPass, "sudo TTY tickets are enabled"}
 			}
 			return Result{StatusFail, "sudo TTY tickets are not configured"}
@@ -57,8 +60,11 @@ func init() {
 			"sudo will log all allowed commands to the system log.",
 		),
 		func() Result {
-			out, err := shell("grep -r 'log_allowed' /etc/sudoers /etc/sudoers.d/ 2>/dev/null")
-			if err == nil && contains(out, "log_allowed") {
+			out, err := run("/usr/bin/sudo", "-V")
+			if err != nil {
+				return Result{StatusWarn, "Could not read sudo configuration"}
+			}
+			if contains(out, "Log when a command is allowed by sudoers") {
 				return Result{StatusPass, "sudo command logging is enabled"}
 			}
 			return Result{StatusFail, "sudo command logging is not configured"}

@@ -2,7 +2,7 @@
 //  SecurityScoreView.swift
 //  mergen
 //
-//  Speedometer gauge + per-section pass bars shown in the sidebar after a scan.
+//  Circular score ring + per-section pass bars shown in the sidebar after a scan.
 //
 
 import SwiftUI
@@ -21,7 +21,9 @@ struct SecurityScoreView: View {
     private var score:       Double { total > 0 ? Double(greenCount) / Double(total) : 0 }
 
     private var scoreColor: Color {
-        score >= 0.8 ? .green : score >= 0.5 ? .orange : .red
+        score >= 0.8 ? Color(red: 0.13, green: 0.73, blue: 0.54)
+            : score >= 0.5 ? Color(red: 0.97, green: 0.63, blue: 0.22)
+            : Color(red: 0.96, green: 0.36, blue: 0.36)
     }
     private var scoreLabel: String {
         score >= 0.8 ? "Good" : score >= 0.5 ? "Fair" : "At Risk"
@@ -47,17 +49,28 @@ struct SecurityScoreView: View {
     }
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
 
-            SpeedometerView(score: score, scoreColor: scoreColor, scoreLabel: scoreLabel)
+            // ── Circular score ring ────────────────────────────────────────
+            CircularScoreRing(score: score, scoreColor: scoreColor, scoreLabel: scoreLabel)
 
+            // ── Stat pills ─────────────────────────────────────────────────
+            HStack(spacing: 0) {
+                ScorePill(value: greenCount,  label: "Pass",  color: Color(red: 0.13, green: 0.73, blue: 0.54))
+                ScorePill(value: redCount,    label: "Fail",  color: Color(red: 0.96, green: 0.36, blue: 0.36))
+                ScorePill(value: yellowCount, label: "Warn",  color: Color(red: 0.97, green: 0.63, blue: 0.22))
+            }
+            .background(Color.primary.opacity(0.04))
+            .cornerRadius(8)
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.07), lineWidth: 1))
+
+            // ── Section bars ────────────────────────────────────────────────
             if !sections.isEmpty {
-                VStack(spacing: 6) {
+                VStack(spacing: 5) {
                     ForEach(sections, id: \.name) { sec in
                         SectionBarRow(name: sec.name, pass: sec.pass, total: sec.total)
                     }
                 }
-                .padding(.horizontal, 2)
             }
 
             if manualCount > 0 {
@@ -71,128 +84,85 @@ struct SecurityScoreView: View {
                 }
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
     }
 }
 
-// MARK: - Speedometer Gauge
+// MARK: - Circular Score Ring
 
-struct SpeedometerView: View {
-    let score:      Double
+struct CircularScoreRing: View {
+    let score: Double
     let scoreColor: Color
     let scoreLabel: String
 
+    @State private var animatedScore: Double = 0
+
+    private let ringSize: CGFloat  = 106
+    private let lineWidth: CGFloat = 11
+
     var body: some View {
-        Color.clear
-            .frame(height: 100)
-            .overlay(
-                GeometryReader { geo in
-                    SpeedometerCanvas(
-                        score:      score,
-                        scoreColor: scoreColor,
-                        scoreLabel: scoreLabel,
-                        size:       geo.size
-                    )
-                }
-            )
+        ZStack {
+            // Track
+            Circle()
+                .stroke(Color.primary.opacity(0.08), lineWidth: lineWidth)
+                .frame(width: ringSize, height: ringSize)
+
+            // Colored arc
+            Circle()
+                .trim(from: 0, to: animatedScore)
+                .stroke(
+                    AngularGradient(
+                        colors: [scoreColor.opacity(0.75), scoreColor],
+                        center: .center,
+                        startAngle: .degrees(-90),
+                        endAngle: .degrees(360 * animatedScore - 90)
+                    ),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
+                .frame(width: ringSize, height: ringSize)
+                .rotationEffect(.degrees(-90))
+                .animation(.spring(response: 1.1, dampingFraction: 0.82), value: animatedScore)
+
+            // Center
+            VStack(spacing: 0) {
+                Text("\(Int(score * 100))%")
+                    .font(.system(size: 21, weight: .bold, design: .rounded))
+                    .foregroundColor(scoreColor)
+                    .animation(.easeInOut(duration: 0.9), value: score)
+                Text(scoreLabel.uppercased())
+                    .font(.system(size: 8, weight: .semibold, design: .rounded))
+                    .foregroundColor(.secondary)
+                    .tracking(0.7)
+            }
+        }
+        .frame(width: ringSize, height: ringSize)
+        .onAppear { animatedScore = score }
+        .onChange(of: score) { newVal in animatedScore = newVal }
     }
 }
 
-private struct SpeedometerCanvas: View {
-    let score:      Double
-    let scoreColor: Color
-    let scoreLabel: String
-    let size:       CGSize
+// MARK: - Score Pill
 
-    private var cx: CGFloat { size.width / 2 }
-    private var cy: CGFloat { size.height }
-    private var r:  CGFloat { min(size.width / 2 - 10, size.height - 8) }
-    private var lw: CGFloat { 9 }
-
-    // needle angle: 180° = left (0%), 270° = up (50%), 360° = right (100%)
-    private var needleRad: Double { (180.0 + score * 180.0) * .pi / 180.0 }
+struct ScorePill: View {
+    let value: Int
+    let label: String
+    let color: Color
 
     var body: some View {
-        ZStack {
-            gaugeBackground
-            progressArc
-            needle
-            pivotDot
-            scoreLabel_view
-        }
-        .clipped()
-    }
-
-    // MARK: Sub-views (split to help the type checker)
-
-    private var gaugeBackground: some View {
-        ZStack {
-            // Red zone 180→240
-            arcStroke(from: 180, to: 240, color: Color.red.opacity(0.15), cap: .butt)
-            // Orange zone 240→300
-            arcStroke(from: 240, to: 300, color: Color.orange.opacity(0.13), cap: .butt)
-            // Green zone 300→360
-            arcStroke(from: 300, to: 360, color: Color.green.opacity(0.13), cap: .butt)
-            // Gray track overlay
-            arcStroke(from: 180, to: 360, color: Color.primary.opacity(0.07), cap: .butt)
-        }
-    }
-
-    private var progressArc: some View {
-        arcStroke(from: 180, to: 180 + score * 180, color: scoreColor, cap: .round)
-            .animation(.easeInOut(duration: 0.9), value: score)
-    }
-
-    private var needleTip: CGPoint {
-        let nLen = r * 0.66
-        return CGPoint(x: cx + nLen * CGFloat(Foundation.cos(needleRad)),
-                       y: cy + nLen * CGFloat(Foundation.sin(needleRad)))
-    }
-
-    private var needle: some View {
-        let tip = needleTip
-        let pivot = CGPoint(x: cx, y: cy)
-        return Path { p in
-            p.move(to: pivot)
-            p.addLine(to: tip)
-        }
-        .stroke(Color.primary.opacity(0.6),
-                style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-        .animation(.easeInOut(duration: 0.9), value: score)
-    }
-
-    private var pivotDot: some View {
-        Circle()
-            .fill(Color.primary.opacity(0.2))
-            .frame(width: 8, height: 8)
-            .position(x: cx, y: cy)
-    }
-
-    private var scoreLabel_view: some View {
         VStack(spacing: 1) {
-            Text("\(Int(score * 100))%")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(scoreColor)
-            Text(scoreLabel.uppercased())
-                .font(.system(size: 8, weight: .semibold, design: .rounded))
+            Text("\(value)")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+            Text(label)
+                .font(.system(size: 9, weight: .medium))
                 .foregroundColor(.secondary)
-                .tracking(0.6)
         }
-        .position(x: cx, y: cy - r * 0.50)
-    }
-
-    // MARK: Helper
-
-    private func arcStroke(from: Double, to: Double, color: Color, cap: CGLineCap) -> some View {
-        Path { p in
-            p.addArc(center: .init(x: cx, y: cy), radius: r,
-                     startAngle: .degrees(from), endAngle: .degrees(to), clockwise: true)
-        }
-        .stroke(color, style: StrokeStyle(lineWidth: lw, lineCap: cap))
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 7)
     }
 }
 
-// MARK: - Section Pass Bar
+// MARK: - Section Bar Row
 
 struct SectionBarRow: View {
     let name:  String
@@ -200,7 +170,13 @@ struct SectionBarRow: View {
     let total: Int
 
     private var ratio:    Double { total > 0 ? Double(pass) / Double(total) : 0 }
-    private var barColor: Color  { ratio >= 0.8 ? .green : ratio >= 0.5 ? .orange : .red }
+    private var barColor: Color  {
+        ratio >= 0.8
+            ? Color(red: 0.13, green: 0.73, blue: 0.54)
+            : ratio >= 0.5
+                ? Color(red: 0.97, green: 0.63, blue: 0.22)
+                : Color(red: 0.96, green: 0.36, blue: 0.36)
+    }
 
     var body: some View {
         HStack(spacing: 6) {
@@ -212,15 +188,15 @@ struct SectionBarRow: View {
 
             GeometryReader { g in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(Color.primary.opacity(0.07))
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(barColor.opacity(0.72))
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(barColor)
                         .frame(width: max(0, g.size.width * ratio))
-                        .animation(.easeInOut(duration: 0.6).delay(0.05), value: ratio)
+                        .animation(.spring(response: 0.8, dampingFraction: 0.82).delay(0.1), value: ratio)
                 }
             }
-            .frame(height: 5)
+            .frame(height: 6)
 
             Text("\(pass)/\(total)")
                 .font(.system(size: 8, design: .monospaced))

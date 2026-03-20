@@ -15,10 +15,10 @@ func init() {
 		),
 		func() Result {
 			out, err := defaultsRead("/Library/Preferences/com.apple.mDNSResponder.plist", "NoMulticastAdvertisements")
-			if err != nil || trim(out) != "1" {
-				return Result{StatusFail, "Bonjour advertising is enabled (NoMulticastAdvertisements = " + out + ")"}
+			if err == nil && trim(out) == "1" {
+				return Result{StatusPass, "Bonjour advertising is disabled"}
 			}
-			return Result{StatusPass, "Bonjour advertising is disabled"}
+			return Result{StatusFail, "Bonjour advertising is enabled"}
 		},
 	))
 }

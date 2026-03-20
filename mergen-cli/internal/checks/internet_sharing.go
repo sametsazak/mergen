@@ -75,7 +75,10 @@ func init() {
 		),
 		func() Result {
 			out, err := defaultsReadHost("com.apple.Bluetooth", "PrefKeyServicesEnabled")
-			if err == nil && trim(out) == "1" {
+			if err != nil {
+				return Result{StatusWarn, "Could not determine Bluetooth Sharing status"}
+			}
+			if trim(out) == "1" {
 				return Result{StatusFail, "Bluetooth Sharing is enabled"}
 			}
 			return Result{StatusPass, "Bluetooth Sharing is disabled"}

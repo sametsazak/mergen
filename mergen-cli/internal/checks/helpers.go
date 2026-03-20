@@ -20,13 +20,19 @@ func run(name string, args ...string) (string, error) {
 }
 
 // defaultsRead reads a single defaults key. Returns ("", error) if key absent.
+// Uses stdout-only so that "domain/default pair does not exist" stderr messages
+// never leak into check output strings.
 func defaultsRead(domain, key string) (string, error) {
-	return run("/usr/bin/defaults", "read", domain, key)
+	cmd := exec.Command("/usr/bin/defaults", "read", domain, key)
+	out, err := cmd.Output()
+	return strings.TrimSpace(string(out)), err
 }
 
 // defaultsReadHost reads a -currentHost defaults key.
 func defaultsReadHost(domain, key string) (string, error) {
-	return run("/usr/bin/defaults", "-currentHost", "read", domain, key)
+	cmd := exec.Command("/usr/bin/defaults", "-currentHost", "read", domain, key)
+	out, err := cmd.Output()
+	return strings.TrimSpace(string(out)), err
 }
 
 // launchctlDisabled returns true when the given service label is listed as

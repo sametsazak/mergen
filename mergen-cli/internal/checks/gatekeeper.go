@@ -71,9 +71,18 @@ func init() {
 		"2.6.3.4", "Share with app developers disabled",
 		"2", "CIS Benchmark", "Low",
 		"Sharing crash data with app developers may expose system details.",
-		"Disable in System Settings > Privacy & Security > Analytics & Improvements.",
-		true, nil,
-		func() Result { return Result{StatusManual, "Manual review required"} },
+		"Deploy MDM profile with allowDiagnosticSubmission = false.",
+		false, nil,
+		func() Result {
+			out, err := shell("osascript -l JavaScript -e \"$.NSUserDefaults.alloc.initWithSuiteName('com.apple.applicationaccess').objectForKey('allowDiagnosticSubmission').js\" 2>/dev/null")
+			if err == nil && trim(out) == "false" {
+				return Result{StatusPass, "Share with App Developers is disabled via MDM"}
+			}
+			if err == nil && trim(out) == "true" {
+				return Result{StatusFail, "Share with App Developers is enabled via MDM"}
+			}
+			return Result{StatusWarn, "Share with App Developers state unknown — no MDM profile installed"}
+		},
 	))
 
 	Register(newCheck(
@@ -118,20 +127,35 @@ func init() {
 	))
 
 	Register(newCheck(
-		"2.6.7", "Lockdown Mode (advisory)",
+		"2.6.7", "Lockdown Mode status",
 		"2", "CIS Benchmark", "Low",
 		"Lockdown Mode provides extreme protection for high-risk individuals.",
 		"Enable in System Settings > Privacy & Security > Lockdown Mode.",
 		true, nil,
-		func() Result { return Result{StatusManual, "Advisory: review whether Lockdown Mode is appropriate"} },
+		func() Result {
+			out, err := defaultsRead("/Library/Preferences/com.apple.security.lockdown", "LockdownModeEnabled")
+			if err == nil && trim(out) == "1" {
+				return Result{StatusPass, "Lockdown Mode is enabled"}
+			}
+			return Result{StatusManual, "Lockdown Mode is disabled — advisory: only required for high-risk users"}
+		},
 	))
 
 	Register(newCheck(
 		"2.6.8", "Admin password required for System Settings",
 		"2", "CIS Benchmark", "Medium",
 		"Requiring admin authentication prevents unauthorized changes to system preferences.",
-		"Enable in System Settings > Privacy & Security.",
-		true, nil,
-		func() Result { return Result{StatusManual, "Manual review required"} },
+		"security authorizationdb write system.preferences allow-root false",
+		false, nil,
+		func() Result {
+			out, err := shell("security authorizationdb read system.preferences 2>/dev/null")
+			if err != nil {
+				return Result{StatusWarn, "Could not read authorization database"}
+			}
+			if contains(out, "<false/>") && contains(out, "<string>admin</string>") {
+				return Result{StatusPass, "Admin password is required for system-wide preferences"}
+			}
+			return Result{StatusFail, "Admin password may not be required for system-wide preferences"}
+		},
 	))
 }

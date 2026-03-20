@@ -2,12 +2,12 @@ package checks
 
 import "strings"
 
-// CIS 3.2 — Security auditing enabled
-// CIS 3.3 — Audit flags configured
+// CIS 3.1 — Security auditing enabled
+// CIS 3.2 — Audit flags configured
 
 func init() {
 	Register(newCheck(
-		"3.2", "Security auditing enabled",
+		"3.1", "Security auditing enabled",
 		"3", "CIS Benchmark", "Medium",
 		"The macOS audit daemon (auditd) records security-relevant events for forensic analysis.",
 		"sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.auditd.plist",
@@ -22,7 +22,7 @@ func init() {
 	))
 
 	Register(newCheck(
-		"3.3", "Audit flags configured",
+		"3.2", "Audit flags configured",
 		"3", "CIS Benchmark", "Medium",
 		"Audit flags should capture login/logout (lo), auth (aa), admin (ad), file deletion (fd, fm).",
 		"Edit /etc/security/audit_control and set: flags=lo,aa,ad,fd,fm,-all",

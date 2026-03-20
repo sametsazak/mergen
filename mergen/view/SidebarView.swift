@@ -8,47 +8,56 @@ import SwiftUI
 struct SidebarView: View {
     @ObservedObject var scanManager: ScanManager
     @Binding var selectedCategory: String?
-    @State private var isScanButtonHovered = false
     @State private var showFixSheet = false
 
-    private let categories: [(label: String, icon: String, value: String?)] = [
-        ("All Checks",    "shield.lefthalf.filled",  nil),
-        ("CIS Benchmark", "lock.laptopcomputer",      "CIS Benchmark"),
-        ("Privacy",       "eye.slash",                "Privacy"),
-        ("Security",      "lock.shield",              "Security"),
+    private let categories: [(label: String, icon: String, value: String?, color: Color)] = [
+        ("All Checks",    "shield.lefthalf.filled",  nil,             Color(red: 0.39, green: 0.40, blue: 0.95)),
+        ("CIS Benchmark", "lock.laptopcomputer",      "CIS Benchmark", Color(red: 0.13, green: 0.73, blue: 0.54)),
+        ("Privacy",       "eye.slash",                "Privacy",       Color(red: 0.98, green: 0.63, blue: 0.22)),
+        ("Security",      "lock.shield",              "Security",      Color(red: 0.96, green: 0.36, blue: 0.36)),
     ]
 
     var body: some View {
         VStack(spacing: 0) {
 
-            // Branding
-            VStack(spacing: 4) {
-                Image(systemName: "shield.lefthalf.filled.slash")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 38, height: 38)
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.accentColor, .accentColor.opacity(0.6)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+            // ── Branding ───────────────────────────────────────────────────
+            VStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.12))
+                        .frame(width: 56, height: 56)
+                    Image(systemName: "shield.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 28, height: 28)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.accentColor, .accentColor.opacity(0.65)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                Text("Mergen")
-                    .font(.system(size: 19, weight: .bold, design: .rounded))
-                Text("macOS Security Audit")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.top, 22)
-            .padding(.bottom, 16)
+                        .shadow(color: .accentColor.opacity(0.35), radius: 6, y: 2)
+                }
 
-            // Category list
-            VStack(spacing: 2) {
+                VStack(spacing: 2) {
+                    Text("Mergen")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                    Text("macOS Security Audit")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.top, 24)
+            .padding(.bottom, 18)
+
+            // ── Navigation ─────────────────────────────────────────────────
+            VStack(spacing: 3) {
                 ForEach(categories, id: \.label) { cat in
                     CategoryRow(
                         label: cat.label,
                         icon: cat.icon,
+                        iconColor: cat.color,
                         isSelected: selectedCategory == cat.value,
                         isDisabled: scanManager.scanning
                     ) {
@@ -56,36 +65,34 @@ struct SidebarView: View {
                     }
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.top, 6)
-            .padding(.bottom, 10)
+            .padding(.horizontal, 10)
+            .padding(.bottom, 14)
 
-            // Scan controls
-            VStack(spacing: 10) {
+            Divider().padding(.horizontal, 14)
+
+            // ── Scan controls ──────────────────────────────────────────────
+            VStack(spacing: 8) {
                 if scanManager.scanning {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 10) {
                         CircularProgressView(progress: scanManager.progress)
-                        Text("\(scanManager.scanResults.count) checks completed")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .monospacedDigit()
-                        Text("\(Int(scanManager.progress * 100))%")
-                            .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundColor(.accentColor)
+                        VStack(spacing: 2) {
+                            Text("\(Int(scanManager.progress * 100))%")
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundColor(.accentColor)
+                            Text("\(scanManager.scanResults.count) checks done")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 14)
                 } else {
                     Button(action: {
                         scanManager.startScan(category: selectedCategory)
                     }) {
-                        Label("Start Scan", systemImage: "play.circle.fill")
+                        Label("Start Scan", systemImage: "play.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PrimaryButtonStyle())
-                    .scaleEffect(isScanButtonHovered ? 1.02 : 1.0)
-                    .onHover { h in
-                        withAnimation(.easeInOut(duration: 0.15)) { isScanButtonHovered = h }
-                    }
 
                     if !scanManager.scanResults.isEmpty {
                         let fixableCount = scanManager.scanResults.filter { $0.isAutoFixable }.count
@@ -111,13 +118,13 @@ struct SidebarView: View {
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 12)
+            .padding(.top, 14)
 
-            // Security score (shown after scan)
+            // ── Score (after scan) ──────────────────────────────────────────
             if !scanManager.scanResults.isEmpty && !scanManager.scanning {
                 SecurityScoreView(scanResults: scanManager.scanResults)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 4)
+                    .padding(.horizontal, 10)
+                    .padding(.top, 8)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
 
@@ -132,6 +139,7 @@ struct SidebarView: View {
 struct CategoryRow: View {
     let label: String
     let icon: String
+    let iconColor: Color
     let isSelected: Bool
     let isDisabled: Bool
     let action: () -> Void
@@ -141,21 +149,35 @@ struct CategoryRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Image(systemName: icon)
-                    .frame(width: 20)
-                    .foregroundColor(isSelected ? .accentColor : .secondary)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(isSelected ? iconColor.opacity(0.15) : Color.primary.opacity(0.06))
+                        .frame(width: 26, height: 26)
+                    Image(systemName: icon)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(isSelected ? iconColor : .secondary)
+                }
                 Text(label)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                     .foregroundColor(isSelected ? .primary : .secondary)
                 Spacer()
+                if isSelected {
+                    Circle()
+                        .fill(iconColor)
+                        .frame(width: 6, height: 6)
+                }
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
             .background(
-                RoundedRectangle(cornerRadius: 7)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(isSelected
-                          ? Color.accentColor.opacity(0.12)
-                          : (isHovered ? Color.primary.opacity(0.05) : Color.clear))
+                          ? iconColor.opacity(0.09)
+                          : (isHovered ? Color.primary.opacity(0.04) : Color.clear))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? iconColor.opacity(0.22) : Color.clear, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -170,12 +192,23 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .semibold))
-            .padding(.vertical, 8)
+            .padding(.vertical, 9)
             .padding(.horizontal, 14)
-            .background(Color.accentColor)
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.39, green: 0.44, blue: 0.98),
+                        Color(red: 0.52, green: 0.34, blue: 0.96)
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
             .foregroundColor(.white)
-            .cornerRadius(9)
-            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .cornerRadius(10)
+            .shadow(color: Color(red: 0.39, green: 0.40, blue: 0.95).opacity(0.35), radius: 6, y: 3)
+            .opacity(configuration.isPressed ? 0.88 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
     }
 }
 
@@ -183,24 +216,35 @@ struct FixButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .semibold))
-            .padding(.vertical, 8)
+            .padding(.vertical, 9)
             .padding(.horizontal, 14)
-            .background(Color.red.opacity(0.88))
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.96, green: 0.28, blue: 0.28),
+                        Color(red: 0.83, green: 0.17, blue: 0.37)
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
             .foregroundColor(.white)
-            .cornerRadius(9)
-            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .cornerRadius(10)
+            .shadow(color: Color.red.opacity(0.30), radius: 6, y: 3)
+            .opacity(configuration.isPressed ? 0.88 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
     }
 }
 
 struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 13))
-            .padding(.vertical, 7)
+            .font(.system(size: 13, weight: .medium))
+            .padding(.vertical, 8)
             .padding(.horizontal, 14)
             .background(Color.primary.opacity(0.07))
-            .foregroundColor(.primary)
-            .cornerRadius(9)
+            .foregroundColor(.secondary)
+            .cornerRadius(10)
             .opacity(configuration.isPressed ? 0.7 : 1.0)
     }
 }

@@ -39,10 +39,13 @@ func init() {
 		),
 		func() Result {
 			out, err := defaultsRead("com.apple.Safari", "WarnAboutFraudulentWebsites")
-			if err != nil || trim(out) != "1" {
+			if err == nil && trim(out) == "1" {
+				return Result{StatusPass, "Safari fraudulent website warning is enabled"}
+			}
+			if err == nil && trim(out) == "0" {
 				return Result{StatusFail, "Safari fraud warning is disabled"}
 			}
-			return Result{StatusPass, "Safari fraudulent website warning is enabled"}
+			return Result{StatusWarn, "Safari fraud warning state unknown (default is enabled)"}
 		},
 	))
 
@@ -58,10 +61,10 @@ func init() {
 		),
 		func() Result {
 			out, err := defaultsRead("com.apple.Safari", "BlockStoragePolicy")
-			if err != nil || trim(out) != "2" {
-				return Result{StatusFail, "Cross-site tracking prevention not fully enabled (BlockStoragePolicy = " + out + ")"}
+			if err == nil && trim(out) == "2" {
+				return Result{StatusPass, "Cross-site tracking prevention is enabled"}
 			}
-			return Result{StatusPass, "Cross-site tracking prevention is enabled"}
+			return Result{StatusWarn, "Safari cross-site tracking prevention is not fully configured (BlockStoragePolicy = " + trim(out) + ")"}
 		},
 	))
 
@@ -97,9 +100,9 @@ func init() {
 		func() Result {
 			out, err := defaultsRead("com.apple.Safari", "PlugInFirstVisitPolicy")
 			if err == nil && trim(out) == "2" {
-				return Result{StatusPass, "Safari internet plugins are disabled (PlugInFirstVisitPolicy = 2)"}
+				return Result{StatusPass, "Safari internet plugins are disabled"}
 			}
-			return Result{StatusFail, "Safari internet plugins are not blocked (PlugInFirstVisitPolicy = " + out + ")"}
+			return Result{StatusFail, "Safari internet plugins are not blocked"}
 		},
 	))
 
@@ -115,10 +118,13 @@ func init() {
 		),
 		func() Result {
 			out, err := defaultsRead("com.apple.Safari", "ShowOverlayStatusBar")
-			if err != nil || trim(out) != "1" {
+			if err == nil && trim(out) == "1" {
+				return Result{StatusPass, "Safari status bar is shown"}
+			}
+			if err == nil && trim(out) == "0" {
 				return Result{StatusFail, "Safari status bar is hidden"}
 			}
-			return Result{StatusPass, "Safari status bar is shown"}
+			return Result{StatusWarn, "Safari status bar state unknown"}
 		},
 	))
 }

@@ -11,14 +11,16 @@ func init() {
 		"Enable in System Settings > Time Machine.",
 		false, nil,
 		func() Result {
-			out, err := defaultsRead("/Library/Preferences/com.apple.TimeMachine.plist", "AutoBackup")
-			if err != nil {
-				return Result{StatusFail, "Time Machine plist not found — Time Machine may not be configured"}
+			out, err := run("/usr/bin/tmutil", "destinationinfo")
+			if err == nil && (contains(out, "Name") || contains(out, "Kind")) {
+				return Result{StatusPass, "Time Machine backup destination is configured"}
 			}
-			if trim(out) == "1" {
+			// Fall back to AutoBackup plist key
+			pout, perr := defaultsRead("/Library/Preferences/com.apple.TimeMachine.plist", "AutoBackup")
+			if perr == nil && trim(pout) == "1" {
 				return Result{StatusPass, "Time Machine automatic backup is enabled"}
 			}
-			return Result{StatusFail, "Time Machine automatic backup is disabled"}
+			return Result{StatusFail, "Time Machine backup destination is not configured"}
 		},
 	))
 

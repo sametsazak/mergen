@@ -118,7 +118,7 @@ Examples:
 				if sec == "" {
 					name = "Additional Checks"
 				}
-				output.PrintSectionHeader(sec, name)
+				output.PrintSectionHeader(sec, name, len(items))
 
 				for _, r := range items {
 					if flagFailed && r.Result.Status != checks.StatusFail {

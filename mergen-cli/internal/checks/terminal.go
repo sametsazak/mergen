@@ -18,17 +18,23 @@ func init() {
 			out, err := run("/usr/bin/osascript", "-l", "JavaScript", "-e",
 				"$.NSUserDefaults.alloc.initWithSuiteName('com.apple.Terminal').objectForKey('SecureKeyboardEntry').js")
 			if err == nil {
-				if trim(out) == "true" || trim(out) == "1" {
+				if trim(out) == "true" {
 					return Result{StatusPass, "Secure keyboard entry is enabled"}
 				}
-				return Result{StatusFail, "Secure keyboard entry is disabled"}
+				if trim(out) == "false" {
+					return Result{StatusFail, "Secure keyboard entry is disabled"}
+				}
+				// Neither true nor false — fall through to defaults
 			}
 			// Fallback to defaults read
-			out2, err2 := defaultsRead("com.apple.Terminal", "SecureKeyboardEntry")
-			if err2 != nil || trim(out2) != "1" {
-				return Result{StatusFail, "Secure keyboard entry is disabled (value: " + out2 + ")"}
+			out2, _ := defaultsRead("com.apple.Terminal", "SecureKeyboardEntry")
+			if trim(out2) == "1" {
+				return Result{StatusPass, "Secure keyboard entry is enabled"}
 			}
-			return Result{StatusPass, "Secure keyboard entry is enabled"}
+			if trim(out2) == "0" {
+				return Result{StatusFail, "Secure keyboard entry is disabled"}
+			}
+			return Result{StatusWarn, "Secure keyboard entry state unknown"}
 		},
 	))
 }

@@ -48,22 +48,28 @@ struct FixAllSheet: View {
 
             // ── Admin privilege notice ───────────────────────────────────────
             if adminCount > 0 {
-                HStack(spacing: 10) {
-                    Image(systemName: "lock.shield.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(.orange)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("\(adminCount) fix\(adminCount == 1 ? "" : "es") require administrator privileges")
-                            .font(.system(size: 12, weight: .semibold))
-                        Text("You will be prompted once for your password. All admin fixes are applied together.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                let adminColor = Color(red: 0.97, green: 0.63, blue: 0.22)
+                HStack(spacing: 0) {
+                    RoundedRectangle(cornerRadius: 0)
+                        .fill(adminColor)
+                        .frame(width: 4)
+                    HStack(spacing: 12) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(adminColor)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("\(adminCount) fix\(adminCount == 1 ? "" : "es") require administrator privileges")
+                                .font(.system(size: 13, weight: .semibold))
+                            Text("You will be prompted once for your password. All admin fixes are batched together.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.orange.opacity(0.07))
+                .background(adminColor.opacity(0.08))
                 Divider()
             }
 
@@ -104,10 +110,25 @@ struct FixAllSheet: View {
                     } label: {
                         Label("Apply All Fixes", systemImage: "bolt.fill")
                             .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.39, green: 0.44, blue: 0.98),
+                                        Color(red: 0.52, green: 0.34, blue: 0.96)
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(9)
+                            .shadow(color: Color.accentColor.opacity(0.30), radius: 5, y: 2)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.accentColor)
+                    .buttonStyle(.plain)
                     .disabled(fixable.isEmpty)
+                    .opacity(fixable.isEmpty ? 0.5 : 1)
                 }
             }
             .padding(16)

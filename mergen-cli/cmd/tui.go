@@ -86,7 +86,7 @@ type menuEntry struct {
 }
 
 var mainMenu = []menuEntry{
-	{"⚡", "Scan All Checks", "Run all 73 security checks concurrently", "a", "scan"},
+	{"⚡", "Scan All Checks", "Run all 85 security checks concurrently", "a", "scan"},
 	{"§", "Scan by Section", "Choose a specific CIS section to audit", "s", "section"},
 	{"✗", "Show Only Failures", "Scan and display only failing checks", "f", "scan --failed"},
 	{"⚙", "Fix Issues", "Auto-remediate all fixable failures", "x", "fix"},

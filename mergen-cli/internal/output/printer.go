@@ -3,6 +3,7 @@ package output
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/sametsazak/mergen-cli/internal/checks"
@@ -55,39 +56,73 @@ func StatusIcon(s checks.Status) string {
 	}
 }
 
-// PrintCheckResult prints a single result line during scanning.
+// PrintCheckResult prints a single result line.
 func PrintCheckResult(cr checks.CheckResult) {
 	c := cr.Check
 	r := cr.Result
 
-	cisTag := ""
-	if id := c.CISID(); id != "" {
-		cisTag = CISTag.Render(fmt.Sprintf("[%-8s]", id))
+	// CIS ID column — fixed 9 chars wide, no brackets
+	cisID := c.CISID()
+	var cisCol string
+	if cisID != "" {
+		cisCol = CISTag.Render(fmt.Sprintf("%-9s", cisID))
 	} else {
-		cisTag = CISTag.Render("[        ]")
+		cisCol = strings.Repeat(" ", 9)
 	}
 
 	icon := StatusIcon(r.Status)
+
 	name := c.Name()
-	if len(name) > 52 {
-		name = name[:49] + "…"
+	maxName := 50
+	if utf8.RuneCountInString(name) > maxName {
+		runes := []rune(name)
+		name = string(runes[:maxName-1]) + "…"
 	}
 
-	line := fmt.Sprintf("  %s %s %-52s", icon, cisTag, name)
-	fmt.Println(line)
+	// Name colour: dim for pass (already resolved), bright for fail/warn/manual
+	var nameStyle lipgloss.Style
+	switch r.Status {
+	case checks.StatusPass:
+		nameStyle = Muted
+	case checks.StatusFail:
+		nameStyle = Bright.Bold(true)
+	default:
+		nameStyle = Bright
+	}
 
-	if r.Status == checks.StatusFail || r.Status == checks.StatusError {
-		if r.Output != "" {
-			fmt.Println(OutputTxt.Render(r.Output))
+	fmt.Printf("  %s  %s %s\n", icon, cisCol, nameStyle.Render(name))
+
+	// Show detail line for Fail, Warn, and Error
+	if r.Output != "" && (r.Status == checks.StatusFail || r.Status == checks.StatusWarn || r.Status == checks.StatusError) {
+		msg := r.Output
+		// Truncate extremely long messages (e.g. plist dumps)
+		const maxMsg = 110
+		if utf8.RuneCountInString(msg) > maxMsg {
+			runes := []rune(msg)
+			msg = string(runes[:maxMsg-1]) + "…"
 		}
+		fmt.Printf("     %s %s\n", Dim.Render("└─"), OutputTxt.Render(msg))
 	}
 }
 
-// PrintSectionHeader prints a section divider.
-func PrintSectionHeader(section, title string) {
-	label := fmt.Sprintf("  §%s  %s", section, title)
+// PrintSectionHeader prints a section divider with optional check count.
+func PrintSectionHeader(section, title string, count int) {
+	var label string
+	if section == "" {
+		label = "Additional Checks"
+	} else {
+		label = fmt.Sprintf("§%s  %s", section, title)
+	}
+
+	countHint := ""
+	if count > 0 {
+		countHint = "  " + Dim.Render(fmt.Sprintf("%d checks", count))
+	}
+
+	const ruleLen = 52
 	fmt.Println()
-	fmt.Println(SectionBox.Render(label))
+	fmt.Printf("  %s%s\n", Accent.Bold(true).Render(label), countHint)
+	fmt.Printf("  %s\n", Dim.Render(strings.Repeat("─", ruleLen)))
 }
 
 // PrintProgress renders an inline progress bar.
@@ -95,19 +130,20 @@ func PrintProgress(done, total int) string {
 	if total == 0 {
 		return ""
 	}
-	width := 30
+	width := 32
 	filled := int(float64(done) / float64(total) * float64(width))
-	bar := strings.Repeat("█", filled) + strings.Repeat("░", width-filled)
+	bar := ProgressBar.Render(strings.Repeat("█", filled)) +
+		Dim.Render(strings.Repeat("░", width-filled))
 	pct := int(float64(done) / float64(total) * 100)
-	return fmt.Sprintf("  %s %s  %d%%  (%d/%d)",
-		ProgressBar.Render(bar),
-		Muted.Render(""),
+	return fmt.Sprintf("  %s  %s  %d%%  (%d/%d)",
+		bar,
+		Dim.Render("scanning"),
 		pct, done, total)
 }
 
-// PrintSummary prints the final scan summary.
+// PrintSummary prints the final scan summary box.
 func PrintSummary(results []checks.CheckResult) {
-	var pass, fail, warn, manual, errCount int
+	var pass, fail, warn, manual int
 	for _, r := range results {
 		switch r.Result.Status {
 		case checks.StatusPass:
@@ -118,34 +154,39 @@ func PrintSummary(results []checks.CheckResult) {
 			warn++
 		case checks.StatusManual:
 			manual++
-		default:
-			errCount++
 		}
 	}
 
 	total := len(results)
-	score := 0.0
 	automated := pass + fail + warn
+	score := 0.0
 	if automated > 0 {
 		score = float64(pass) / float64(automated) * 100
 	}
 
 	var scoreStyle lipgloss.Style
+	var scoreLabel string
 	switch {
-	case score >= 80:
+	case score >= 90:
 		scoreStyle = PassTxt.Bold(true)
+		scoreLabel = PassTxt.Render("Excellent")
+	case score >= 75:
+		scoreStyle = PassTxt.Bold(true)
+		scoreLabel = PassTxt.Render("Good")
 	case score >= 50:
 		scoreStyle = WarnTxt.Bold(true)
+		scoreLabel = WarnTxt.Render("Fair")
 	default:
 		scoreStyle = FailTxt.Bold(true)
+		scoreLabel = FailTxt.Render("Poor")
 	}
 
 	// Score bar
-	width := 40
-	filled := int(score / 100 * float64(width))
+	barWidth := 44
+	filled := int(score / 100 * float64(barWidth))
 	var barColor lipgloss.Color
 	switch {
-	case score >= 80:
+	case score >= 75:
 		barColor = colPass
 	case score >= 50:
 		barColor = colWarn
@@ -153,14 +194,16 @@ func PrintSummary(results []checks.CheckResult) {
 		barColor = colFail
 	}
 	bar := lipgloss.NewStyle().Foreground(barColor).Render(strings.Repeat("█", filled)) +
-		Muted.Render(strings.Repeat("░", width-filled))
+		Dim.Render(strings.Repeat("░", barWidth-filled))
 
 	content := fmt.Sprintf(
-		"%s  %s\n\n"+
-			"  %s  %s pass    %s  %s fail    %s  %s warn    %s  %s manual\n\n"+
-			"  %s\n  %s",
+		"%s  %s  %s\n\n"+
+			"  %s  %s pass    %s  %s fail    %s  %s warn    %s  %s info\n\n"+
+			"  %s\n"+
+			"  %s",
 		Accent.Render("Security Score"),
 		scoreStyle.Render(fmt.Sprintf("%.0f%%", score)),
+		scoreLabel,
 		PassTxt.Render("✓"), Bold.Render(fmt.Sprintf("%-3d", pass)),
 		FailTxt.Render("✗"), Bold.Render(fmt.Sprintf("%-3d", fail)),
 		WarnTxt.Render("⚠"), Bold.Render(fmt.Sprintf("%-3d", warn)),
@@ -174,7 +217,7 @@ func PrintSummary(results []checks.CheckResult) {
 	fmt.Println()
 }
 
-// PrintResults prints all results grouped by section.
+// PrintResults prints all results grouped by section (used by report command).
 func PrintResults(results []checks.CheckResult) {
 	sections := []struct{ num, title string }{
 		{"1", "Software Updates"},
@@ -186,14 +229,11 @@ func PrintResults(results []checks.CheckResult) {
 		{"", "Additional Checks"},
 	}
 
-	// Index results by section
 	bySection := map[string][]checks.CheckResult{}
 	for _, r := range results {
 		id := r.Check.CISID()
 		var key string
-		if id == "" {
-			key = ""
-		} else {
+		if id != "" {
 			parts := strings.SplitN(id, ".", 2)
 			key = parts[0]
 		}
@@ -205,7 +245,7 @@ func PrintResults(results []checks.CheckResult) {
 		if !ok || len(items) == 0 {
 			continue
 		}
-		PrintSectionHeader(sec.num, sec.title)
+		PrintSectionHeader(sec.num, sec.title, len(items))
 		for _, r := range items {
 			PrintCheckResult(r)
 		}
@@ -233,7 +273,7 @@ func PrintFixableList(results []checks.CheckResult) {
 
 	for _, r := range fixable {
 		fi := r.Check.Fix()
-		privTag := Muted.Render("[user]")
+		privTag := Muted.Render("[user] ")
 		if fi.RequiresAdmin {
 			privTag = WarnTxt.Render("[admin]")
 		}
@@ -243,7 +283,7 @@ func PrintFixableList(results []checks.CheckResult) {
 			r.Check.Name(),
 		)
 		if fi.Description != "" {
-			fmt.Println(OutputTxt.Render("→ " + fi.Description))
+			fmt.Printf("     %s %s\n", Dim.Render("└─"), OutputTxt.Render(fi.Description))
 		}
 	}
 	fmt.Println()
@@ -265,23 +305,21 @@ func PrintCheckDetail(cr checks.CheckResult) {
 	}
 	fmt.Println()
 	fmt.Println(Muted.Render("  Description"))
-	fmt.Println(OutputTxt.Render(c.Description()))
-	fmt.Println()
+	fmt.Printf("     %s\n\n", OutputTxt.Render(c.Description()))
 	if r.Output != "" {
 		fmt.Println(Muted.Render("  Finding"))
-		fmt.Println(OutputTxt.Render(r.Output))
-		fmt.Println()
+		fmt.Printf("     %s\n\n", OutputTxt.Render(r.Output))
 	}
 	fmt.Println(Muted.Render("  Remediation"))
-	fmt.Println(OutputTxt.Render(c.Remediation()))
+	fmt.Printf("     %s\n", OutputTxt.Render(c.Remediation()))
 	if fi := c.Fix(); fi != nil {
 		fmt.Println()
 		privLabel := ManTxt.Render("user-level")
 		if fi.RequiresAdmin {
 			privLabel = WarnTxt.Render("admin (password required)")
 		}
-		fmt.Printf("  %s %s\n", Muted.Render("Auto-fix available ·"), privLabel)
-		fmt.Println(OutputTxt.Render("$ " + fi.Command))
+		fmt.Printf("  %s %s\n", Muted.Render("Auto-fix ·"), privLabel)
+		fmt.Printf("     %s\n", CISTag.Render("$ "+fi.Command))
 	}
 	fmt.Println()
 }

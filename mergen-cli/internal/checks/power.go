@@ -29,12 +29,30 @@ func init() {
 	))
 
 	Register(newCheck(
-		"2.9.1", "Improve Spotlight suggestions disabled",
+		"2.9.1", "Spotlight search query sharing disabled",
 		"2", "CIS Benchmark", "Low",
-		"Spotlight suggestions send search queries to Apple servers.",
-		"Disable in System Settings > Siri & Spotlight.",
-		true, nil,
-		func() Result { return Result{StatusManual, "Manual review required"} },
+		"Spotlight can send search queries to Apple servers for improved suggestions.",
+		"Deploy MDM profile with 'Search Queries Data Sharing Status' = 2, or disable in System Settings > Siri & Spotlight.",
+		false,
+		userFix(
+			"defaults write com.apple.assistant.support 'Search Queries Data Sharing Status' -int 2",
+			"Spotlight search query sharing will be disabled.",
+		),
+		func() Result {
+			out, err := shell("osascript -l JavaScript -e \"$.NSUserDefaults.alloc.initWithSuiteName('com.apple.assistant.support').objectForKey('Search Queries Data Sharing Status').js\" 2>/dev/null")
+			if err == nil && trim(out) == "2" {
+				return Result{StatusPass, "Spotlight search query sharing is disabled"}
+			}
+			// Fall back to direct defaults read
+			out2, _ := defaultsRead("com.apple.assistant.support", "Search Queries Data Sharing Status")
+			if trim(out2) == "2" {
+				return Result{StatusPass, "Spotlight search query sharing is disabled"}
+			}
+			if trim(out2) == "1" || trim(out) == "1" {
+				return Result{StatusFail, "Spotlight search query sharing is enabled"}
+			}
+			return Result{StatusWarn, "Spotlight search query sharing status could not be determined"}
+		},
 	))
 
 	Register(newCheck(
@@ -50,7 +68,7 @@ func init() {
 		func() Result {
 			cpu, _ := run("/usr/sbin/sysctl", "-n", "machdep.cpu.brand_string")
 			if strings.Contains(cpu, "Intel") {
-				return Result{StatusWarn, "Check applies to Apple Silicon only (detected Intel CPU)"}
+				return Result{StatusPass, "Not applicable — Apple Silicon only (detected Intel CPU)"}
 			}
 			out, err := shell("pmset -b -g 2>/dev/null | grep -E '^ sleep|^ displaysleep'")
 			if err != nil || out == "" {
@@ -61,9 +79,9 @@ func init() {
 	))
 
 	Register(newCheck(
-		"2.10.2", "Power Nap disabled",
+		"2.10.2", "Power Nap disabled (Intel Macs only)",
 		"2", "CIS Benchmark", "Low",
-		"Power Nap allows the Mac to perform tasks while asleep, increasing the attack surface.",
+		"Power Nap allows the Mac to perform tasks while asleep, increasing the attack surface. This setting only applies to Intel Macs.",
 		"sudo pmset -a powernap 0",
 		false,
 		adminFix(
@@ -71,7 +89,11 @@ func init() {
 			"Power Nap and dark wake will be disabled.",
 		),
 		func() Result {
-			out, err := shell("pmset -g 2>/dev/null | grep powernap")
+			cpu, _ := run("/usr/sbin/sysctl", "-n", "machdep.cpu.brand_string")
+			if !strings.Contains(cpu, "Intel") {
+				return Result{StatusPass, "Not applicable — this check is for Intel Macs only"}
+			}
+			out, err := shell("pmset -g custom 2>/dev/null | grep powernap")
 			if err != nil {
 				return Result{StatusWarn, "Could not read power settings"}
 			}
@@ -93,9 +115,9 @@ func init() {
 			"Wake for network access will be disabled.",
 		),
 		func() Result {
-			out, err := shell("pmset -g 2>/dev/null | grep womp")
-			if err != nil {
-				return Result{StatusWarn, "Could not read power settings"}
+			out, err := shell("pmset -g custom 2>/dev/null | grep womp")
+			if err != nil || trim(out) == "" {
+				return Result{StatusWarn, "Could not determine wake for network access setting"}
 			}
 			if contains(out, "1") {
 				return Result{StatusFail, "Wake for network access is enabled"}

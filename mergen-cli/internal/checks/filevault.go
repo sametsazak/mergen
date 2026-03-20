@@ -24,26 +24,40 @@ func init() {
 	))
 
 	Register(newCheck(
-		"5.10", "XProtect protection enabled",
+		"5.10", "XProtect is running and updated",
 		"5", "CIS Benchmark", "High",
 		"XProtect is macOS's built-in malware detection and blocking system.",
 		"XProtect is managed automatically by Apple and should not be disabled.",
 		false, nil,
 		func() Result {
-			_, err := shell("ls /Library/Apple/System/Library/CoreServices/XProtect.bundle 2>/dev/null")
-			if err == nil {
-				return Result{StatusPass, "XProtect bundle is present"}
+			out, err := run("/usr/bin/xprotect", "status")
+			if err == nil && contains(out, "enabled: true") {
+				return Result{StatusPass, "XProtect is running and up to date"}
 			}
-			return Result{StatusWarn, "Could not verify XProtect presence"}
+			// Fall back to checking launchctl service
+			svc, serr := run("/bin/launchctl", "list", "com.apple.XProtect.daemon.scan")
+			if serr == nil && contains(svc, "com.apple.XProtect") {
+				return Result{StatusPass, "XProtect daemon is running"}
+			}
+			return Result{StatusWarn, "Could not verify XProtect status"}
 		},
 	))
 
 	Register(newCheck(
 		"", "Certificate trust settings valid",
-		"5", "CIS Benchmark", "Medium",
+		"5", "Security", "High",
 		"Untrusted root certificates can enable man-in-the-middle attacks.",
 		"Review certificate trust settings in Keychain Access > System Roots.",
-		true, nil,
-		func() Result { return Result{StatusManual, "Manual review required in Keychain Access"} },
+		false, nil,
+		func() Result {
+			out, err := shell("security dump-trust-settings 2>&1")
+			if err != nil {
+				return Result{StatusWarn, "Could not query certificate trust settings"}
+			}
+			if contains(out, "No Trust Settings were found") {
+				return Result{StatusPass, "No custom certificate trust overrides found"}
+			}
+			return Result{StatusFail, "Custom certificate trust settings exist — review in Keychain Access"}
+		},
 	))
 }

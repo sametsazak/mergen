@@ -360,34 +360,36 @@ struct FilterPill: View {
     let action: () -> Void
     @State private var isHovered = false
 
+    private var pillColor: Color {
+        filter == .all ? Color.accentColor : filter.color
+    }
+
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 3) {
+            HStack(spacing: 4) {
                 Image(systemName: filter.icon)
-                    .font(.system(size: 10))
+                    .font(.system(size: 11, weight: .medium))
                 if filter == .all {
                     Text("All")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 12, weight: .semibold))
                 } else if let c = count {
                     Text("\(c)")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 12, weight: .bold))
                 }
             }
-            .foregroundColor(isSelected
-                ? (filter == .all ? .primary : filter.color)
-                : .secondary)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 4)
+            .foregroundColor(isSelected ? (filter == .all ? .white : .white) : .secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
             .background(
-                RoundedRectangle(cornerRadius: 6)
+                RoundedRectangle(cornerRadius: 20)
                     .fill(isSelected
-                          ? (filter == .all
-                             ? Color.primary.opacity(0.10)
-                             : filter.color.opacity(0.13))
-                          : (isHovered ? Color.primary.opacity(0.05) : Color.clear))
+                          ? pillColor
+                          : (isHovered ? Color.primary.opacity(0.06) : Color.clear))
             )
+            .shadow(color: isSelected ? pillColor.opacity(0.30) : .clear, radius: 4, y: 2)
         }
         .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
         .onHover { h in withAnimation(.easeInOut(duration: 0.1)) { isHovered = h } }
     }
 }
@@ -399,24 +401,36 @@ struct ScanProgressBanner: View {
     let completed: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Label("Scanning in progress…", systemImage: "antenna.radiowaves.left.and.right")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.accentColor)
+                HStack(spacing: 6) {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .font(.system(size: 11))
+                        .foregroundColor(.accentColor)
+                    Text("Scanning…")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.accentColor)
+                }
                 Spacer()
-                Text("\(completed) completed · \(Int(progress * 100))%")
-                    .font(.system(size: 11))
+                Text("\(completed) done · \(Int(progress * 100))%")
+                    .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
                     .monospacedDigit()
             }
             ProgressView(value: progress)
                 .progressViewStyle(.linear)
                 .tint(.accentColor)
+                .scaleEffect(y: 1.3)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color.accentColor.opacity(0.05))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            LinearGradient(
+                colors: [Color.accentColor.opacity(0.08), Color.accentColor.opacity(0.04)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
     }
 }
 
@@ -472,14 +486,19 @@ struct EmptyFilterView: View {
     let clearFilters: () -> Void
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
             Spacer()
-            Image(systemName: hasFilters ? "line.3.horizontal.decrease.circle" : "checkmark.seal.fill")
-                .font(.system(size: 40))
-                .foregroundColor(.secondary.opacity(0.4))
+            ZStack {
+                Circle()
+                    .fill(Color.secondary.opacity(0.07))
+                    .frame(width: 72, height: 72)
+                Image(systemName: hasFilters ? "line.3.horizontal.decrease.circle" : "checkmark.seal.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.secondary.opacity(0.45))
+            }
             VStack(spacing: 6) {
                 Text(hasFilters ? "No results" : "No checks yet")
-                    .font(.headline)
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.secondary)
                 Text(hasFilters
                      ? "No checks match your current filters."
@@ -492,6 +511,7 @@ struct EmptyFilterView: View {
                 Button("Clear Filters") { clearFilters() }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+                    .tint(.accentColor)
             }
             Spacer()
         }
@@ -512,16 +532,17 @@ struct SectionHeader: View {
     var body: some View {
         HStack(spacing: 6) {
             Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.secondary)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.primary.opacity(0.6))
                 .textCase(nil)
             Spacer()
             HStack(spacing: 4) {
-                if failCount > 0 { StatusBadge(count: failCount, color: .red) }
-                if warnCount > 0 { StatusBadge(count: warnCount, color: .orange) }
-                if passCount > 0 { StatusBadge(count: passCount, color: .green) }
+                if failCount > 0 { StatusBadge(count: failCount, color: Color(red: 0.96, green: 0.36, blue: 0.36)) }
+                if warnCount > 0 { StatusBadge(count: warnCount, color: Color(red: 0.97, green: 0.63, blue: 0.22)) }
+                if passCount > 0 { StatusBadge(count: passCount, color: Color(red: 0.13, green: 0.73, blue: 0.54)) }
             }
         }
+        .padding(.vertical, 2)
     }
 }
 
@@ -531,12 +552,12 @@ struct StatusBadge: View {
 
     var body: some View {
         Text("\(count)")
-            .font(.system(size: 10, weight: .semibold, design: .rounded))
+            .font(.system(size: 10, weight: .bold, design: .rounded))
             .foregroundColor(color)
-            .padding(.horizontal, 5)
+            .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(color.opacity(0.12))
-            .cornerRadius(5)
+            .background(color.opacity(0.14))
+            .cornerRadius(20)
     }
 }
 
@@ -547,10 +568,10 @@ struct VulnerabilityRow: View {
 
     private var statusColor: Color {
         switch vulnerability.checkstatus {
-        case "Green":  return .green
-        case "Red":    return .red
-        case "Yellow": return .orange
-        case "Blue":   return .blue
+        case "Green":  return Color(red: 0.13, green: 0.73, blue: 0.54)
+        case "Red":    return Color(red: 0.96, green: 0.36, blue: 0.36)
+        case "Yellow": return Color(red: 0.97, green: 0.63, blue: 0.22)
+        case "Blue":   return Color(red: 0.27, green: 0.55, blue: 0.95)
         default:       return .gray
         }
     }
@@ -567,18 +588,18 @@ struct VulnerabilityRow: View {
 
     private var severityColor: Color {
         switch vulnerability.severity.lowercased() {
-        case "critical": return .red
-        case "high":     return .orange
-        case "medium":   return Color(red: 0.8, green: 0.65, blue: 0)
-        case "low":      return .blue
+        case "critical": return Color(red: 0.96, green: 0.36, blue: 0.36)
+        case "high":     return Color(red: 0.97, green: 0.63, blue: 0.22)
+        case "medium":   return Color(red: 0.85, green: 0.72, blue: 0.10)
+        case "low":      return Color(red: 0.27, green: 0.55, blue: 0.95)
         default:         return .gray
         }
     }
 
-    private var accentColor: Color {
+    private var leftBarColor: Color {
         switch vulnerability.checkstatus {
-        case "Red":    return statusColor.opacity(0.65)
-        case "Yellow": return statusColor.opacity(0.55)
+        case "Red":    return statusColor
+        case "Yellow": return statusColor
         default:       return .clear
         }
     }
@@ -586,27 +607,27 @@ struct VulnerabilityRow: View {
     var body: some View {
         HStack(spacing: 0) {
 
-            // Left accent bar (coloured for Red/Yellow, invisible for others)
+            // Left accent bar
             RoundedRectangle(cornerRadius: 2)
-                .fill(accentColor)
+                .fill(leftBarColor)
                 .frame(width: 3)
-                .padding(.vertical, 5)
+                .padding(.vertical, 6)
 
-            HStack(spacing: 10) {
+            HStack(spacing: 11) {
                 Image(systemName: statusIcon)
                     .foregroundColor(statusColor)
-                    .font(.system(size: 15))
+                    .font(.system(size: 16))
                     .frame(width: 20)
 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         if !vulnerability.cisID.isEmpty {
                             Text(vulnerability.cisID)
-                                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                .font(.system(size: 10, weight: .semibold, design: .monospaced))
                                 .foregroundColor(.secondary)
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 2)
-                                .background(Color.primary.opacity(0.06))
+                                .background(Color.primary.opacity(0.07))
                                 .cornerRadius(4)
                         }
                         Text(vulnerability.name)
@@ -623,20 +644,19 @@ struct VulnerabilityRow: View {
 
                 Spacer()
 
-                // Only show severity chip for High/Critical to reduce noise
-                if vulnerability.severity.lowercased() == "high" || vulnerability.severity.lowercased() == "critical" {
+                if vulnerability.severity.lowercased() == "critical" || vulnerability.severity.lowercased() == "high" {
                     Text(vulnerability.severity)
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundColor(severityColor)
-                        .padding(.horizontal, 6)
+                        .padding(.horizontal, 7)
                         .padding(.vertical, 3)
-                        .background(severityColor.opacity(0.10))
-                        .cornerRadius(5)
+                        .background(severityColor.opacity(0.12))
+                        .cornerRadius(20)
                 }
             }
-            .padding(.leading, 8)
+            .padding(.leading, 9)
         }
-        .padding(.vertical, 3)
+        .padding(.vertical, 4)
     }
 }
 
@@ -729,99 +749,164 @@ private struct SevLegendDot: View {
 // MARK: - Welcome View
 
 struct WelcomeView: View {
-    @State private var isRotating = false
+    @State private var pulse1 = false
+    @State private var pulse2 = false
+    @State private var pulse3 = false
+    @State private var glowing = false
+    @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 26) {
             Spacer()
 
-            VStack(spacing: 12) {
-                // Shield with animated radar rings
-                ZStack {
-                    // Outer slow ring (counter-clockwise)
-                    Circle()
-                        .strokeBorder(
-                            style: StrokeStyle(lineWidth: 1, dash: [3, 9])
-                        )
-                        .foregroundColor(.accentColor.opacity(0.13))
-                        .frame(width: 118, height: 118)
-                        .rotationEffect(.degrees(isRotating ? -360 : 0))
-                        .animation(
-                            .linear(duration: 16).repeatForever(autoreverses: false),
-                            value: isRotating
-                        )
+            // ── Animated hero ──────────────────────────────────────────────
+            ZStack {
+                // Sonar pulse rings — expand and fade outward
+                Circle()
+                    .stroke(Color.accentColor.opacity(pulse3 ? 0 : 0.12), lineWidth: 1.5)
+                    .frame(width: 160, height: 160)
+                    .scaleEffect(pulse3 ? 1.55 : 1.0)
+                    .animation(.easeOut(duration: 2.2).repeatForever(autoreverses: false), value: pulse3)
 
-                    // Inner faster ring (clockwise)
-                    Circle()
-                        .strokeBorder(
-                            style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])
-                        )
-                        .foregroundColor(.accentColor.opacity(0.28))
-                        .frame(width: 88, height: 88)
-                        .rotationEffect(.degrees(isRotating ? 360 : 0))
-                        .animation(
-                            .linear(duration: 9).repeatForever(autoreverses: false),
-                            value: isRotating
-                        )
+                Circle()
+                    .stroke(Color.accentColor.opacity(pulse2 ? 0 : 0.22), lineWidth: 1.5)
+                    .frame(width: 130, height: 130)
+                    .scaleEffect(pulse2 ? 1.45 : 1.0)
+                    .animation(.easeOut(duration: 2.2).repeatForever(autoreverses: false), value: pulse2)
 
-                    Image(systemName: "shield.lefthalf.filled.slash")
-                        .font(.system(size: 52))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.accentColor, .accentColor.opacity(0.55)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                }
-                .frame(width: 120, height: 120)
-                .onAppear { isRotating = true }
+                Circle()
+                    .stroke(Color.accentColor.opacity(pulse1 ? 0 : 0.38), lineWidth: 2)
+                    .frame(width: 100, height: 100)
+                    .scaleEffect(pulse1 ? 1.35 : 1.0)
+                    .animation(.easeOut(duration: 2.2).repeatForever(autoreverses: false), value: pulse1)
 
-                VStack(spacing: 6) {
-                    Text("macOS Security Audit")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                    Text("CIS Apple macOS 26 Tahoe Benchmark v1.0.0")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
+                // Soft glow background
+                Circle()
+                    .fill(Color.accentColor.opacity(glowing ? 0.13 : 0.06))
+                    .frame(width: 82, height: 82)
+                    .blur(radius: 8)
+                    .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: glowing)
+
+                // Shield
+                Image(systemName: "shield.fill")
+                    .font(.system(size: 46, weight: .medium))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.accentColor, .accentColor.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .shadow(color: .accentColor.opacity(glowing ? 0.45 : 0.2), radius: glowing ? 14 : 7)
+                    .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: glowing)
             }
-
-            VStack(alignment: .leading, spacing: 10) {
-                FeatureRow(icon: "lock.shield.fill",      color: .blue,   title: "90+ Automated Checks",      desc: "All CIS Tahoe benchmark sections")
-                FeatureRow(icon: "cpu.fill",              color: .purple, title: "Apple Intelligence Checks",  desc: "New 2.5.x AI privacy checks for Tahoe")
-                FeatureRow(icon: "line.3.horizontal.decrease.circle.fill", color: .orange, title: "Filter, Sort & Search", desc: "Quickly find failures, warnings, or specific checks")
-                FeatureRow(icon: "square.and.arrow.up",   color: .green,  title: "Export Reports",             desc: "HTML and JSON formats")
+            .frame(width: 170, height: 170)
+            .onAppear {
+                glowing = true
+                pulse1 = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { pulse2 = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5)  { pulse3 = true }
             }
-            .padding(16)
-            .background(Color.primary.opacity(0.04))
-            .cornerRadius(12)
+            .opacity(appeared ? 1 : 0)
+            .scaleEffect(appeared ? 1 : 0.82)
+            .animation(.spring(response: 0.55, dampingFraction: 0.72).delay(0.05), value: appeared)
 
-            Text("Choose a category in the sidebar, then press Start Scan")
-                .font(.caption)
+            // ── Title ──────────────────────────────────────────────────────
+            VStack(spacing: 5) {
+                Text("Mergen")
+                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                Text("macOS Security Audit")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text("CIS Apple macOS 26 Tahoe Benchmark v1.0.0")
+                    .font(.caption)
+                    .foregroundColor(.secondary.opacity(0.65))
+            }
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 8)
+            .animation(.easeOut(duration: 0.45).delay(0.22), value: appeared)
+
+            // ── Stats strip ────────────────────────────────────────────────
+            HStack(spacing: 0) {
+                WelcomeStatPill(value: "85", label: "checks")
+                Rectangle().fill(Color.primary.opacity(0.1)).frame(width: 1, height: 28)
+                WelcomeStatPill(value: "42", label: "auto-fixable")
+                Rectangle().fill(Color.primary.opacity(0.1)).frame(width: 1, height: 28)
+                WelcomeStatPill(value: "6", label: "sections")
+            }
+            .background(Color.primary.opacity(0.05))
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.primary.opacity(0.07), lineWidth: 1)
+            )
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 8)
+            .animation(.easeOut(duration: 0.45).delay(0.36), value: appeared)
+
+            // ── Feature grid ───────────────────────────────────────────────
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                WelcomeFeatureCard(icon: "lock.shield.fill",             color: .blue,   title: "CIS Benchmark",      desc: "All 6 sections covered")
+                WelcomeFeatureCard(icon: "cpu.fill",                     color: .purple, title: "Apple Intelligence", desc: "AI privacy checks (2.5.x)")
+                WelcomeFeatureCard(icon: "wrench.and.screwdriver.fill",  color: .orange, title: "Auto-Fix",           desc: "Remediate with one click")
+                WelcomeFeatureCard(icon: "square.and.arrow.up",          color: .green,  title: "Export Reports",     desc: "HTML and JSON formats")
+            }
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 10)
+            .animation(.easeOut(duration: 0.45).delay(0.5), value: appeared)
+
+            // ── CTA ────────────────────────────────────────────────────────
+            Text("Press **Start Scan** to begin")
+                .font(.subheadline)
                 .foregroundColor(.secondary)
+                .opacity(appeared ? 1 : 0)
+                .animation(.easeOut(duration: 0.45).delay(0.62), value: appeared)
 
             Spacer()
         }
-        .padding(36)
-        .frame(maxWidth: 460)
+        .padding(32)
+        .frame(maxWidth: 470)
+        .onAppear { appeared = true }
     }
 }
 
-struct FeatureRow: View {
+struct WelcomeStatPill: View {
+    let value: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 1) {
+            Text(value)
+                .font(.system(size: 17, weight: .bold, design: .rounded))
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+    }
+}
+
+struct WelcomeFeatureCard: View {
     let icon: String
     let color: Color
     let title: String
     let desc: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 9) {
             Image(systemName: icon)
+                .font(.system(size: 15))
                 .foregroundColor(color)
                 .frame(width: 18)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 13, weight: .semibold))
-                Text(desc).font(.caption).foregroundColor(.secondary)
+                Text(title).font(.system(size: 12, weight: .semibold))
+                Text(desc).font(.caption2).foregroundColor(.secondary)
             }
         }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.primary.opacity(0.04))
+        .cornerRadius(9)
     }
 }
