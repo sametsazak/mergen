@@ -8,7 +8,6 @@ import AppKit
 
 struct ContentView: View {
     @StateObject private var scanManager = ScanManager()
-    @State private var selectedCategory: String? = nil
     @State private var selectedVulnerability: Vulnerability? = nil
     @State private var searchText = ""
     @State private var showLogViewer = false
@@ -18,48 +17,42 @@ struct ContentView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-
-            // ── Sidebar ────────────────────────────────────────────────────
-            SidebarView(
-                scanManager: scanManager,
-                selectedCategory: $selectedCategory
-            )
-            .frame(width: 220)
-            .background(Color(red: 0.08, green: 0.05, blue: 0.18))
-
-            Rectangle()
-                .fill(Color.white.opacity(0.08))
-                .frame(width: 1)
-
+        Group {
             if isWelcome {
-                // ── Welcome ────────────────────────────────────────────────
                 WelcomeView {
-                    scanManager.startScan(category: selectedCategory)
+                    scanManager.startScan(category: nil)
                 }
             } else {
-                // ── Results list ───────────────────────────────────────────
-                ResultsListView(
-                    scanManager: scanManager,
-                    selectedCategory: selectedCategory,
-                    selectedVulnerability: $selectedVulnerability,
-                    searchText: $searchText
-                )
-                .frame(minWidth: 300, idealWidth: 360)
+                VStack(spacing: 0) {
+                    ResultsTopBar(scanManager: scanManager)
 
-                Rectangle()
-                    .fill(Color.white.opacity(0.08))
-                    .frame(width: 1)
+                    Rectangle()
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 1)
 
-                // ── Detail panel ───────────────────────────────────────────
-                DetailPanelView(
-                    vulnerability: selectedVulnerability,
-                    scanManager: scanManager
-                )
-                .frame(minWidth: 260)
+                    HStack(spacing: 0) {
+                        ResultsListView(
+                            scanManager: scanManager,
+                            selectedCategory: nil,
+                            selectedVulnerability: $selectedVulnerability,
+                            searchText: $searchText
+                        )
+                        .frame(minWidth: 300, idealWidth: 380)
+
+                        Rectangle()
+                            .fill(Color.white.opacity(0.08))
+                            .frame(width: 1)
+
+                        DetailPanelView(
+                            vulnerability: selectedVulnerability,
+                            scanManager: scanManager
+                        )
+                        .frame(minWidth: 280)
+                    }
+                }
             }
         }
-        .frame(minWidth: 860, minHeight: 520)
+        .frame(minWidth: 840, minHeight: 520)
         .background(
             LinearGradient(
                 colors: [
@@ -75,9 +68,7 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .toolbar {
             ToolbarItem(placement: .automatic) {
-                Button {
-                    showLogViewer = true
-                } label: {
+                Button { showLogViewer = true } label: {
                     Label("Audit Log", systemImage: "doc.text.magnifyingglass")
                         .font(.system(size: 12))
                 }
@@ -86,6 +77,167 @@ struct ContentView: View {
                     LogViewerSheet()
                 }
             }
+        }
+    }
+}
+
+// MARK: - Results Top Bar
+
+struct ResultsTopBar: View {
+    @ObservedObject var scanManager: ScanManager
+    @State private var showFixSheet = false
+
+    private let accent = Color(red: 0.65, green: 0.52, blue: 1.00)
+    private let accentDp = Color(red: 0.42, green: 0.26, blue: 0.88)
+
+    private var automated: [Vulnerability] { scanManager.scanResults.filter { !$0.isManual && $0.checkstatus != "Blue" } }
+    private var passCount: Int { automated.filter { $0.checkstatus == "Green" }.count }
+    private var failCount: Int { scanManager.scanResults.filter { $0.checkstatus == "Red" }.count }
+    private var warnCount: Int { scanManager.scanResults.filter { $0.checkstatus == "Yellow" }.count }
+    private var score:     Double { automated.isEmpty ? 0 : Double(passCount) / Double(automated.count) }
+    private var fixable:   Int { scanManager.scanResults.filter { $0.isAutoFixable }.count }
+
+    private var scoreColor: Color {
+        score >= 0.8 ? Color(red: 0.13, green: 0.83, blue: 0.60)
+            : score >= 0.5 ? Color(red: 0.97, green: 0.73, blue: 0.32)
+            : Color(red: 1.00, green: 0.45, blue: 0.45)
+    }
+    private var scoreLabel: String {
+        score >= 0.8 ? "GOOD" : score >= 0.5 ? "FAIR" : "AT RISK"
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+
+            // ── Branding ───────────────────────────────────────────────────
+            HStack(spacing: 7) {
+                Image(systemName: "shield.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(LinearGradient(
+                        colors: [accent, accentDp],
+                        startPoint: .top, endPoint: .bottom
+                    ))
+                Text("Mergen")
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            .padding(.horizontal, 16)
+
+            divider()
+
+            // ── Score ring ─────────────────────────────────────────────────
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.white.opacity(0.12), lineWidth: 3)
+                        .frame(width: 32, height: 32)
+                    Circle()
+                        .trim(from: 0, to: score)
+                        .stroke(scoreColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .frame(width: 32, height: 32)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.spring(response: 1.1, dampingFraction: 0.82), value: score)
+                    Text("\(Int(score * 100))")
+                        .font(.system(size: 8, weight: .bold, design: .rounded))
+                        .foregroundColor(scoreColor)
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("\(Int(score * 100))%")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(scoreColor)
+                    Text(scoreLabel)
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.45))
+                        .tracking(0.6)
+                }
+            }
+            .padding(.horizontal, 14)
+
+            divider()
+
+            // ── Stats ──────────────────────────────────────────────────────
+            HStack(spacing: 20) {
+                statChip(passCount, "Passed",   Color(red: 0.13, green: 0.83, blue: 0.60))
+                statChip(failCount, "Failed",   Color(red: 1.00, green: 0.45, blue: 0.45))
+                statChip(warnCount, "Warnings", Color(red: 0.97, green: 0.73, blue: 0.32))
+            }
+            .padding(.horizontal, 14)
+
+            Spacer()
+
+            // ── Scanning progress ──────────────────────────────────────────
+            if scanManager.scanning {
+                HStack(spacing: 7) {
+                    ProgressView()
+                        .scaleEffect(0.6)
+                        .frame(width: 14, height: 14)
+                    Text("Scanning… \(Int(scanManager.progress * 100))%")
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.65))
+                        .monospacedDigit()
+                }
+                .padding(.horizontal, 14)
+            }
+
+            // ── Actions ────────────────────────────────────────────────────
+            if !scanManager.scanning {
+                HStack(spacing: 6) {
+                    if fixable > 0 {
+                        Button { showFixSheet = true } label: {
+                            Label("Fix \(fixable)", systemImage: "bolt.fill")
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .tint(Color(red: 1.00, green: 0.35, blue: 0.35))
+                        .sheet(isPresented: $showFixSheet) {
+                            FixAllSheet(scanManager: scanManager)
+                        }
+                    }
+
+                    Button { scanManager.startScan(category: nil) } label: {
+                        Label("Rescan", systemImage: "arrow.clockwise")
+                            .font(.system(size: 11))
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+
+                    Button { scanManager.resetScan() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 11))
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .help("Reset")
+
+                    divider()
+
+                    ExportButtons(scanResults: scanManager.scanResults)
+                }
+                .padding(.horizontal, 12)
+            }
+        }
+        .frame(height: 52)
+        .background(Color(red: 0.10, green: 0.07, blue: 0.20).opacity(0.85))
+    }
+
+    @ViewBuilder
+    private func divider() -> some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.10))
+            .frame(width: 1, height: 24)
+    }
+
+    @ViewBuilder
+    private func statChip(_ count: Int, _ label: String, _ color: Color) -> some View {
+        HStack(spacing: 5) {
+            Text("\(count)")
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+                .monospacedDigit()
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundColor(.white.opacity(0.50))
         }
     }
 }

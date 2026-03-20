@@ -57,6 +57,7 @@
 		BC876C1429DDC204002127F2 /* ColoredGroupedListStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */; };
 		BC876C1629E0307E002127F2 /* HTMLReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */; };
 		BC876C1829E0322D002127F2 /* JSONReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */; };
+		BCPDF0012F000001000000001 /* PDFReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCPDF0002F000001000000001 /* PDFReportGenerator.swift */; };
 		BC9B6A172A03E18200F672EE /* Crashtest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC9B6A162A03E18200F672EE /* Crashtest.swift */; };
 		BCA6498629D96F9E002FB952 /* FileHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498529D96F9E002FB952 /* FileHelpers.swift */; };
 		BCA6498829DACD37002FB952 /* FileSharingCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498729DACD37002FB952 /* FileSharingCheck.swift */; };
@@ -182,6 +183,7 @@
 		BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColoredGroupedListStyle.swift; sourceTree = "<group>"; };
 		BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLReportGenerator.swift; sourceTree = "<group>"; };
 		BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONReportGenerator.swift; sourceTree = "<group>"; };
+		BCPDF0002F000001000000001 /* PDFReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFReportGenerator.swift; sourceTree = "<group>"; };
 		BC9B6A162A03E18200F672EE /* Crashtest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Crashtest.swift; sourceTree = "<group>"; };
 		BCA6498529D96F9E002FB952 /* FileHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHelpers.swift; sourceTree = "<group>"; };
 		BCA6498729DACD37002FB952 /* FileSharingCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSharingCheck.swift; sourceTree = "<group>"; };
@@ -415,6 +417,7 @@
 				BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */,
 				BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */,
 				BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */,
+				BCPDF0002F000001000000001 /* PDFReportGenerator.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -612,6 +615,7 @@
 				BC6C516D29D5C8C300B85797 /* Java6Check.swift in Sources */,
 				BCA649A429DB7920002FB952 /* BluetoothMenuCheck.swift in Sources */,
 				BC876C1629E0307E002127F2 /* HTMLReportGenerator.swift in Sources */,
+				BCPDF0012F000001000000001 /* PDFReportGenerator.swift in Sources */,
 				BC6C519829D7902500B85797 /* DVDOrCDSharingDisabledCheck.swift in Sources */,
 				BCA6499829DB6793002FB952 /* CheckMediaSharingDisabled.swift in Sources */,
 				BC6C518329D7348400B85797 /* AppleSoftwareUpdateCheck.swift in Sources */,
