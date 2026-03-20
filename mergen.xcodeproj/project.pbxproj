@@ -40,11 +40,6 @@
 		BC6C519629D78BD100B85797 /* TimeWithinLimitsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C519529D78BD100B85797 /* TimeWithinLimitsCheck.swift */; };
 		BC6C519829D7902500B85797 /* DVDOrCDSharingDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C519729D7902500B85797 /* DVDOrCDSharingDisabledCheck.swift */; };
 		BC6C519A29D7909C00B85797 /* ScreenSharingDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C519929D7909C00B85797 /* ScreenSharingDisabledCheck.swift */; };
-		BC6C519C29D81A9F00B85797 /* RouletteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C519B29D81A9F00B85797 /* RouletteText.swift */; };
-		BC6C519E29D81AF500B85797 /* ScanButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C519D29D81AF500B85797 /* ScanButton.swift */; };
-		BC6C51A029D81B3200B85797 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C519F29D81B3200B85797 /* SidebarView.swift */; };
-		BC6C51A229D81B6400B85797 /* CircularProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C51A129D81B6400B85797 /* CircularProgressView.swift */; };
-		BC6C51A429D81BA000B85797 /* OverallScores.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C51A329D81BA000B85797 /* OverallScores.swift */; };
 		BC876BFA29DC2090002127F2 /* LocationServicesMenuBarCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876BF929DC2090002127F2 /* LocationServicesMenuBarCheck.swift */; };
 		BC876BFC29DC263F002127F2 /* PersonalizedAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876BFB29DC263F002127F2 /* PersonalizedAds.swift */; };
 		BC876BFE29DC27D5002127F2 /* ScreenSaverCornersCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876BFD29DC27D5002127F2 /* ScreenSaverCornersCheck.swift */; };
@@ -53,13 +48,8 @@
 		BC876C0C29DC51EC002127F2 /* ScreenSaverIntervalCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C0B29DC51EC002127F2 /* ScreenSaverIntervalCheck.swift */; };
 		BC876C0E29DC53D1002127F2 /* PasswordOnWakeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C0D29DC53D1002127F2 /* PasswordOnWakeCheck.swift */; };
 		BC876C1029DC5BDB002127F2 /* CheckAuditDisEnabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C0F29DC5BDB002127F2 /* CheckAuditDisEnabled.swift */; };
-		BC876C1229DD822D002127F2 /* CustomButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1129DD822D002127F2 /* CustomButtonStyle.swift */; };
-		BC876C1429DDC204002127F2 /* ColoredGroupedListStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */; };
 		BC876C1629E0307E002127F2 /* HTMLReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */; };
 		BC876C1829E0322D002127F2 /* JSONReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */; };
-		BCPDF0012F000001000000001 /* PDFReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCPDF0002F000001000000001 /* PDFReportGenerator.swift */; };
-		BC9B6A172A03E18200F672EE /* Crashtest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC9B6A162A03E18200F672EE /* Crashtest.swift */; };
-		BCA6498629D96F9E002FB952 /* FileHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498529D96F9E002FB952 /* FileHelpers.swift */; };
 		BCA6498829DACD37002FB952 /* FileSharingCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498729DACD37002FB952 /* FileSharingCheck.swift */; };
 		BCA6498A29DACE72002FB952 /* PrinterSharingDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498929DACE72002FB952 /* PrinterSharingDisabledCheck.swift */; };
 		BCA6498C29DAD04C002FB952 /* RemoteLoginDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA6498B29DAD04C002FB952 /* RemoteLoginDisabledCheck.swift */; };
@@ -128,7 +118,6 @@
 		BCEA581D2F6CA33300814E2E /* SudoTTYTicketsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F92F6CA33300814E2E /* SudoTTYTicketsCheck.swift */; };
 		BCEA581E2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DD2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift */; };
 		BCEA581F2F6CA33300814E2E /* LoginScreenMessageCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E52F6CA33300814E2E /* LoginScreenMessageCheck.swift */; };
-		BCEA58212F6CA35D00814E2E /* SecurityScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA58202F6CA35D00814E2E /* SecurityScoreView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -165,11 +154,6 @@
 		BC6C519529D78BD100B85797 /* TimeWithinLimitsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeWithinLimitsCheck.swift; sourceTree = "<group>"; };
 		BC6C519729D7902500B85797 /* DVDOrCDSharingDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DVDOrCDSharingDisabledCheck.swift; sourceTree = "<group>"; };
 		BC6C519929D7909C00B85797 /* ScreenSharingDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSharingDisabledCheck.swift; sourceTree = "<group>"; };
-		BC6C519B29D81A9F00B85797 /* RouletteText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouletteText.swift; sourceTree = "<group>"; };
-		BC6C519D29D81AF500B85797 /* ScanButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanButton.swift; sourceTree = "<group>"; };
-		BC6C519F29D81B3200B85797 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
-		BC6C51A129D81B6400B85797 /* CircularProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressView.swift; sourceTree = "<group>"; };
-		BC6C51A329D81BA000B85797 /* OverallScores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverallScores.swift; sourceTree = "<group>"; };
 		BC6C51A829D8200300B85797 /* TestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TestPlan.xctestplan; sourceTree = "<group>"; };
 		BC876BF929DC2090002127F2 /* LocationServicesMenuBarCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationServicesMenuBarCheck.swift; sourceTree = "<group>"; };
 		BC876BFB29DC263F002127F2 /* PersonalizedAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizedAds.swift; sourceTree = "<group>"; };
@@ -179,13 +163,8 @@
 		BC876C0B29DC51EC002127F2 /* ScreenSaverIntervalCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverIntervalCheck.swift; sourceTree = "<group>"; };
 		BC876C0D29DC53D1002127F2 /* PasswordOnWakeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordOnWakeCheck.swift; sourceTree = "<group>"; };
 		BC876C0F29DC5BDB002127F2 /* CheckAuditDisEnabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckAuditDisEnabled.swift; sourceTree = "<group>"; };
-		BC876C1129DD822D002127F2 /* CustomButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButtonStyle.swift; sourceTree = "<group>"; };
-		BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColoredGroupedListStyle.swift; sourceTree = "<group>"; };
 		BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLReportGenerator.swift; sourceTree = "<group>"; };
 		BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONReportGenerator.swift; sourceTree = "<group>"; };
-		BCPDF0002F000001000000001 /* PDFReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFReportGenerator.swift; sourceTree = "<group>"; };
-		BC9B6A162A03E18200F672EE /* Crashtest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Crashtest.swift; sourceTree = "<group>"; };
-		BCA6498529D96F9E002FB952 /* FileHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHelpers.swift; sourceTree = "<group>"; };
 		BCA6498729DACD37002FB952 /* FileSharingCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSharingCheck.swift; sourceTree = "<group>"; };
 		BCA6498929DACE72002FB952 /* PrinterSharingDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrinterSharingDisabledCheck.swift; sourceTree = "<group>"; };
 		BCA6498B29DAD04C002FB952 /* RemoteLoginDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteLoginDisabledCheck.swift; sourceTree = "<group>"; };
@@ -257,7 +236,6 @@
 		BCEA57FA2F6CA33300814E2E /* TerminalSecureKeyboardCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSecureKeyboardCheck.swift; sourceTree = "<group>"; };
 		BCEA57FB2F6CA33300814E2E /* WritingToolsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingToolsCheck.swift; sourceTree = "<group>"; };
 		BCEA57FC2F6CA33300814E2E /* XProtectStatusCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XProtectStatusCheck.swift; sourceTree = "<group>"; };
-		BCEA58202F6CA35D00814E2E /* SecurityScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScoreView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -352,7 +330,6 @@
 				BC876C0B29DC51EC002127F2 /* ScreenSaverIntervalCheck.swift */,
 				BC876C0D29DC53D1002127F2 /* PasswordOnWakeCheck.swift */,
 				BC876C0F29DC5BDB002127F2 /* CheckAuditDisEnabled.swift */,
-				BC9B6A162A03E18200F672EE /* Crashtest.swift */,
 			);
 			path = CISBenchmark;
 			sourceTree = "<group>";
@@ -406,18 +383,8 @@
 				BCD734F329CF2B9700C0B779 /* VulnerabilityDetailView.swift */,
 				AA0003112F6CA33300814E2E /* FixAllSheet.swift */,
 				AA0005112F6CA33300814E2E /* LogViewerSheet.swift */,
-				BC6C519B29D81A9F00B85797 /* RouletteText.swift */,
-				BC6C519D29D81AF500B85797 /* ScanButton.swift */,
-				BC6C519F29D81B3200B85797 /* SidebarView.swift */,
-				BCEA58202F6CA35D00814E2E /* SecurityScoreView.swift */,
-				BC6C51A129D81B6400B85797 /* CircularProgressView.swift */,
-				BC6C51A329D81BA000B85797 /* OverallScores.swift */,
-				BCA6498529D96F9E002FB952 /* FileHelpers.swift */,
-				BC876C1129DD822D002127F2 /* CustomButtonStyle.swift */,
-				BC876C1329DDC204002127F2 /* ColoredGroupedListStyle.swift */,
 				BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */,
 				BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */,
-				BCPDF0002F000001000000001 /* PDFReportGenerator.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -538,7 +505,6 @@
 				BC876C1829E0322D002127F2 /* JSONReportGenerator.swift in Sources */,
 				BC6C519229D78A6700B85797 /* AirPlayReceiverDisabledCheck.swift in Sources */,
 				BC6C516929D3934500B85797 /* SecureKernelExtensionLoadingCheck.swift in Sources */,
-				BC9B6A172A03E18200F672EE /* Crashtest.swift in Sources */,
 				BC6C518729D782EA00B85797 /* AppStoreUpdateCheck.swift in Sources */,
 				BC876BFC29DC263F002127F2 /* PersonalizedAds.swift in Sources */,
 				BCD734E529CF137C00C0B779 /* Vulnerability.swift in Sources */,
@@ -605,7 +571,6 @@
 				BC6C517B29D6174B00B85797 /* FileExtentionCheck.swift in Sources */,
 				BCD734F429CF2B9700C0B779 /* VulnerabilityDetailView.swift in Sources */,
 				BCA6499629DB6699002FB952 /* ContentCachingDisabledCheck.swift in Sources */,
-				BCA6498629D96F9E002FB952 /* FileHelpers.swift in Sources */,
 				BC6C516329D38E2100B85797 /* IcloudEnabled.swift in Sources */,
 				BCA6498E29DAD1C1002FB952 /* RemoteManagementCheck.swift in Sources */,
 				BC6C517329D5CDE200B85797 /* ApacheHTTPCheck.swift in Sources */,
@@ -615,33 +580,24 @@
 				BC6C516D29D5C8C300B85797 /* Java6Check.swift in Sources */,
 				BCA649A429DB7920002FB952 /* BluetoothMenuCheck.swift in Sources */,
 				BC876C1629E0307E002127F2 /* HTMLReportGenerator.swift in Sources */,
-				BCPDF0012F000001000000001 /* PDFReportGenerator.swift in Sources */,
 				BC6C519829D7902500B85797 /* DVDOrCDSharingDisabledCheck.swift in Sources */,
 				BCA6499829DB6793002FB952 /* CheckMediaSharingDisabled.swift in Sources */,
 				BC6C518329D7348400B85797 /* AppleSoftwareUpdateCheck.swift in Sources */,
-				BC6C51A029D81B3200B85797 /* SidebarView.swift in Sources */,
 				BCD734F229CF20FF00C0B779 /* ScanManager.swift in Sources */,
 				BCD7350D29D2415600C0B779 /* SshEnableCheck.swift in Sources */,
 				BC6C519629D78BD100B85797 /* TimeWithinLimitsCheck.swift in Sources */,
-				BC6C51A229D81B6400B85797 /* CircularProgressView.swift in Sources */,
-				BC876C1429DDC204002127F2 /* ColoredGroupedListStyle.swift in Sources */,
 				BC876C0229DC4B95002127F2 /* WakeForNetworkAccessCheck.swift in Sources */,
-				BC6C519C29D81A9F00B85797 /* RouletteText.swift in Sources */,
 				BC6C518129D618BA00B85797 /* FastUserSwitchingCheck.swift in Sources */,
 				BC6C517729D60F0C00B85797 /* PasswordHintsCheck.swift in Sources */,
-				BC6C51A429D81BA000B85797 /* OverallScores.swift in Sources */,
 				BC6C517529D60E9700B85797 /* NfsServerCheck.swift in Sources */,
 				BC876C0E29DC53D1002127F2 /* PasswordOnWakeCheck.swift in Sources */,
 				BC876C0029DC29F2002127F2 /* UniversalControlCheck.swift in Sources */,
 				BCA649A229DB7845002FB952 /* ShowWifiMenuCheck.swift in Sources */,
 				BCD734EC29CF14C200C0B779 /* ScanResultView.swift in Sources */,
-				BC6C519E29D81AF500B85797 /* ScanButton.swift in Sources */,
 				BCA6499C29DB6A45002FB952 /* BackupAutomaticallyEnabledCheck.swift in Sources */,
 				BCA6498C29DAD04C002FB952 /* RemoteLoginDisabledCheck.swift in Sources */,
 				BC6C517F29D6183F00B85797 /* SafariInternetPluginCheck.swift in Sources */,
-				BCEA58212F6CA35D00814E2E /* SecurityScoreView.swift in Sources */,
 				BCD734E729CF13CF00C0B779 /* Scanner.swift in Sources */,
-				BC876C1229DD822D002127F2 /* CustomButtonStyle.swift in Sources */,
 				BCA6499A29DB6854002FB952 /* BluetoothSharingDisabledCheck.swift in Sources */,
 				BC6C518C29D7855700B85797 /* CriticalUpdateInstallCheck.swift in Sources */,
 				AA0001122F6CA33300814E2E /* FixCommands.swift in Sources */,

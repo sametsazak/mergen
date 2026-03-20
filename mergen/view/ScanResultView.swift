@@ -31,10 +31,10 @@ enum StatusFilter: String, CaseIterable, Identifiable {
     var color: Color {
         switch self {
         case .all:      return .primary
-        case .failed:   return .red
-        case .passed:   return .green
-        case .warned:   return .orange
-        case .advisory: return .blue
+        case .failed:   return Color(red: 0.85, green: 0.25, blue: 0.25)
+        case .passed:   return Color(red: 0.13, green: 0.66, blue: 0.47)
+        case .warned:   return Color(red: 0.80, green: 0.52, blue: 0.10)
+        case .advisory: return .secondary
         }
     }
 }
@@ -229,7 +229,7 @@ struct ResultsListView: View {
                                     }
                                     .buttonStyle(.borderedProminent)
                                     .controlSize(.mini)
-                                    .tint(.red)
+                                    .tint(Color(red: 0.85, green: 0.25, blue: 0.25))
                                     .sheet(isPresented: $showFixSheet) {
                                         FixAllSheet(scanManager: scanManager)
                                     }
@@ -261,7 +261,6 @@ struct ResultsListView: View {
                                     ForEach(group.items, id: \.id) { v in
                                         VulnerabilityRow(vulnerability: v)
                                             .tag(v.id)
-                                            .listRowBackground(Color.white.opacity(0.04))
                                     }
                                 } header: {
                                     SectionHeader(title: group.section, items: group.items)
@@ -269,7 +268,6 @@ struct ResultsListView: View {
                             }
                         }
                         .listStyle(.inset)
-                        .scrollContentBackground(.hidden)
                         .animation(.default, value: scanManager.scanResults.count)
                     }
         }
@@ -357,7 +355,7 @@ struct FilterPill: View {
     @State private var isHovered = false
 
     private var pillColor: Color {
-        filter == .all ? Color.accentColor : filter.color
+        filter == .all ? Color.primary : filter.color
     }
 
     var body: some View {
@@ -402,10 +400,10 @@ struct ScanProgressBanner: View {
                 HStack(spacing: 6) {
                     Image(systemName: "antenna.radiowaves.left.and.right")
                         .font(.system(size: 11))
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.primary)
                     Text("Scanning…")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.primary)
                 }
                 Spacer()
                 Text("\(completed) done · \(Int(progress * 100))%")
@@ -415,14 +413,14 @@ struct ScanProgressBanner: View {
             }
             ProgressView(value: progress)
                 .progressViewStyle(.linear)
-                .tint(.accentColor)
+                .tint(.primary)
                 .scaleEffect(y: 1.3)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(
             LinearGradient(
-                colors: [Color.accentColor.opacity(0.08), Color.accentColor.opacity(0.04)],
+                colors: [Color.primary.opacity(0.08), Color.primary.opacity(0.04)],
                 startPoint: .leading,
                 endPoint: .trailing
             )
@@ -507,7 +505,7 @@ struct EmptyFilterView: View {
                 Button("Clear Filters") { clearFilters() }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
-                    .tint(.accentColor)
+                    .tint(.primary)
             }
             Spacer()
         }

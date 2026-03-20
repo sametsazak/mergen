@@ -8,7 +8,6 @@
 [![Swift](https://img.shields.io/badge/swift-5.9-orange?style=flat-square)](https://swift.org)
 [![Go](https://img.shields.io/badge/go-1.21+-00ADD8?style=flat-square)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
 [![CIS Benchmark](https://img.shields.io/badge/CIS-macOS%2026%20Tahoe%20v1.0.0-red?style=flat-square)](https://www.cisecurity.org)
 
 Mergen audits your Mac against 85 CIS Benchmark controls and **fixes most failures automatically**.
@@ -25,12 +24,6 @@ Available as a native **SwiftUI app** and a **Go CLI** — pick whichever fits y
 - [Overview](#overview)
 - [SwiftUI App](#swiftui-app)
 - [CLI (`mergen-cli`)](#cli-mergen-cli)
-  - [Installation](#installation)
-  - [Commands](#commands)
-  - [Examples](#examples)
-  - [All Flags](#all-flags)
-  - [Output Format](#output-format)
-  - [CI / CD Integration](#ci--cd-integration)
 - [Checks Reference](#checks-reference)
 - [How Auto-Fix Works](#how-auto-fix-works)
 - [macOS 26 Tahoe Compatibility](#macos-26-tahoe-compatibility)
@@ -51,7 +44,7 @@ Unlike shell scripts that only report findings, Mergen can **remediate failures 
 
 ## SwiftUI App
 
-A free, open-source, fully native SwiftUI app — no Terminal required.
+The GUI option — point and click, no Terminal needed. Full feature parity with the CLI.
 
 ### Features
 
@@ -72,16 +65,15 @@ A free, open-source, fully native SwiftUI app — no Terminal required.
 - In-app log viewer: color-coded entries, filter by type, search, copy-all
 
 **Reporting**
-- HTML report: styled, standalone, shareable
+- HTML report: styled, standalone, shareable — dark purple gradient theme
 - JSON export: full metadata per check including CIS ID, status, severity, and remediation
 
 **Interface**
-- 3-pane layout: Sidebar → Results list → Detail panel
+- 2-pane layout: Results list → Detail panel
 - Filter pills: All / Failed / Passed / Warnings / Advisory
 - Sort by CIS ID, Severity, Name, or Status
 - Search across name, CIS ID, description, and finding text
-- Security score ring with animated breakdown
-- Dark mode support
+- Security score ring with pass/fail/warn counts
 
 ### Installation
 
@@ -91,15 +83,15 @@ git clone https://github.com/sametsazak/mergen.git
 
 Open `mergen.xcodeproj` in Xcode and run. No third-party dependencies. No network calls.
 
-**Requirements:** macOS 13 Ventura or later (tested on macOS 26 Tahoe)
+**Requirements:** macOS 13 Ventura or later · Tested on macOS 26 Tahoe
 
 ### Usage
 
-1. Launch Mergen and press **Start Scan**
+1. Launch Mergen and press **Scan**
 2. Use the **Failed** filter pill and sort by Severity to prioritize
 3. Click any check to see description, finding, and remediation steps
-4. Press **Fix N Issues** to open the Fix All sheet
-5. Export results as **HTML** or **JSON** from the toolbar
+4. Press **Fix N** in the top bar to open the Fix All sheet
+5. Export results as **HTML** or **JSON**
 
 ### Admin Privilege Notice
 
@@ -138,8 +130,6 @@ go build -o mergen .
 sudo mv mergen /usr/local/bin/   # optional: install system-wide
 ```
 
----
-
 ### Commands
 
 #### `mergen` — Interactive TUI
@@ -162,149 +152,50 @@ Running `mergen` with no arguments launches a keyboard-driven interactive menu:
   ↑↓ / jk navigate  ·  enter select  ·  shortcut key  ·  q quit
 ```
 
----
-
 #### `mergen scan` — Run Security Checks
 
-Runs all 85 checks and prints a structured report.
-
-```
+```bash
 mergen scan [flags]
 ```
 
-**Output example:**
+**Flags:**
 
-```
-  §1  Software Updates  5 checks
-  ────────────────────────────────────────────────────
-  ✓  1.2       Critical updates auto-install enabled
-  ✓  1.3       Auto-update enabled
-  ✓  1.4       App Store auto-updates enabled
-  ✓  1.5       Security responses auto-install enabled
-  ⚠  1.6       Software update deferment policy
-     └─ No software update deferment MDM policy found
+| Flag | Short | Default | Description |
+|------|-------|---------|-------------|
+| `--section` | `-s` | — | Run only checks in a CIS section (1–6) |
+| `--category` | `-c` | — | Filter by category (e.g. `CIS Benchmark`) |
+| `--failed` | `-f` | false | Show only failed checks |
+| `--quiet` | `-q` | false | Print summary only |
+| `--json` | — | false | Output results as JSON array |
+| `--workers` | `-w` | 8 | Number of parallel check workers |
 
-  §2  System Settings  36 checks
-  ────────────────────────────────────────────────────
-  ✓  2.2.1     Firewall enabled
-  ✗  2.3.3.4   Remote login (SSH) disabled
-     └─ SSH is enabled — remote login is active
-  ...
-
-╭────────────────────────────────────────────────────────────────╮
-│                                                                │
-│   Security Score  74%  Fair                                    │
-│                                                                │
-│     ✓  47  pass    ✗  19  fail    ⚠  17  warn    ℹ  2   info   │
-│                                                                │
-│     ████████████████████████████░░░░░░░░░░░░                   │
-│     85 checks total · 83 automated · 2 advisory                │
-│                                                                │
-╰────────────────────────────────────────────────────────────────╯
-```
-
-**Status icons:**
-
-| Icon | Meaning |
-|------|---------|
-| `✓` green | Pass — compliant |
-| `✗` red | Fail — needs attention |
-| `⚠` orange | Warn — could not determine state, or advisory |
-| `ℹ` blue | Info — advisory only, not scored |
-
-**Exit codes:** `0` = all checks pass; `1` = one or more failures
-
----
+**Exit codes:** `0` = all checks pass · `1` = one or more failures
 
 #### `mergen fix` — Auto-Remediate Failures
 
-Scans for failures then applies available automatic fixes.
-
-```
+```bash
 mergen fix [flags]
 ```
 
-User-level fixes run immediately. Admin fixes require your macOS password via the standard authentication dialog. All admin fixes are batched into **one password prompt**.
-
-```
-  3 issue(s) to fix:
-
-  ✗ [user]   Safari auto-open safe files disabled
-     └─ Safari will no longer automatically open downloaded files.
-  ✗ [admin]  Firewall enabled
-     └─ The application firewall will be enabled.
-  ✗ [admin]  Guest login disabled
-     └─ The Guest account will be disabled.
-
-  Apply fixes? [y/N]
-```
-
-After applying, each fixed check re-runs to verify the result:
-
-```
-  ✓  Safari auto-open safe files disabled
-  ✓  Firewall enabled
-  ✓  Guest login disabled
-
-  ✓  All 3 issues fixed
-```
-
----
+| Flag | Short | Default | Description |
+|------|-------|---------|-------------|
+| `--id` | — | — | Fix a single check by CIS ID (e.g. `2.2.1`) |
+| `--yes` | `-y` | false | Apply all fixes without confirmation |
+| `--dry-run` | — | false | Preview fixes without applying |
 
 #### `mergen list` — Browse All Checks
 
-Lists every registered check with CIS ID, severity, and fix availability.
-
+```bash
+mergen list [--section 1-6]
 ```
-mergen list [flags]
-```
-
-```
-  §1  Software Updates  5 checks
-  ────────────────────────────────────────────────────
-
-  1.2       Critical    [admin]  Critical updates auto-install enabled
-  1.3       High        [admin]  Auto-update enabled
-  1.4       Medium      [admin]  App Store auto-updates enabled
-  1.5       High        [admin]  Security responses auto-install enabled
-  1.6       Low                  Software update deferment policy
-
-  85 total · 42 auto-fixable · 2 advisory
-```
-
----
 
 #### `mergen report` — Export HTML or JSON
 
-Runs a full scan and writes a report file.
-
-```
-mergen report [flags]
-```
-
 ```bash
-mergen report                           # HTML → ./mergen-report.html
-mergen report --format json             # JSON → ./mergen-report.json
+mergen report                             # HTML → ./mergen-report.html
+mergen report --format json               # JSON → ./mergen-report.json
 mergen report --format html -o ~/Desktop/audit.html
 ```
-
-The HTML report is a styled, standalone file — no external dependencies, safe to share or archive.
-
-The JSON report includes full metadata per check:
-
-```json
-[
-  {
-    "cis_id": "2.2.1",
-    "name": "Firewall enabled",
-    "status": "pass",
-    "output": "Firewall is enabled and active"
-  },
-  ...
-]
-```
-
----
 
 ### Examples
 
@@ -312,14 +203,8 @@ The JSON report includes full metadata per check:
 # Full scan
 mergen scan
 
-# Scan a single section
-mergen scan --section 5
-
-# Show only failures (great for piping to grep)
+# Show only failures
 mergen scan --failed
-
-# Quiet mode — summary only, no per-check output
-mergen scan --quiet
 
 # Machine-readable output
 mergen scan --json | jq '.[] | select(.status == "fail")'
@@ -327,91 +212,14 @@ mergen scan --json | jq '.[] | select(.status == "fail")'
 # Fix everything that can be fixed
 mergen fix --yes
 
-# Fix a single check by CIS ID
-mergen fix --id 2.2.1
-
-# Preview what would be fixed (no changes applied)
+# Preview what would be fixed
 mergen fix --dry-run
-
-# List only Section 6 checks
-mergen list --section 6
 
 # Export HTML report
 mergen report --format html -o ~/Desktop/security-audit.html
-
-# Export JSON and count failures
-mergen report --format json && jq '[.[] | select(.status=="fail")] | length' mergen-report.json
 ```
-
----
-
-### All Flags
-
-#### `mergen scan`
-
-| Flag | Short | Default | Description |
-|------|-------|---------|-------------|
-| `--section` | `-s` | — | Run only checks in a CIS section (1–6) |
-| `--category` | `-c` | — | Filter by category (e.g. `CIS Benchmark`) |
-| `--failed` | `-f` | false | Show only failed checks |
-| `--quiet` | `-q` | false | Print summary only, no per-check output |
-| `--json` | — | false | Output results as JSON array |
-| `--workers` | `-w` | 8 | Number of parallel check workers |
-
-#### `mergen fix`
-
-| Flag | Short | Default | Description |
-|------|-------|---------|-------------|
-| `--id` | — | — | Fix a single check by CIS ID (e.g. `2.2.1`) |
-| `--yes` | `-y` | false | Apply all fixes without confirmation prompt |
-| `--dry-run` | — | false | Show what would be fixed without applying |
-
-#### `mergen list`
-
-| Flag | Short | Default | Description |
-|------|-------|---------|-------------|
-| `--section` | `-s` | — | Filter by section number (1–6) |
-
-#### `mergen report`
-
-| Flag | Short | Default | Description |
-|------|-------|---------|-------------|
-| `--format` | `-F` | `html` | Output format: `html` or `json` |
-| `--output` | `-o` | auto | Output file path |
-
----
-
-### Output Format
-
-#### Status Levels
-
-- **Pass (✓)** — Check passed. No action needed.
-- **Fail (✗)** — Check failed. Fix available or manual remediation required.
-- **Warn (⚠)** — State could not be determined (MDM-managed setting, missing plist key, or advisory check). Review manually.
-- **Info (ℹ)** — Advisory check. Not included in the security score.
-
-#### Scoring
-
-The security score is calculated as:
-
-```
-score = pass / (pass + fail + warn) × 100
-```
-
-Advisory (Info) checks are excluded from scoring. Score labels:
-
-| Score | Label |
-|-------|-------|
-| ≥ 90% | Excellent |
-| ≥ 75% | Good |
-| ≥ 50% | Fair |
-| < 50% | Poor |
-
----
 
 ### CI / CD Integration
-
-The CLI exits with code `1` if any check fails, making it easy to gate on in CI:
 
 ```yaml
 # GitHub Actions example
@@ -430,10 +238,8 @@ The CLI exits with code `1` if any check fails, making it easy to gate on in CI:
 ```
 
 ```bash
-# Fail CI if any Critical or High checks fail
-mergen scan --json | jq -e '
-  [.[] | select(.status == "fail")] | length == 0
-' || exit 1
+# Fail CI if any checks fail
+mergen scan --json | jq -e '[.[] | select(.status == "fail")] | length == 0' || exit 1
 ```
 
 ---
@@ -506,7 +312,7 @@ mergen scan --json | jq -e '
 
 | CIS ID | Check | Severity | Auto-Fix |
 |--------|-------|----------|----------|
-| 3.1 | Security auditing enabled (auditd) | Medium | — |
+| 3.1 | Security auditing enabled | Medium | — |
 | 3.2 | Audit flags configured | Medium | — |
 
 ### §4 — Network
@@ -592,11 +398,11 @@ In the CLI, all admin fixes within a single `mergen fix` run are batched into **
 
 Issues, pull requests, and new checks are all welcome.
 
-**To add a new check to the SwiftUI app:** subclass `Vulnerability` in `mergen/checkmodules/`, register it in `Scanner.swift`, and optionally add a fix command to `FixCommands.swift`.
+**To add a check to the SwiftUI app:** subclass `Vulnerability` in `mergen/checkmodules/`, register it in `Scanner.swift`, and optionally add a fix command to `FixCommands.swift`.
 
-**To add a new check to the CLI:** create a new file in `mergen-cli/internal/checks/`, implement an `init()` function that calls `Register(newCheck(...))`. The check auto-registers via Go's `init()` mechanism — no other wiring needed.
+**To add a check to the CLI:** create a new file in `mergen-cli/internal/checks/`, implement an `init()` function that calls `Register(newCheck(...))`. The check auto-registers via Go's `init()` mechanism.
 
-**Fix command rules:** The fix must write to the exact same key/plist/API that the check reads. Otherwise the re-check will always report failure even if the command succeeded.
+**Fix command rule:** The fix must write to the exact same key/plist/API that the check reads. Otherwise the re-check will always report failure even if the command succeeded.
 
 ---
 
