@@ -43,16 +43,24 @@ struct SidebarView: View {
                 VStack(spacing: 2) {
                     Text("Mergen")
                         .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
                     Text("macOS Security Audit")
                         .font(.system(size: 11))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.white.opacity(0.45))
                 }
             }
             .padding(.top, 24)
             .padding(.bottom, 18)
 
             // ── Navigation ─────────────────────────────────────────────────
-            VStack(spacing: 3) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("CATEGORIES")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.35))
+                    .tracking(1.2)
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 2)
+
                 ForEach(categories, id: \.label) { cat in
                     CategoryRow(
                         label: cat.label,
@@ -68,7 +76,10 @@ struct SidebarView: View {
             .padding(.horizontal, 10)
             .padding(.bottom, 14)
 
-            Divider().padding(.horizontal, 14)
+            Rectangle()
+                .fill(Color.white.opacity(0.10))
+                .frame(height: 1)
+                .padding(.horizontal, 14)
 
             // ── Scan controls ──────────────────────────────────────────────
             VStack(spacing: 8) {
@@ -78,10 +89,10 @@ struct SidebarView: View {
                         VStack(spacing: 2) {
                             Text("\(Int(scanManager.progress * 100))%")
                                 .font(.system(size: 13, weight: .bold, design: .rounded))
-                                .foregroundColor(.accentColor)
+                                .foregroundColor(.white)
                             Text("\(scanManager.scanResults.count) checks done")
                                 .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white.opacity(0.55))
                         }
                     }
                     .padding(.vertical, 14)
@@ -151,15 +162,15 @@ struct CategoryRow: View {
             HStack(spacing: 10) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(isSelected ? iconColor.opacity(0.15) : Color.primary.opacity(0.06))
+                        .fill(isSelected ? iconColor.opacity(0.22) : Color.white.opacity(0.07))
                         .frame(width: 26, height: 26)
                     Image(systemName: icon)
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(isSelected ? iconColor : .secondary)
+                        .foregroundColor(isSelected ? iconColor : .white.opacity(0.55))
                 }
                 Text(label)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
-                    .foregroundColor(isSelected ? .primary : .secondary)
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.65))
                 Spacer()
                 if isSelected {
                     Circle()
@@ -172,12 +183,8 @@ struct CategoryRow: View {
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(isSelected
-                          ? iconColor.opacity(0.09)
-                          : (isHovered ? Color.primary.opacity(0.04) : Color.clear))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? iconColor.opacity(0.22) : Color.clear, lineWidth: 1)
+                          ? Color.white.opacity(0.10)
+                          : (isHovered ? Color.white.opacity(0.05) : Color.clear))
             )
         }
         .buttonStyle(.plain)
@@ -242,8 +249,8 @@ struct SecondaryButtonStyle: ButtonStyle {
             .font(.system(size: 13, weight: .medium))
             .padding(.vertical, 8)
             .padding(.horizontal, 14)
-            .background(Color.primary.opacity(0.07))
-            .foregroundColor(.secondary)
+            .background(Color.white.opacity(0.08))
+            .foregroundColor(.white.opacity(0.70))
             .cornerRadius(10)
             .opacity(configuration.isPressed ? 0.7 : 1.0)
     }

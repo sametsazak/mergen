@@ -156,11 +156,7 @@ struct ResultsListView: View {
     // MARK: Body
 
     var body: some View {
-        Group {
-            if scanManager.scanResults.isEmpty && !scanManager.scanning {
-                WelcomeView()
-            } else {
-                VStack(spacing: 0) {
+        VStack(spacing: 0) {
 
                     // Search bar
                     HStack(spacing: 8) {
@@ -265,6 +261,7 @@ struct ResultsListView: View {
                                     ForEach(group.items, id: \.id) { v in
                                         VulnerabilityRow(vulnerability: v)
                                             .tag(v.id)
+                                            .listRowBackground(Color.white.opacity(0.04))
                                     }
                                 } header: {
                                     SectionHeader(title: group.section, items: group.items)
@@ -272,10 +269,9 @@ struct ResultsListView: View {
                             }
                         }
                         .listStyle(.inset)
+                        .scrollContentBackground(.hidden)
                         .animation(.default, value: scanManager.scanResults.count)
                     }
-                }
-            }
         }
         .navigationTitle(selectedCategory ?? "All Checks")
         .onChange(of: selectedCategory) { _ in
@@ -746,167 +742,3 @@ private struct SevLegendDot: View {
     }
 }
 
-// MARK: - Welcome View
-
-struct WelcomeView: View {
-    @State private var pulse1 = false
-    @State private var pulse2 = false
-    @State private var pulse3 = false
-    @State private var glowing = false
-    @State private var appeared = false
-
-    var body: some View {
-        VStack(spacing: 26) {
-            Spacer()
-
-            // ── Animated hero ──────────────────────────────────────────────
-            ZStack {
-                // Sonar pulse rings — expand and fade outward
-                Circle()
-                    .stroke(Color.accentColor.opacity(pulse3 ? 0 : 0.12), lineWidth: 1.5)
-                    .frame(width: 160, height: 160)
-                    .scaleEffect(pulse3 ? 1.55 : 1.0)
-                    .animation(.easeOut(duration: 2.2).repeatForever(autoreverses: false), value: pulse3)
-
-                Circle()
-                    .stroke(Color.accentColor.opacity(pulse2 ? 0 : 0.22), lineWidth: 1.5)
-                    .frame(width: 130, height: 130)
-                    .scaleEffect(pulse2 ? 1.45 : 1.0)
-                    .animation(.easeOut(duration: 2.2).repeatForever(autoreverses: false), value: pulse2)
-
-                Circle()
-                    .stroke(Color.accentColor.opacity(pulse1 ? 0 : 0.38), lineWidth: 2)
-                    .frame(width: 100, height: 100)
-                    .scaleEffect(pulse1 ? 1.35 : 1.0)
-                    .animation(.easeOut(duration: 2.2).repeatForever(autoreverses: false), value: pulse1)
-
-                // Soft glow background
-                Circle()
-                    .fill(Color.accentColor.opacity(glowing ? 0.13 : 0.06))
-                    .frame(width: 82, height: 82)
-                    .blur(radius: 8)
-                    .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: glowing)
-
-                // Shield
-                Image(systemName: "shield.fill")
-                    .font(.system(size: 46, weight: .medium))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.accentColor, .accentColor.opacity(0.6)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .shadow(color: .accentColor.opacity(glowing ? 0.45 : 0.2), radius: glowing ? 14 : 7)
-                    .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: glowing)
-            }
-            .frame(width: 170, height: 170)
-            .onAppear {
-                glowing = true
-                pulse1 = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { pulse2 = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5)  { pulse3 = true }
-            }
-            .opacity(appeared ? 1 : 0)
-            .scaleEffect(appeared ? 1 : 0.82)
-            .animation(.spring(response: 0.55, dampingFraction: 0.72).delay(0.05), value: appeared)
-
-            // ── Title ──────────────────────────────────────────────────────
-            VStack(spacing: 5) {
-                Text("Mergen")
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
-                Text("macOS Security Audit")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-                Text("CIS Apple macOS 26 Tahoe Benchmark v1.0.0")
-                    .font(.caption)
-                    .foregroundColor(.secondary.opacity(0.65))
-            }
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 8)
-            .animation(.easeOut(duration: 0.45).delay(0.22), value: appeared)
-
-            // ── Stats strip ────────────────────────────────────────────────
-            HStack(spacing: 0) {
-                WelcomeStatPill(value: "85", label: "checks")
-                Rectangle().fill(Color.primary.opacity(0.1)).frame(width: 1, height: 28)
-                WelcomeStatPill(value: "42", label: "auto-fixable")
-                Rectangle().fill(Color.primary.opacity(0.1)).frame(width: 1, height: 28)
-                WelcomeStatPill(value: "6", label: "sections")
-            }
-            .background(Color.primary.opacity(0.05))
-            .cornerRadius(10)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.primary.opacity(0.07), lineWidth: 1)
-            )
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 8)
-            .animation(.easeOut(duration: 0.45).delay(0.36), value: appeared)
-
-            // ── Feature grid ───────────────────────────────────────────────
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                WelcomeFeatureCard(icon: "lock.shield.fill",             color: .blue,   title: "CIS Benchmark",      desc: "All 6 sections covered")
-                WelcomeFeatureCard(icon: "cpu.fill",                     color: .purple, title: "Apple Intelligence", desc: "AI privacy checks (2.5.x)")
-                WelcomeFeatureCard(icon: "wrench.and.screwdriver.fill",  color: .orange, title: "Auto-Fix",           desc: "Remediate with one click")
-                WelcomeFeatureCard(icon: "square.and.arrow.up",          color: .green,  title: "Export Reports",     desc: "HTML and JSON formats")
-            }
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 10)
-            .animation(.easeOut(duration: 0.45).delay(0.5), value: appeared)
-
-            // ── CTA ────────────────────────────────────────────────────────
-            Text("Press **Start Scan** to begin")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .opacity(appeared ? 1 : 0)
-                .animation(.easeOut(duration: 0.45).delay(0.62), value: appeared)
-
-            Spacer()
-        }
-        .padding(32)
-        .frame(maxWidth: 470)
-        .onAppear { appeared = true }
-    }
-}
-
-struct WelcomeStatPill: View {
-    let value: String
-    let label: String
-
-    var body: some View {
-        VStack(spacing: 1) {
-            Text(value)
-                .font(.system(size: 17, weight: .bold, design: .rounded))
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-    }
-}
-
-struct WelcomeFeatureCard: View {
-    let icon: String
-    let color: Color
-    let title: String
-    let desc: String
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 9) {
-            Image(systemName: icon)
-                .font(.system(size: 15))
-                .foregroundColor(color)
-                .frame(width: 18)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 12, weight: .semibold))
-                Text(desc).font(.caption2).foregroundColor(.secondary)
-            }
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.primary.opacity(0.04))
-        .cornerRadius(9)
-    }
-}
