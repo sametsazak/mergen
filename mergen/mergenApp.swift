@@ -16,7 +16,7 @@ struct MyApplication: App {
             ContentView()
                 .frame(minWidth: 1115, maxWidth: .infinity, minHeight: 615, maxHeight: .infinity)
         }
-        .windowStyle(HiddenTitleBarWindowStyle())
+        .windowStyle(DefaultWindowStyle())
         .commands {
             SidebarCommands() // 1
             

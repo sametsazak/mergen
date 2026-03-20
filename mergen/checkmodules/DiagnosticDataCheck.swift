@@ -10,13 +10,13 @@ import Foundation
 class DiagnosticDataCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Sending Diagnostic and Usage Data to Apple Status",
+            name: "Diagnostic data sharing disabled",
             description: "Check if sending diagnostic and usage data to Apple is disabled",
             category: "Privacy",
-            remediation: "Go to System Preferences > Security & Privacy > Privacy > Analytics & Improvements, and select 'Off' for 'Share Mac Analytics'",
+            remediation: "Go to System Settings > Security & Privacy > Privacy > Analytics & Improvements, and select 'Off' for 'Share Mac Analytics'",
             severity: "Low",
             documentation: "This code checks if your system is set to send diagnostic and usage data to Apple. While sharing this data helps Apple improve its products and services, it may also expose sensitive information about your usage patterns.",
-            mitigation: "To protect your privacy and prevent potential information leakage, you can disable sending diagnostic and usage data to Apple. To do this, go to System Preferences > Security & Privacy > Privacy > Analytics & Improvements, and select 'Off' for 'Share Mac Analytics'.",
+            mitigation: "To protect your privacy and prevent potential information leakage, you can disable sending diagnostic and usage data to Apple. To do this, go to System Settings > Security & Privacy > Privacy > Analytics & Improvements, and select 'Off' for 'Share Mac Analytics'.",
             checkstatus: "",
             docID: 24
         )
@@ -29,6 +29,7 @@ class DiagnosticDataCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

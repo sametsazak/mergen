@@ -15,41 +15,42 @@ class SecurityAuditingCheck: Vulnerability {
 
     init() {
         super.init(
-            name: "Check Security Auditing Is Enabled",
+            name: "Security auditing enabled",
             description: "This checks if security auditing is enabled on your computer. Security auditing helps detect unauthorized access and protect sensitive data.",
             category: "CIS Benchmark",
             remediation: "Enable security auditing.",
             severity: "Low",
             documentation: "Security auditing helps detect unauthorized access to a user's system and sensitive data. This code checks if the com.apple.auditd service is running, which indicates security auditing is enabled.",
             mitigation: "Enable security auditing to ensure security events are logged and monitored.",
-            docID: 59
+            docID: 59, cisID: "3.1"
         )
     }
 
     override func check() {
         let task = Process()
-        task.launchPath = "/bin/launchctl"
+        task.executableURL = URL(fileURLWithPath: "/bin/launchctl")
         task.arguments = ["list", "com.apple.auditd"]
 
         let pipe = Pipe()
+        let errPipe = Pipe()
         task.standardOutput = pipe
+        task.standardError = errPipe
 
         do {
             try task.run()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8) {
-                if output.contains("com.apple.auditd") {
-                    status = "Security auditing is enabled."
-                    checkstatus = "Green"
-                } else if output.contains("Could not find service") {
-                    status = "Security auditing is not enabled."
-                    checkstatus = "Red"
-                } else {
-                    status = "Error: Unable to parse the launchctl output."
-                    checkstatus = "Yellow"
-                }
+            task.waitUntilExit()
+            let output = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+            let errOutput = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+            let combined = output + errOutput
+
+            if combined.contains("com.apple.auditd") && !combined.contains("Could not find") {
+                status = "Security auditing (BSM/auditd) is enabled."
+                checkstatus = "Green"
             } else {
-                status = "Error: Unable to parse the launchctl output."
+                // BSM/auditd was removed from macOS 26 Tahoe. Apple replaced it with
+                // the Unified Log (log stream/log show). This check is no longer applicable
+                // on Tahoe and newer systems.
+                status = "BSM audit daemon not found. On macOS 26 Tahoe+, BSM/auditd was removed and replaced by Unified Logging."
                 checkstatus = "Yellow"
             }
         } catch let e {

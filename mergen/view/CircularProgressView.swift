@@ -23,10 +23,6 @@ struct CircularProgressView: View {
                 .stroke(Color.accentColor, lineWidth: 10)
                 .frame(width: 100, height: 100)
                 .rotationEffect(Angle(degrees: 270.0))
-                .onAppear {
-                    withAnimation(.linear) {
-                    }
-                }
             Text("\(Int(progress * 100))%") // Add percentage text
                 .font(.system(size: 30))
                 .bold()

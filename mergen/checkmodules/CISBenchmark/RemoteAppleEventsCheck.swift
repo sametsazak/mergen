@@ -14,14 +14,14 @@ import Foundation
 class RemoteAppleEventsDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Remote Apple Events Is Disabled",
+            name: "Remote Apple Events disabled",
             description: "Remote Apple Events allows other users to send AppleScript events to your computer. This check ensures that Remote Apple Events is disabled to protect your computer from unauthorized access.",
             category: "CIS Benchmark",
-            remediation: "To disable Remote Apple Events, go to 'System Preferences', click on 'Sharing', and uncheck the 'Remote Apple Events' option.",
+            remediation: "To disable Remote Apple Events, go to 'System Settings', click on 'Sharing', and uncheck the 'Remote Apple Events' option.",
             severity: "Medium",
             documentation: "For more information about Remote Apple Events and how to disable it, visit: https://support.apple.com/guide/mac-help/use-remote-apple-events-mchlp1628/mac",
             mitigation: "Disabling Remote Apple Events minimizes the risk of unauthorized access to your computer. This reduces the ways an attacker can remotely control your system and helps protect your data from unauthorized access.",
-            docID: 40
+            docID: 40, cisID: "2.3.3.6"
         )
     }
 
@@ -33,6 +33,7 @@ class RemoteAppleEventsDisabledCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 

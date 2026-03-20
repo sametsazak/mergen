@@ -12,7 +12,7 @@ import SwiftUI
 struct ScanResultIndicator: View {
     let scanResults: [Vulnerability]
     private var groupedScanResults: [String: [Vulnerability]] {
-        Dictionary(grouping: scanResults, by: { $0.checkstatus! })
+        Dictionary(grouping: scanResults, by: { $0.checkstatus ?? "Yellow" })
     }
 
     var body: some View {

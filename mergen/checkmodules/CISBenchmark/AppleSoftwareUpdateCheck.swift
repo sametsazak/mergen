@@ -12,7 +12,7 @@ import Foundation
 class AppleSoftwareUpdateCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check All Apple-Provided Software Is Updated In Last 30 Days",
+            name: "Apple software updated within 30 days",
             description: "Checks if all Apple-provided software is up-to-date using the Software Update tool.",
             category: "CIS Benchmark",
             remediation: "Run the Software Update tool to install the latest security patches and software updates from Apple.",
@@ -20,7 +20,7 @@ class AppleSoftwareUpdateCheck: Vulnerability {
             documentation: "https://support.apple.com/en-us/HT201541",
             mitigation: "Regularly updating all Apple-provided software helps prevent unauthorized access and minimizes the risk of known vulnerabilities being exploited.",
             checkstatus: "",
-            docID: 7
+            docID: 7, cisID: "1.1"
         )
     }
 
@@ -31,6 +31,7 @@ class AppleSoftwareUpdateCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

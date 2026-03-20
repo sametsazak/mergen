@@ -13,7 +13,7 @@ class EFIVersionCheck: Vulnerability {
     
     init() {
         super.init(
-            name: "Check EFI Version is Valid and Regularly Checked",
+            name: "EFI version valid and regularly checked",
             description: "Check if the EFI version is valid and being regularly checked on the system",
             category: "CIS Benchmark",
             remediation: "Upgrade to the latest EFI version and enable automatic checks",
@@ -26,11 +26,12 @@ class EFIVersionCheck: Vulnerability {
 
     override func check() {
         let task = Process()
-        task.launchPath = "/usr/sbin/system_profiler"
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/system_profiler")
         task.arguments = ["SPHardwareDataType", "-xml"]
 
         let pipe = Pipe()
         task.standardOutput = pipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

@@ -12,24 +12,26 @@ import Foundation
 class AppStoreUpdatesCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check 'Install Application Updates from the App Store' Is Enabled",
+            name: "App Store auto-updates enabled",
             description: "Check if 'Install app updates from the App Store' is enabled in the App Store preferences",
             category: "CIS Benchmark",
             remediation: "Enable 'Install app updates from the App Store' in the App Store preferences",
             severity: "Medium",
             documentation: "https://support.apple.com/en-us/HT202180",
             mitigation: "Enabling automatic installation of app updates from the App Store helps ensure that security patches and software updates are installed in a timely manner.",
-            docID: 9
+            docID: 9, cisID: "1.4"
         )
     }
 
     override func check() {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
-        task.arguments = ["read", "/Library/Preferences/com.apple.SoftwareUpdate", "AutomaticallyInstallMacOSUpdates"]
+        // CIS 1.4: App Store app updates use AutoUpdate in com.apple.commerce
+        task.arguments = ["read", "/Library/Preferences/com.apple.commerce", "AutoUpdate"]
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

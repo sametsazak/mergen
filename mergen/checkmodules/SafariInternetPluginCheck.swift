@@ -10,7 +10,7 @@ import Foundation
 class SafariInternetPluginsCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Safari Disable Internet Plugins for Global Use",
+            name: "Safari Internet plugins disabled",
             description: "This check ensures that Internet plugins are disabled for global use in Safari, which helps prevent the execution of malicious code.",
             category: "Security",
             remediation: "To disable Internet plugins for global use in Safari, go to Safari > Preferences > Security, and uncheck the 'Allow Plug-ins' option.",

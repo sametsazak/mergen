@@ -1,185 +1,276 @@
+<div align="center">
 
-# Mergen - MacOS Audit and Security Check Tool
+# 🛡️ Mergen
 
-Mergen is an open-source, native macOS application for auditing and checking the security of your Mac. It scans your system for security issues based on the [Center for Internet Security (CIS) Benchmark](https://www.cisecurity.org/cis-benchmarks), and checks various settings and configurations related to security and privacy.
+**Native macOS security audit tool — CIS Apple macOS 26 Tahoe Benchmark v1.0.0**
+
+[![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-lightgrey?style=flat-square)](https://github.com/sametsazak/mergen)
+[![Swift](https://img.shields.io/badge/swift-5.9-orange?style=flat-square)](https://swift.org)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
+[![CIS Benchmark](https://img.shields.io/badge/CIS-macOS%2026%20Tahoe%20v1.0.0-red?style=flat-square)](https://www.cisecurity.org)
+
+Mergen audits your Mac against 90+ CIS Benchmark controls and **fixes most failures automatically** — no terminal required.
 
 ![Screenshot](img/main.png)
 
-![Screenshot](img/report.png)
+</div>
 
-```bash
-Mergen provides the following features to help you secure your Mac:
+---
 
-1. Check Gatekeeper Status
-2. Check Secure Kernel Extension Loading
-3. Guest Login Status Check
-4. iCloud Drive Status Check
-5. Check If SSH Is Enabled
-6. Check Firewall Status
-7. Check FileVault Status
-8. Check All Apple-Provided Software Is Updated In Last 30 Days
-9. Check Auto Update Is Enabled
-10. Check 'Install Application Updates from the App Store' Is Enabled
-11. Check Install Security Responses and System Files Is Enabled
-12. Check 'Install system data files and security updates' Is Enabled
-13. Check Firewall Stealth Mode Is Enabled
-14. Check AirDrop Is Disabled
-15. Check AirPlay Receiver Is Disabled
-16. Check 'Set Time and Date Automatically' Is Enabled
-17. Check Time Is Set Within Appropriate Limits
-18. Check DVD or CD Sharing Is Disabled
-19. Check Screen Sharing Is Disabled
-20. Check File Sharing Is Disabled
-21. Check Printer Sharing Is Disabled
-22. Check Remote Login Is Disabled
-23. Check Remote Management(ARDagent) Is Disabled
-24. Check Remote Apple Events Is Disabled
-25. Check Internet Sharing Is Disabled
-26. Check Content Caching Is Disabled
-27. Check Media Sharing Is Disabled
-28. Check Bluetooth Sharing Is Disabled
-29. Check Backup Automatically is Enabled If Time Machine Is Enabled
-30. Check that Time Machine is Enabled
-31. Check Time Machine Volumes Are Encrypted If Time Machine Is Enabled
-32. Check Show Wi-Fi status in Menu Bar Is Enabled
-33. Check Show Bluetooth Status in Menu Bar Is Enabled
-34. Check Location Services Is Enabled
-35. Check Location Services Is in the Menu Bar
-36. Check Personalized Ads Status
-37. Check Screen Saver Corners Are Secure
-38. Check Universal Control is Disabled
-39. Check Wake for Network Access is Disabled
-40. Check an Inactivity Interval of 20 Minutes or Less for the Screen Saver Is Enabled
-41. Check a Password is Required to Wake the Computer from Sleep or Screen Saver
-42. Check Security Auditing Is Enabled
-43. Check System Integrity Protection (SIP) Status
-44. Check XProtect Status
-45. Check Certificate Trust Settings
-46. Check Siri Status
-47. Check Sending Diagnostic and Usage Data to Apple Status
-48. Check Java 6 Default Runtime Status
-49. Check EFI Version is Valid and Regularly Checked
-50. Check Bonjour Advertising Service Status
-51. Check HTTP Server Status
-52. Check NFS Server Status
-53. Check 'Show Password Hints' Status
-54. Check 'Allow guests to connect to shared folders' Status
-55. Check Filename Extension Status
-56. Check Automatic Run of Safe Files in Safari
-57. Check Safari Disable Internet Plugins for Global Use
-58. Check Fast User Switching Status
+## Overview
+
+Mergen is a free, open-source, fully native SwiftUI app that audits macOS security configuration against the **CIS Apple macOS 26 Tahoe Benchmark v1.0.0**. It covers software updates, firewall, sharing services, privacy, authentication, and more.
+
+Unlike shell scripts or compliance tools that only report findings, Mergen can **remediate failures directly** — applying the correct system change and immediately re-verifying the result.
+
+> All feedback, issues, and pull requests are welcome. The code is open — if you find a bug or want to add a check, open an issue or PR.
+
+---
+
+## ⚠️ Administrator Privilege Notice
+
+Some fixes require elevated privileges. When an admin-level fix runs:
+
+- macOS shows the **standard system authentication dialog** — the same one used by System Settings
+- Your password is handled entirely by macOS via `do shell script ... with administrator privileges`
+- **Mergen never stores, logs, or transmits your password**
+- The exact command run is written to the audit log before execution — fully inspectable
+- Every fix command is visible in [`FixCommands.swift`](mergen/core/FixCommands.swift)
+
+When using **Fix All**, all admin fixes are batched into a **single password prompt**.
+
+---
+
+## Features
+
+### Scanning
+- 90+ automated checks across CIS sections 1–6
+- Live results — list populates as checks complete
+- 15-second per-check timeout so hung checks never stall the scan
+- Apple Intelligence / AI privacy checks (CIS 2.5.x, new in Tahoe)
+
+### Auto-Remediation
+- **Fix individual checks** from the detail panel
+- **Fix All sheet** — see every fixable failure, apply them all at once
+- **Two privilege tiers**: user-level fixes run silently; admin fixes use one password prompt
+- **Before/after preview** — each fix shows what's currently wrong and what will change
+- After every fix, the check re-runs to verify the result
+- When a fix doesn't resolve the issue, the actual check finding is shown so you know why
+
+### Audit Logging
+- Every scan and fix action is logged to `~/Library/Logs/mergen/mergen-YYYY-MM-DD.log`
+- In-app log viewer: color-coded entries, filter by type, search, copy-all
+- Accessible from the toolbar, the Fix All sheet, and individual check detail panels
+
+### Reporting
+- **HTML report**: styled, standalone, sharable
+- **JSON export**: full metadata per check including CIS ID, status, severity, and remediation
+
+### Interface
+- 3-pane layout: Sidebar → Results list → Detail panel
+- Filter pills: All / Failed / Passed / Warnings / Advisory
+- Sort by CIS ID, Severity, Name, or Status
+- Search across name, CIS ID, description, and finding text
+- Security score ring with animated breakdown
+- Dark mode support
+
+---
+
+## Checks
+
+### Section 1 — Software Updates
+| CIS ID | Check | Auto-Fix |
+|--------|-------|----------|
+| 1.2 | Critical updates auto-install enabled | ✓ Admin |
+| 1.3 | Auto-update enabled | ✓ Admin |
+| 1.4 | App Store auto-updates enabled | ✓ Admin |
+| 1.5 | Security responses auto-install enabled | ✓ Admin |
+| 1.6 | Software update deferment policy | — |
+
+### Section 2 — System Settings
+| CIS ID | Check | Auto-Fix |
+|--------|-------|----------|
+| 2.1.1.1 | iCloud Keychain (advisory) | — |
+| 2.1.1.3 | iCloud Drive disabled | — |
+| 2.2.1 | Firewall enabled | ✓ Admin |
+| 2.2.2 | Firewall stealth mode enabled | ✓ Admin |
+| 2.3.1.1 | AirDrop disabled | ✓ User |
+| 2.3.1.2 | AirPlay Receiver disabled | ✓ User |
+| 2.3.2.1 | Time set automatically | ✓ Admin |
+| 2.3.2.2 | Time within appropriate limits | — |
+| 2.3.3.1 | Screen sharing disabled | ✓ Admin |
+| 2.3.3.2 | File sharing disabled | ✓ Admin |
+| 2.3.3.3 | Printer sharing disabled | ✓ Admin |
+| 2.3.3.4 | Remote login (SSH) disabled | ✓ Admin |
+| 2.3.3.5 | Remote management disabled | ✓ Admin |
+| 2.3.3.6 | Remote Apple Events disabled | ✓ Admin |
+| 2.3.3.7 | Internet sharing disabled | ✓ Admin |
+| 2.3.3.8 | Content caching disabled | ✓ Admin |
+| 2.3.3.9 | Media sharing disabled | ✓ Admin |
+| 2.3.3.10 | Bluetooth sharing disabled | ✓ User |
+| 2.5.1.1 | External Intelligence Extensions disabled | — |
+| 2.5.1.2 | Writing Tools (Apple Intelligence) disabled | — |
+| 2.5.1.3 | Mail summarization disabled | — |
+| 2.5.1.4 | Notes summarization disabled | — |
+| 2.5.2.1 | Siri disabled | ✓ User |
+| 2.6.3.1 | Diagnostic data sharing disabled | ✓ Admin |
+| 2.6.3.2 | Improve Siri & Dictation disabled | ✓ User |
+| 2.6.3.3 | Improve assistive voice disabled | ✓ User |
+| 2.6.3.4 | Share with app developers disabled | — |
+| 2.6.4 | Personalized ads disabled | ✓ User |
+| 2.6.5 | Gatekeeper enabled | ✓ Admin |
+| 2.6.7 | Lockdown Mode (advisory) | — |
+| 2.6.8 | Admin password required for System Settings | — |
+| 2.8.1 | Universal control disabled | ✓ User |
+| 2.9.1 | Improve Spotlight suggestions disabled | — |
+| 2.10.1.2 | Sleep enabled (Apple Silicon) | ✓ Admin |
+| 2.10.2 | Power Nap disabled | ✓ Admin |
+| 2.10.3 | Wake for network access disabled | ✓ Admin |
+| 2.11.1 | Screen saver activates within 20 minutes | ✓ User |
+| 2.11.2 | Password required on wake | ✓ User |
+| 2.11.3 | Login window message configured | — |
+| 2.11.4 | Login window shows name and password fields | ✓ Admin |
+| 2.11.5 | Password hints disabled | ✓ Admin |
+| 2.13.1 | Guest login disabled | ✓ Admin |
+| 2.13.2 | Guest access to shared folders disabled | ✓ Admin |
+| 2.13.3 | Automatic login disabled | ✓ Admin |
+
+### Section 3 — Logging & Auditing
+| CIS ID | Check | Auto-Fix |
+|--------|-------|----------|
+| 3.2 | Security auditing enabled | — |
+| 3.3 | Audit flags configured | — |
+
+### Section 4 — Network
+| CIS ID | Check | Auto-Fix |
+|--------|-------|----------|
+| 4.1 | Bonjour advertising disabled | ✓ Admin |
+| 4.2 | Apache HTTP server disabled | ✓ Admin |
+| 4.3 | NFS server disabled | ✓ Admin |
+
+### Section 5 — Authentication & Authorization
+| CIS ID | Check | Auto-Fix |
+|--------|-------|----------|
+| 5.1.1 | System Integrity Protection enabled | — |
+| 5.1.3 | AMFI enabled | — |
+| 5.1.4 | Signed System Volume (SSV) enabled | — |
+| 5.2.1 | Password lockout threshold configured | ✓ Admin |
+| 5.2.2 | Minimum password length enforced | ✓ Admin |
+| 5.4 | Sudo timeout configured | ✓ Admin |
+| 5.5 | Sudo TTY tickets enabled | ✓ Admin |
+| 5.6 | Root account disabled | ✓ Admin |
+| 5.9 | Sudo logging enabled | ✓ Admin |
+| 5.10 | XProtect protection enabled | — |
+| 5.11 | Secure kernel extension loading enforced | — |
+| — | FileVault enabled | — |
+| — | Certificate trust settings valid | — |
+
+### Section 6 — User Interface
+| CIS ID | Check | Auto-Fix |
+|--------|-------|----------|
+| 6.1.1 | Filename extensions shown | ✓ User |
+| 6.1.2 | Home folder permissions | — |
+| 6.3.1 | Safari auto-open safe files disabled | ✓ User |
+| 6.3.3 | Safari fraudulent website warning enabled | ✓ User |
+| 6.3.4 | Safari cross-site tracking prevention | ✓ User |
+| 6.3.6 | Safari advertising privacy (Private Click Measurement) | ✓ User |
+| 6.3.10 | Safari status bar shown | ✓ User |
+| 6.4.1 | Terminal secure keyboard entry enabled | ✓ User |
+
+### Additional Checks
+| Check | Auto-Fix |
+|-------|----------|
+| Wi-Fi status shown in menu bar | — |
+| Bluetooth status shown in menu bar | — |
+| Location services shown in menu bar | — |
+| Screen saver corners configured | — |
+| Fast user switching disabled | ✓ Admin |
+| Time Machine enabled | — |
+| Time Machine backup enabled | — |
+| Time Machine volumes encrypted | — |
+| EFI version valid (Intel only) | — |
+| App sandbox enforced | — |
+| DVD/CD sharing disabled | — |
+| Java 6 runtime disabled | — |
+| Apple software updated within 30 days | — |
+
+---
+
+## How Auto-Fix Works
+
+Mergen applies fixes at two privilege levels:
+
+| Level | How it runs | Typical checks |
+|-------|-------------|----------------|
+| **User** | Runs as you, no password | Safari, screen saver, AirDrop, Siri, privacy settings |
+| **Admin** | Standard macOS auth dialog via AppleScript | Firewall, sharing services, software update policy, login settings |
+
+After every fix attempt the original check re-runs. The result shown — Fixed or Still failing — reflects the actual check outcome, not just whether the command exited cleanly.
+
+---
+
+## Audit Log
+
+All scan and fix activity is logged automatically to:
+
 ```
-## Installation and Usage
+~/Library/Logs/mergen/mergen-YYYY-MM-DD.log
+```
 
-Mergen is an open-source project, and you can download the latest release binary from the GitHub repository or you can build yourself.
+Open it from the toolbar, from the Fix All sheet when failures remain, or from a check's detail panel after a failed fix.
+
+---
+
+## Installation
 
 ```bash
 git clone https://github.com/sametsazak/mergen.git
 ```
 
-Open the Mergen.xcworkspace file in Xcode.
+Open `mergen.xcodeproj` in Xcode and run. No third-party dependencies. No network calls. Everything runs locally.
 
-Build and run the project in Xcode.
+**Requirements:** macOS 13 Ventura or later (tested on macOS 26 Tahoe)
 
-### Usage
+---
 
-Once you have installed Mergen, you can launch the application and start checking the security issues. The application is user-friendly and easy to use. Follow the steps mentioned below to check the security issues:
+## Usage
 
-- Launch the Mergen application.
+1. Launch Mergen and press **Start Scan**
+2. Use the **Failed** filter pill and sort by Severity to prioritize
+3. Click any check to see description, finding, and remediation steps
+4. Press **Fix N Issues** to open the Fix All sheet, or use the Fix button in each check's detail panel
+5. Export results as **HTML** or **JSON** from the toolbar
 
-- Choose a category and press the scan button to start the security check.
-
-![Screenshot](img/darkmode.png)
-
-- Once the security check is complete, you can see the reporting options and statistics. 
-
-- You can see more details by double clicking the findings.
-
-![Screenshot](img/detail.png)
-
-
-## Reporting
-
-![Screenshot](img/report.png)
-
-### HTML Report
-
-The HTML export feature lets you quickly generate a professional-looking report of your scan results. This report includes all the details about the security checks performed, as well as any warnings or errors that were detected. You can share it with others for review or reference.
-
-![Screenshot](img/report1.png)
-
-### JSON Export
-
-The JSON export feature allows you to export the scan results in JSON format that other applications can quickly process. This is particularly useful if you need to integrate the results with other security tools or workflows. The JSON format provides a detailed breakdown of each security check, making it easy to identify areas requiring further attention.
-
-```json
- {
-    "status" : "Firewall is enabled.",
-    "documentation" : "For more information on configuring your firewall, visit: https:\/\/support.apple.com\/en-us\/HT201642",
-    "category" : "CIS Benchmark",
-    "mitigation" : "Enabling and configuring the firewall helps prevent unauthorized access to your device and increases overall security. A properly configured firewall can block incoming connections and minimize the risk of unauthorized access.",
-    "remediation" : "To enable and configure the firewall, go to System Preferences -> Security & Privacy -> Firewall, click 'Turn On Firewall', and 'Firewall Options...' to block incoming connections.",
-    "description" : "The firewall helps protect your device from unauthorized access. This check verifies if the firewall is enabled and configured correctly.",
-    "severity" : "High",
-    "name" : "Check Firewall Status",
-    "docID" : 5
-  }
-  ```
-
-## Challenges
-
-Developing this application was a fun but challenging experience. Here's a rundown of the main problems I faced along the way:
-
-1. Learning Swift and SwiftUI on the Fly
-
-As a Python-savvy developer, I had to learn Swift and SwiftUI on the go while building Mergen. I had to learn Swift and SwiftUI while simultaneously developing Mergen. This learning curve was a unique challenge, as I had to familiarize myself with new programming languages. However, through dedication and perseverance, I managed to overcome some problems and, at least, created a simple version my ideas.
-
-2. No Admin Rights? No Problem!
-
-Mergen's all about security, so it needed access to system settings and configs. But getting admin rights or using sudo in a macOS app wasn't an option, which made some security checks a bit tricky. To work around this, I focused on checks that could run with just user rights, even if it meant sacrificing a few features.
-
-3. Keeping the Code Simple and User-Friendly
-
-In an effort to make Mergen as accessible as possible for users and contributors. This goal presented a challenge, as macOS has numerous versions, and not every module could be tested on each one. As a result, user feedback is vital for identifying and addressing any compatibility issues or limitations that may arise due to the differences in macOS versions. This feedback-driven approach allows Mergen to continuously improve and adapt to different environments.
-
+---
 
 ## Contributing
 
-Since I'm not an expert Swift developer, there might be some issues with the code but we welcome contributions from anyone interested in improving the security of Mac. If you are interested in contributing to the project, please follow these steps:
+Issues, pull requests, and new checks are all welcome.
 
-- Fork the repository and clone it to your local machine.
+**To add a new check:** subclass `Vulnerability` in `mergen/checkmodules/`, register it in `Scanner.swift`, and optionally add a fix command to `FixCommands.swift`.
 
-- Create a new branch for your changes.
+**To add or fix a fix command:** add one line to the appropriate dictionary in `FixCommands.swift`. The fix must write to the exact same key, plist, or API that the check reads — otherwise the re-check will always report failure even if the command succeeded.
 
-- Make your changes and write tests it.
+---
 
-- Commit your changes and push them to your forked repository.
+## macOS 26 Tahoe Compatibility
 
-- Open a pull request and describe your changes in detail.
+| Change in Tahoe | How Mergen handles it |
+|-----------------|----------------------|
+| `com.apple.alf` plist removed | Firewall checks use `socketfilterfw --getglobalstate` |
+| `com.apple.auditd` removed | Section 3 checks report Yellow, not Red |
+| Screen saver keys moved to `-currentHost` domain | Checks try `-currentHost` first, fall back to user domain |
+| `spctl --status` writes to stderr | Both stdout and stderr captured |
+
+---
 
 ## License
-Mergen is released under the MIT License.
 
-```bash
-MIT License
+MIT License — Copyright (c) 2023 Samet Sazak
 
-Copyright (c) [2023] [Samet Sazak]
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

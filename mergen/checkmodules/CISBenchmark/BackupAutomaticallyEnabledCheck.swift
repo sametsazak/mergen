@@ -10,14 +10,14 @@ import Foundation
 class BackupAutomaticallyCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Backup Automatically is Enabled If Time Machine Is Enabled",
+            name: "Time Machine backup enabled",
             description: "Time Machine is a backup utility that helps to protect your data. This check ensures that if Time Machine is enabled, Backup Automatically is also enabled.",
             category: "CIS Benchmark",
-            remediation: "To enable Backup Automatically, go to 'System Preferences', click on 'Time Machine', and check the 'Backup Automatically' option.",
+            remediation: "To enable Backup Automatically, go to 'System Settings', click on 'Time Machine', and check the 'Backup Automatically' option.",
             severity: "Medium",
             documentation: "For more information about Time Machine and Backup Automatically, visit: https://support.apple.com/guide/mac-help/what-is-time-machine-mh15139/mac",
             mitigation: "Enabling Backup Automatically helps to ensure that your system is regularly backed up, which helps prevent data loss and aids in data recovery if needed.",
-            docID: 45
+            docID: 45, cisID: "2.3.4.1"
         )
     }
 

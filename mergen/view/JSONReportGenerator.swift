@@ -16,9 +16,12 @@ struct ScanResult: Encodable {
     let severity: String
     let documentation: String?
     let status: String?
+    let checkstatus: String?
     let mitigation: String
     let docID: Int32
-    
+    let cisID: String
+    let isManual: Bool
+
     init(vulnerability: Vulnerability) {
         self.name = vulnerability.name
         self.description = vulnerability.description
@@ -27,8 +30,11 @@ struct ScanResult: Encodable {
         self.severity = vulnerability.severity
         self.documentation = vulnerability.documentation
         self.status = vulnerability.status
+        self.checkstatus = vulnerability.checkstatus
         self.mitigation = vulnerability.mitigation
         self.docID = vulnerability.docID
+        self.cisID = vulnerability.cisID
+        self.isManual = vulnerability.isManual
     }
 }
 

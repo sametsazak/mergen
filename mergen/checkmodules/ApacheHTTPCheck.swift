@@ -10,37 +10,34 @@ import Foundation
 class HttpServerCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check HTTP Server Status",
+            name: "Apache HTTP server disabled",
             description: "This check ensures that the HTTP server is not running on your system, which helps protect against potential security vulnerabilities.",
-            category: "Security",
+            category: "CIS Benchmark",
             remediation: "To disable the built-in Apache server or configure it securely, follow the instructions in the provided documentation link.",
             severity: "Medium",
             documentation: "For more information on disabling or configuring the built-in Apache server, visit: https://support.apple.com/en-us/HT210060",
             mitigation: "Disabling or securely configuring the built-in Apache server helps protect your system from security vulnerabilities associated with running an HTTP server.",
-            docID: 28
+            docID: 28, cisID: "4.2"
         )
     }
 
     override func check() {
+        // Check whether httpd is actually running via launchctl, not config syntax
         let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/sbin/apachectl")
-        task.arguments = ["-t"]
-
-        let outputPipe = Pipe()
-        task.standardOutput = outputPipe
+        task.executableURL = URL(fileURLWithPath: "/bin/launchctl")
+        task.arguments = ["list", "org.apache.httpd"]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
 
         do {
             try task.run()
             task.waitUntilExit()
 
-            let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-
-            if output.lowercased().contains("syntax ok") {
-                status = "Apache Server is running."
+            if task.terminationStatus == 0 {
+                status = "Apache HTTP server is running."
                 checkstatus = "Red"
             } else {
-                status = "Apache Server is not Running."
+                status = "Apache HTTP server is not running."
                 checkstatus = "Green"
             }
         } catch let e {

@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA0001122F6CA33300814E2E /* FixCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001112F6CA33300814E2E /* FixCommands.swift */; };
+		AA0002122F6CA33300814E2E /* FixManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0002112F6CA33300814E2E /* FixManager.swift */; };
+		AA0003122F6CA33300814E2E /* FixAllSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0003112F6CA33300814E2E /* FixAllSheet.swift */; };
+		AA0004122F6CA33300814E2E /* AuditLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0004112F6CA33300814E2E /* AuditLogger.swift */; };
+		AA0005122F6CA33300814E2E /* LogViewerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0005112F6CA33300814E2E /* LogViewerSheet.swift */; };
 		BC6C516329D38E2100B85797 /* IcloudEnabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C516229D38E2100B85797 /* IcloudEnabled.swift */; };
 		BC6C516529D390F800B85797 /* GuestLoginCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C516429D390F800B85797 /* GuestLoginCheck.swift */; };
 		BC6C516729D3921400B85797 /* SiriStatusCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6C516629D3921400B85797 /* SiriStatusCheck.swift */; };
@@ -87,9 +92,50 @@
 		BCD7350729D2165700C0B779 /* Preview in Resources */ = {isa = PBXBuildFile; fileRef = BCD7350629D2165700C0B779 /* Preview */; };
 		BCD7350929D2218800C0B779 /* CertificateTrustCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD7350829D2218800C0B779 /* CertificateTrustCheck.swift */; };
 		BCD7350D29D2415600C0B779 /* SshEnableCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD7350C29D2415600C0B779 /* SshEnableCheck.swift */; };
+		BCEA57FD2F6CA33300814E2E /* PowerNapDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57EB2F6CA33300814E2E /* PowerNapDisabledCheck.swift */; };
+		BCEA57FE2F6CA33300814E2E /* SleepEnabledAppleSiliconCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F32F6CA33300814E2E /* SleepEnabledAppleSiliconCheck.swift */; };
+		BCEA57FF2F6CA33300814E2E /* SafariCrossSiteTrackingCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57EE2F6CA33300814E2E /* SafariCrossSiteTrackingCheck.swift */; };
+		BCEA58002F6CA33300814E2E /* GuestHomeFolderCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DF2F6CA33300814E2E /* GuestHomeFolderCheck.swift */; };
+		BCEA58012F6CA33300814E2E /* PasswordMinLengthCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57EA2F6CA33300814E2E /* PasswordMinLengthCheck.swift */; };
+		BCEA58022F6CA33300814E2E /* ImproveAssistiveVoiceCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E22F6CA33300814E2E /* ImproveAssistiveVoiceCheck.swift */; };
+		BCEA58032F6CA33300814E2E /* iCloudKeychainCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E12F6CA33300814E2E /* iCloudKeychainCheck.swift */; };
+		BCEA58042F6CA33300814E2E /* SafariAdvertisingPrivacyCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57ED2F6CA33300814E2E /* SafariAdvertisingPrivacyCheck.swift */; };
+		BCEA58052F6CA33300814E2E /* SudoTimeoutCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F82F6CA33300814E2E /* SudoTimeoutCheck.swift */; };
+		BCEA58062F6CA33300814E2E /* HomeFolderPermissionsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E02F6CA33300814E2E /* HomeFolderPermissionsCheck.swift */; };
+		BCEA58072F6CA33300814E2E /* ExternalIntelligenceExtensionsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DE2F6CA33300814E2E /* ExternalIntelligenceExtensionsCheck.swift */; };
+		BCEA58082F6CA33300814E2E /* ImproveSiriDictationCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E32F6CA33300814E2E /* ImproveSiriDictationCheck.swift */; };
+		BCEA58092F6CA33300814E2E /* NotesSummarizationCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E82F6CA33300814E2E /* NotesSummarizationCheck.swift */; };
+		BCEA580A2F6CA33300814E2E /* TerminalSecureKeyboardCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57FA2F6CA33300814E2E /* TerminalSecureKeyboardCheck.swift */; };
+		BCEA580B2F6CA33300814E2E /* SafariFraudWarningCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57EF2F6CA33300814E2E /* SafariFraudWarningCheck.swift */; };
+		BCEA580C2F6CA33300814E2E /* LockdownModeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E42F6CA33300814E2E /* LockdownModeCheck.swift */; };
+		BCEA580D2F6CA33300814E2E /* RootAccountDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57EC2F6CA33300814E2E /* RootAccountDisabledCheck.swift */; };
+		BCEA580E2F6CA33300814E2E /* SSVEnabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F62F6CA33300814E2E /* SSVEnabledCheck.swift */; };
+		BCEA580F2F6CA33300814E2E /* SpotlightImprovementCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F52F6CA33300814E2E /* SpotlightImprovementCheck.swift */; };
+		BCEA58102F6CA33300814E2E /* SoftwareUpdateDefermentCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F42F6CA33300814E2E /* SoftwareUpdateDefermentCheck.swift */; };
+		BCEA58112F6CA33300814E2E /* AuditFlagsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DC2F6CA33300814E2E /* AuditFlagsCheck.swift */; };
+		BCEA58122F6CA33300814E2E /* SudoLoggingCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F72F6CA33300814E2E /* SudoLoggingCheck.swift */; };
+		BCEA58132F6CA33300814E2E /* LoginWindowNamePasswordCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E62F6CA33300814E2E /* LoginWindowNamePasswordCheck.swift */; };
+		BCEA58142F6CA33300814E2E /* WritingToolsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57FB2F6CA33300814E2E /* WritingToolsCheck.swift */; };
+		BCEA58152F6CA33300814E2E /* AMFIEnabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DB2F6CA33300814E2E /* AMFIEnabledCheck.swift */; };
+		BCEA58162F6CA33300814E2E /* SafariStatusBarCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F02F6CA33300814E2E /* SafariStatusBarCheck.swift */; };
+		BCEA58172F6CA33300814E2E /* AdminPasswordForSystemPrefsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DA2F6CA33300814E2E /* AdminPasswordForSystemPrefsCheck.swift */; };
+		BCEA58182F6CA33300814E2E /* MailSummarizationCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E72F6CA33300814E2E /* MailSummarizationCheck.swift */; };
+		BCEA58192F6CA33300814E2E /* PasswordLockoutThresholdCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E92F6CA33300814E2E /* PasswordLockoutThresholdCheck.swift */; };
+		BCEA581A2F6CA33300814E2E /* ShareMacAnalyticsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F12F6CA33300814E2E /* ShareMacAnalyticsCheck.swift */; };
+		BCEA581B2F6CA33300814E2E /* ShareWithAppDevelopersCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F22F6CA33300814E2E /* ShareWithAppDevelopersCheck.swift */; };
+		BCEA581C2F6CA33300814E2E /* XProtectStatusCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57FC2F6CA33300814E2E /* XProtectStatusCheck.swift */; };
+		BCEA581D2F6CA33300814E2E /* SudoTTYTicketsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F92F6CA33300814E2E /* SudoTTYTicketsCheck.swift */; };
+		BCEA581E2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DD2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift */; };
+		BCEA581F2F6CA33300814E2E /* LoginScreenMessageCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E52F6CA33300814E2E /* LoginScreenMessageCheck.swift */; };
+		BCEA58212F6CA35D00814E2E /* SecurityScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA58202F6CA35D00814E2E /* SecurityScoreView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AA0001112F6CA33300814E2E /* FixCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixCommands.swift; sourceTree = "<group>"; };
+		AA0002112F6CA33300814E2E /* FixManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixManager.swift; sourceTree = "<group>"; };
+		AA0003112F6CA33300814E2E /* FixAllSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixAllSheet.swift; sourceTree = "<group>"; };
+		AA0004112F6CA33300814E2E /* AuditLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogger.swift; sourceTree = "<group>"; };
+		AA0005112F6CA33300814E2E /* LogViewerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewerSheet.swift; sourceTree = "<group>"; };
 		BC6C516229D38E2100B85797 /* IcloudEnabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IcloudEnabled.swift; sourceTree = "<group>"; };
 		BC6C516429D390F800B85797 /* GuestLoginCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuestLoginCheck.swift; sourceTree = "<group>"; };
 		BC6C516629D3921400B85797 /* SiriStatusCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriStatusCheck.swift; sourceTree = "<group>"; };
@@ -174,6 +220,42 @@
 		BCD7350629D2165700C0B779 /* Preview */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Preview; sourceTree = "<group>"; };
 		BCD7350829D2218800C0B779 /* CertificateTrustCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CertificateTrustCheck.swift; sourceTree = "<group>"; };
 		BCD7350C29D2415600C0B779 /* SshEnableCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SshEnableCheck.swift; sourceTree = "<group>"; };
+		BCEA57DA2F6CA33300814E2E /* AdminPasswordForSystemPrefsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminPasswordForSystemPrefsCheck.swift; sourceTree = "<group>"; };
+		BCEA57DB2F6CA33300814E2E /* AMFIEnabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFIEnabledCheck.swift; sourceTree = "<group>"; };
+		BCEA57DC2F6CA33300814E2E /* AuditFlagsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditFlagsCheck.swift; sourceTree = "<group>"; };
+		BCEA57DD2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticLoginDisabledCheck.swift; sourceTree = "<group>"; };
+		BCEA57DE2F6CA33300814E2E /* ExternalIntelligenceExtensionsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalIntelligenceExtensionsCheck.swift; sourceTree = "<group>"; };
+		BCEA57DF2F6CA33300814E2E /* GuestHomeFolderCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuestHomeFolderCheck.swift; sourceTree = "<group>"; };
+		BCEA57E02F6CA33300814E2E /* HomeFolderPermissionsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFolderPermissionsCheck.swift; sourceTree = "<group>"; };
+		BCEA57E12F6CA33300814E2E /* iCloudKeychainCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudKeychainCheck.swift; sourceTree = "<group>"; };
+		BCEA57E22F6CA33300814E2E /* ImproveAssistiveVoiceCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImproveAssistiveVoiceCheck.swift; sourceTree = "<group>"; };
+		BCEA57E32F6CA33300814E2E /* ImproveSiriDictationCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImproveSiriDictationCheck.swift; sourceTree = "<group>"; };
+		BCEA57E42F6CA33300814E2E /* LockdownModeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockdownModeCheck.swift; sourceTree = "<group>"; };
+		BCEA57E52F6CA33300814E2E /* LoginScreenMessageCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreenMessageCheck.swift; sourceTree = "<group>"; };
+		BCEA57E62F6CA33300814E2E /* LoginWindowNamePasswordCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWindowNamePasswordCheck.swift; sourceTree = "<group>"; };
+		BCEA57E72F6CA33300814E2E /* MailSummarizationCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailSummarizationCheck.swift; sourceTree = "<group>"; };
+		BCEA57E82F6CA33300814E2E /* NotesSummarizationCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesSummarizationCheck.swift; sourceTree = "<group>"; };
+		BCEA57E92F6CA33300814E2E /* PasswordLockoutThresholdCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordLockoutThresholdCheck.swift; sourceTree = "<group>"; };
+		BCEA57EA2F6CA33300814E2E /* PasswordMinLengthCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMinLengthCheck.swift; sourceTree = "<group>"; };
+		BCEA57EB2F6CA33300814E2E /* PowerNapDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerNapDisabledCheck.swift; sourceTree = "<group>"; };
+		BCEA57EC2F6CA33300814E2E /* RootAccountDisabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootAccountDisabledCheck.swift; sourceTree = "<group>"; };
+		BCEA57ED2F6CA33300814E2E /* SafariAdvertisingPrivacyCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariAdvertisingPrivacyCheck.swift; sourceTree = "<group>"; };
+		BCEA57EE2F6CA33300814E2E /* SafariCrossSiteTrackingCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariCrossSiteTrackingCheck.swift; sourceTree = "<group>"; };
+		BCEA57EF2F6CA33300814E2E /* SafariFraudWarningCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariFraudWarningCheck.swift; sourceTree = "<group>"; };
+		BCEA57F02F6CA33300814E2E /* SafariStatusBarCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariStatusBarCheck.swift; sourceTree = "<group>"; };
+		BCEA57F12F6CA33300814E2E /* ShareMacAnalyticsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMacAnalyticsCheck.swift; sourceTree = "<group>"; };
+		BCEA57F22F6CA33300814E2E /* ShareWithAppDevelopersCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareWithAppDevelopersCheck.swift; sourceTree = "<group>"; };
+		BCEA57F32F6CA33300814E2E /* SleepEnabledAppleSiliconCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepEnabledAppleSiliconCheck.swift; sourceTree = "<group>"; };
+		BCEA57F42F6CA33300814E2E /* SoftwareUpdateDefermentCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareUpdateDefermentCheck.swift; sourceTree = "<group>"; };
+		BCEA57F52F6CA33300814E2E /* SpotlightImprovementCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightImprovementCheck.swift; sourceTree = "<group>"; };
+		BCEA57F62F6CA33300814E2E /* SSVEnabledCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSVEnabledCheck.swift; sourceTree = "<group>"; };
+		BCEA57F72F6CA33300814E2E /* SudoLoggingCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SudoLoggingCheck.swift; sourceTree = "<group>"; };
+		BCEA57F82F6CA33300814E2E /* SudoTimeoutCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SudoTimeoutCheck.swift; sourceTree = "<group>"; };
+		BCEA57F92F6CA33300814E2E /* SudoTTYTicketsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SudoTTYTicketsCheck.swift; sourceTree = "<group>"; };
+		BCEA57FA2F6CA33300814E2E /* TerminalSecureKeyboardCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSecureKeyboardCheck.swift; sourceTree = "<group>"; };
+		BCEA57FB2F6CA33300814E2E /* WritingToolsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingToolsCheck.swift; sourceTree = "<group>"; };
+		BCEA57FC2F6CA33300814E2E /* XProtectStatusCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XProtectStatusCheck.swift; sourceTree = "<group>"; };
+		BCEA58202F6CA35D00814E2E /* SecurityScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScoreView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +272,41 @@
 		BC6C518829D7833F00B85797 /* CISBenchmark */ = {
 			isa = PBXGroup;
 			children = (
+				BCEA57DA2F6CA33300814E2E /* AdminPasswordForSystemPrefsCheck.swift */,
+				BCEA57DB2F6CA33300814E2E /* AMFIEnabledCheck.swift */,
+				BCEA57DC2F6CA33300814E2E /* AuditFlagsCheck.swift */,
+				BCEA57DD2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift */,
+				BCEA57DE2F6CA33300814E2E /* ExternalIntelligenceExtensionsCheck.swift */,
+				BCEA57DF2F6CA33300814E2E /* GuestHomeFolderCheck.swift */,
+				BCEA57E02F6CA33300814E2E /* HomeFolderPermissionsCheck.swift */,
+				BCEA57E12F6CA33300814E2E /* iCloudKeychainCheck.swift */,
+				BCEA57E22F6CA33300814E2E /* ImproveAssistiveVoiceCheck.swift */,
+				BCEA57E32F6CA33300814E2E /* ImproveSiriDictationCheck.swift */,
+				BCEA57E42F6CA33300814E2E /* LockdownModeCheck.swift */,
+				BCEA57E52F6CA33300814E2E /* LoginScreenMessageCheck.swift */,
+				BCEA57E62F6CA33300814E2E /* LoginWindowNamePasswordCheck.swift */,
+				BCEA57E72F6CA33300814E2E /* MailSummarizationCheck.swift */,
+				BCEA57E82F6CA33300814E2E /* NotesSummarizationCheck.swift */,
+				BCEA57E92F6CA33300814E2E /* PasswordLockoutThresholdCheck.swift */,
+				BCEA57EA2F6CA33300814E2E /* PasswordMinLengthCheck.swift */,
+				BCEA57EB2F6CA33300814E2E /* PowerNapDisabledCheck.swift */,
+				BCEA57EC2F6CA33300814E2E /* RootAccountDisabledCheck.swift */,
+				BCEA57ED2F6CA33300814E2E /* SafariAdvertisingPrivacyCheck.swift */,
+				BCEA57EE2F6CA33300814E2E /* SafariCrossSiteTrackingCheck.swift */,
+				BCEA57EF2F6CA33300814E2E /* SafariFraudWarningCheck.swift */,
+				BCEA57F02F6CA33300814E2E /* SafariStatusBarCheck.swift */,
+				BCEA57F12F6CA33300814E2E /* ShareMacAnalyticsCheck.swift */,
+				BCEA57F22F6CA33300814E2E /* ShareWithAppDevelopersCheck.swift */,
+				BCEA57F32F6CA33300814E2E /* SleepEnabledAppleSiliconCheck.swift */,
+				BCEA57F42F6CA33300814E2E /* SoftwareUpdateDefermentCheck.swift */,
+				BCEA57F52F6CA33300814E2E /* SpotlightImprovementCheck.swift */,
+				BCEA57F62F6CA33300814E2E /* SSVEnabledCheck.swift */,
+				BCEA57F72F6CA33300814E2E /* SudoLoggingCheck.swift */,
+				BCEA57F82F6CA33300814E2E /* SudoTimeoutCheck.swift */,
+				BCEA57F92F6CA33300814E2E /* SudoTTYTicketsCheck.swift */,
+				BCEA57FA2F6CA33300814E2E /* TerminalSecureKeyboardCheck.swift */,
+				BCEA57FB2F6CA33300814E2E /* WritingToolsCheck.swift */,
+				BCEA57FC2F6CA33300814E2E /* XProtectStatusCheck.swift */,
 				BCD734E929CF13FD00C0B779 /* GatekeeperBypassCheck.swift */,
 				BC6C516829D3934500B85797 /* SecureKernelExtensionLoadingCheck.swift */,
 				BC6C516429D390F800B85797 /* GuestLoginCheck.swift */,
@@ -285,9 +402,12 @@
 			children = (
 				BCD734EB29CF14C200C0B779 /* ScanResultView.swift */,
 				BCD734F329CF2B9700C0B779 /* VulnerabilityDetailView.swift */,
+				AA0003112F6CA33300814E2E /* FixAllSheet.swift */,
+				AA0005112F6CA33300814E2E /* LogViewerSheet.swift */,
 				BC6C519B29D81A9F00B85797 /* RouletteText.swift */,
 				BC6C519D29D81AF500B85797 /* ScanButton.swift */,
 				BC6C519F29D81B3200B85797 /* SidebarView.swift */,
+				BCEA58202F6CA35D00814E2E /* SecurityScoreView.swift */,
 				BC6C51A129D81B6400B85797 /* CircularProgressView.swift */,
 				BC6C51A329D81BA000B85797 /* OverallScores.swift */,
 				BCA6498529D96F9E002FB952 /* FileHelpers.swift */,
@@ -329,6 +449,9 @@
 				BCD734E429CF137C00C0B779 /* Vulnerability.swift */,
 				BCD734E629CF13CF00C0B779 /* Scanner.swift */,
 				BCD734F129CF20FF00C0B779 /* ScanManager.swift */,
+				AA0001112F6CA33300814E2E /* FixCommands.swift */,
+				AA0002112F6CA33300814E2E /* FixManager.swift */,
+				AA0004112F6CA33300814E2E /* AuditLogger.swift */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -361,7 +484,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1420;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					BCD734C729CDF6A000C0B779 = {
 						CreatedOnToolsVersion = 14.2;
@@ -417,6 +540,41 @@
 				BC876BFC29DC263F002127F2 /* PersonalizedAds.swift in Sources */,
 				BCD734E529CF137C00C0B779 /* Vulnerability.swift in Sources */,
 				BCA6498A29DACE72002FB952 /* PrinterSharingDisabledCheck.swift in Sources */,
+				BCEA57FD2F6CA33300814E2E /* PowerNapDisabledCheck.swift in Sources */,
+				BCEA57FE2F6CA33300814E2E /* SleepEnabledAppleSiliconCheck.swift in Sources */,
+				BCEA57FF2F6CA33300814E2E /* SafariCrossSiteTrackingCheck.swift in Sources */,
+				BCEA58002F6CA33300814E2E /* GuestHomeFolderCheck.swift in Sources */,
+				BCEA58012F6CA33300814E2E /* PasswordMinLengthCheck.swift in Sources */,
+				BCEA58022F6CA33300814E2E /* ImproveAssistiveVoiceCheck.swift in Sources */,
+				BCEA58032F6CA33300814E2E /* iCloudKeychainCheck.swift in Sources */,
+				BCEA58042F6CA33300814E2E /* SafariAdvertisingPrivacyCheck.swift in Sources */,
+				BCEA58052F6CA33300814E2E /* SudoTimeoutCheck.swift in Sources */,
+				BCEA58062F6CA33300814E2E /* HomeFolderPermissionsCheck.swift in Sources */,
+				BCEA58072F6CA33300814E2E /* ExternalIntelligenceExtensionsCheck.swift in Sources */,
+				BCEA58082F6CA33300814E2E /* ImproveSiriDictationCheck.swift in Sources */,
+				BCEA58092F6CA33300814E2E /* NotesSummarizationCheck.swift in Sources */,
+				BCEA580A2F6CA33300814E2E /* TerminalSecureKeyboardCheck.swift in Sources */,
+				BCEA580B2F6CA33300814E2E /* SafariFraudWarningCheck.swift in Sources */,
+				BCEA580C2F6CA33300814E2E /* LockdownModeCheck.swift in Sources */,
+				BCEA580D2F6CA33300814E2E /* RootAccountDisabledCheck.swift in Sources */,
+				BCEA580E2F6CA33300814E2E /* SSVEnabledCheck.swift in Sources */,
+				BCEA580F2F6CA33300814E2E /* SpotlightImprovementCheck.swift in Sources */,
+				BCEA58102F6CA33300814E2E /* SoftwareUpdateDefermentCheck.swift in Sources */,
+				BCEA58112F6CA33300814E2E /* AuditFlagsCheck.swift in Sources */,
+				BCEA58122F6CA33300814E2E /* SudoLoggingCheck.swift in Sources */,
+				BCEA58132F6CA33300814E2E /* LoginWindowNamePasswordCheck.swift in Sources */,
+				BCEA58142F6CA33300814E2E /* WritingToolsCheck.swift in Sources */,
+				BCEA58152F6CA33300814E2E /* AMFIEnabledCheck.swift in Sources */,
+				BCEA58162F6CA33300814E2E /* SafariStatusBarCheck.swift in Sources */,
+				BCEA58172F6CA33300814E2E /* AdminPasswordForSystemPrefsCheck.swift in Sources */,
+				BCEA58182F6CA33300814E2E /* MailSummarizationCheck.swift in Sources */,
+				BCEA58192F6CA33300814E2E /* PasswordLockoutThresholdCheck.swift in Sources */,
+				BCEA581A2F6CA33300814E2E /* ShareMacAnalyticsCheck.swift in Sources */,
+				BCEA581B2F6CA33300814E2E /* ShareWithAppDevelopersCheck.swift in Sources */,
+				BCEA581C2F6CA33300814E2E /* XProtectStatusCheck.swift in Sources */,
+				BCEA581D2F6CA33300814E2E /* SudoTTYTicketsCheck.swift in Sources */,
+				BCEA581E2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift in Sources */,
+				BCEA581F2F6CA33300814E2E /* LoginScreenMessageCheck.swift in Sources */,
 				BCD734CE29CDF6A000C0B779 /* ContentView.swift in Sources */,
 				BC6C518529D7820C00B85797 /* AutomaticSoftwareUpdateCheck.swift in Sources */,
 				BC876C1029DC5BDB002127F2 /* CheckAuditDisEnabled.swift in Sources */,
@@ -477,10 +635,16 @@
 				BCA6499C29DB6A45002FB952 /* BackupAutomaticallyEnabledCheck.swift in Sources */,
 				BCA6498C29DAD04C002FB952 /* RemoteLoginDisabledCheck.swift in Sources */,
 				BC6C517F29D6183F00B85797 /* SafariInternetPluginCheck.swift in Sources */,
+				BCEA58212F6CA35D00814E2E /* SecurityScoreView.swift in Sources */,
 				BCD734E729CF13CF00C0B779 /* Scanner.swift in Sources */,
 				BC876C1229DD822D002127F2 /* CustomButtonStyle.swift in Sources */,
 				BCA6499A29DB6854002FB952 /* BluetoothSharingDisabledCheck.swift in Sources */,
 				BC6C518C29D7855700B85797 /* CriticalUpdateInstallCheck.swift in Sources */,
+				AA0001122F6CA33300814E2E /* FixCommands.swift in Sources */,
+				AA0002122F6CA33300814E2E /* FixManager.swift in Sources */,
+				AA0003122F6CA33300814E2E /* FixAllSheet.swift in Sources */,
+				AA0004122F6CA33300814E2E /* AuditLogger.swift in Sources */,
+				AA0005122F6CA33300814E2E /* LogViewerSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -520,9 +684,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -540,8 +706,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -580,9 +747,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -596,6 +765,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
@@ -607,19 +777,22 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = mergen/mergen.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = mergen/Preview;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Mergen - Mac Security";
+				INFOPLIST_KEY_CFBundleDisplayName = "Mergen v2 - Mac Security";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sametsazak.mergen;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -638,18 +811,20 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = mergen/Preview;
 				DEVELOPMENT_TEAM = HK2X69GGZH;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Mergen - Mac Security";
+				INFOPLIST_KEY_CFBundleDisplayName = "Mergen v2 - Mac Security";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sametsazak.mergen;
 				PRODUCT_NAME = "$(TARGET_NAME)";

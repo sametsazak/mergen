@@ -10,14 +10,14 @@ import Foundation
 class GuestConnectCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check 'Allow guests to connect to shared folders' Status",
+            name: "Guest access to shared folders disabled",
             description: "This check ensures that the 'Allow guests to connect to shared folders' option is disabled on your system, which helps protect against unauthorized access to your computer.",
-            category: "Security",
-            remediation: "To disable 'Allow guests to connect to shared folders', go to System Preferences > Sharing, and uncheck the 'Allow guests to connect to shared folders' option.",
+            category: "CIS Benchmark",
+            remediation: "To disable 'Allow guests to connect to shared folders', go to System Settings > Sharing, and uncheck the 'Allow guests to connect to shared folders' option.",
             severity: "Medium",
             documentation: "For more information on disabling 'Allow guests to connect to shared folders', visit: https://support.apple.com/guide/mac-help/share-mac-files-with-windows-users-mh14132/mac",
             mitigation: "By disabling 'Allow guests to connect to shared folders', you reduce the risk of unauthorized access to your computer's shared folders, enhancing its security.",
-            docID: 31
+            docID: 31, cisID: "2.13.2"
         )
     }
 
@@ -28,6 +28,7 @@ class GuestConnectCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()
@@ -36,11 +37,12 @@ class GuestConnectCheck: Vulnerability {
             let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-            if output.lowercased() == "no" {
-                status = "Allow guests to connect to shared folders' is disabled"
+            // defaults read returns "0" (disabled) or "1" (enabled)
+            if output == "0" || task.terminationStatus != 0 {
+                status = "Guest access to shared folders is disabled"
                 checkstatus = "Green"
             } else {
-                status = "Allow guests to connect to shared folders' is enabled"
+                status = "Guest access to shared folders is enabled"
                 checkstatus = "Red"
             }
         } catch let e {

@@ -12,14 +12,14 @@ import Foundation
 class MediaSharingDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Media Sharing Is Disabled",
+            name: "Media sharing disabled",
             description: "Media Sharing allows your computer to share media with other devices. This check ensures that Media Sharing is disabled to protect your computer from unauthorized access.",
             category: "CIS Benchmark",
-            remediation: "To disable Media Sharing, go to 'System Preferences', click on 'Sharing', and uncheck the 'Media Sharing' option.",
+            remediation: "To disable Media Sharing, go to 'System Settings', click on 'Sharing', and uncheck the 'Media Sharing' option.",
             severity: "Medium",
             documentation: "For more information about Media Sharing and how to disable it, visit: https://support.apple.com/en-us/HT202190",
             mitigation: "Disabling Media Sharing reduces the attack surface and helps prevent unauthorized access to your computer. This minimizes the ways an attacker can connect to your system and helps protect your media files from unauthorized access.",
-            docID: 43
+            docID: 43, cisID: "2.3.3.9"
         )
     }
 
@@ -31,6 +31,7 @@ class MediaSharingDisabledCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 

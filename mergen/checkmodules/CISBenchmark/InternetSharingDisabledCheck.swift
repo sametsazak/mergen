@@ -16,14 +16,14 @@ import Foundation
 class InternetSharingDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Internet Sharing Is Disabled",
+            name: "Internet sharing disabled",
             description: "Internet Sharing allows your computer to share its internet connection with other devices. This check ensures that Internet Sharing is disabled to protect your computer from unauthorized access.",
             category: "CIS Benchmark",
-            remediation: "To disable Internet Sharing, go to 'System Preferences', click on 'Sharing', and uncheck the 'Internet Sharing' option.",
+            remediation: "To disable Internet Sharing, go to 'System Settings', click on 'Sharing', and uncheck the 'Internet Sharing' option.",
             severity: "Medium",
             documentation: "For more information about Internet Sharing and how to disable it, visit: https://support.apple.com/guide/mac-help/share-your-internet-connection-mchlp1540/mac",
             mitigation: "Disabling Internet Sharing reduces the attack surface and helps prevent unauthorized access to your computer. This minimizes the ways an attacker can connect to your system and helps protect your data from unauthorized access.",
-            docID: 41
+            docID: 41, cisID: "2.3.3.7"
         )
     }
 
@@ -35,35 +35,25 @@ class InternetSharingDisabledCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+            task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 
             if task.terminationStatus == 0 {
                 let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-                if let outputString = String(data: outputData, encoding: .utf8) {
-                    let lines = outputString.components(separatedBy: .newlines)
-                    for (index, line) in lines.enumerated() {
-                        if line.contains("NatPortMapDisabled") {
-                            let enabledLine = lines[index - 1]
-                            let enabledValue = enabledLine.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "Enabled = ", with: "").replacingOccurrences(of: ";", with: "")
-                            
-                            if enabledValue == "1" {
-                                status = "Internet Sharing is Enabled"
-                                checkstatus = "Red"
-                            } else {
-                                status = "Internet Sharing is Disabled"
-                                checkstatus = "Green"
-                            }
-                            break
-                        }
-                    }
+                let outputString = String(data: outputData, encoding: .utf8) ?? ""
+                // If the plist exists and contains "Enabled = 1", internet sharing is on
+                if outputString.contains("Enabled = 1;") {
+                    status = "Internet Sharing is Enabled"
+                    checkstatus = "Red"
                 } else {
-                    status = "Error checking Internet Sharing status"
-                    checkstatus = "Yellow"
+                    status = "Internet Sharing is Disabled"
+                    checkstatus = "Green"
                 }
             } else {
-                status = "Error checking Internet Sharing status"
-                checkstatus = "Yellow"
+                // plist doesn't exist → Internet Sharing has never been enabled
+                status = "Internet Sharing is Disabled"
+                checkstatus = "Green"
             }
         } catch let e {
             print("Error checking \(name): \(e)")

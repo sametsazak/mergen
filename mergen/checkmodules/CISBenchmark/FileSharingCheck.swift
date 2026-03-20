@@ -10,14 +10,14 @@ import Foundation
 class FileSharingDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check File Sharing Is Disabled",
+            name: "File sharing disabled",
             description: "File Sharing allows you to share files and resources with other users over a network. This check ensures that File Sharing is disabled to prevent unauthorized access to your files and resources.",
             category: "CIS Benchmark",
-            remediation: "To disable File Sharing, go to 'System Preferences', click on 'Sharing', and uncheck the 'File Sharing' option.",
+            remediation: "To disable File Sharing, go to 'System Settings', click on 'Sharing', and uncheck the 'File Sharing' option.",
             severity: "Medium",
             documentation: "For more information about File Sharing and how to disable it, visit: https://support.apple.com/guide/mac-help/file-sharing-overview-mh17131/mac",
             mitigation: "Disabling File Sharing reduces the risk of unauthorized access to your computer's files and resources. This minimizes the ways an attacker can connect to your system and helps protect your data from unauthorized access.",
-            docID: 36
+            docID: 36, cisID: "2.3.3.2"
         )
     }
 
@@ -29,6 +29,7 @@ class FileSharingDisabledCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 

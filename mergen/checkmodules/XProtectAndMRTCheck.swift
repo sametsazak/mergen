@@ -10,10 +10,10 @@ import Foundation
 class XProtectAndMRTCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check XProtect Status",
+            name: "XProtect protection enabled",
             description: "This check verifies if XProtect and MRT are enabled on your system, providing additional protection against malware and other security threats.",
             category: "Security",
-            remediation: "To enable XProtect and MRT, go to System Preferences > Security & Privacy > General, and check the 'Automatically update built-in system data files' option.",
+            remediation: "To enable XProtect and MRT, go to System Settings > Security & Privacy > General, and check the 'Automatically update built-in system data files' option.",
             severity: "High",
             documentation: "For more information about XProtect and MRT, visit: https://support.apple.com/en-us/HT202491",
             mitigation: "Enabling XProtect and MRT helps protect your system by detecting and removing known malware and addressing other security threats.",

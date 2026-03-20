@@ -13,7 +13,7 @@ import Foundation
 class AirDropDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check AirDrop Is Disabled",
+            name: "AirDrop disabled",
             description: "AirDrop is a convenient way to share files between Apple devices, but it can also pose a security risk if not used properly. This check verifies if AirDrop is disabled.",
             category: "CIS Benchmark",
             remediation: "To disable AirDrop, open Finder, click on 'Go' in the menu bar, select 'AirDrop', then click on 'Allow me to be discovered by:' and choose 'No One'.",
@@ -21,7 +21,7 @@ class AirDropDisabledCheck: Vulnerability {
             documentation: "For more information about AirDrop and how to disable it, visit: https://support.apple.com/guide/mac-help/share-files-with-airdrop-mh17133/mac",
             mitigation: "Disabling AirDrop helps prevent unauthorized access to your computer and protects your data from being intercepted by unauthorized users. It is recommended to disable AirDrop when not in use and enable it only when needed.",
             checkstatus: "",
-            docID: 13
+            docID: 13, cisID: "2.3.1.1"
         )
     }
 
@@ -31,6 +31,7 @@ class AirDropDisabledCheck: Vulnerability {
         task.arguments = ["read", "com.apple.NetworkBrowser", "DisableAirDrop"]
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

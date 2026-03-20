@@ -10,15 +10,15 @@ import Foundation
 class BonjourCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Bonjour Advertising Service Status",
+            name: "Bonjour advertising disabled",
             description: "Check if Bonjour advertising service is disabled. Bonjour is a service that helps devices and applications discover each other on a local network. Disabling it can help prevent unauthorized access to your computer.",
-            category: "Security",
-            remediation: "Disable Bonjour advertising service by going to System Preferences > Sharing and unchecking all sharing services.",
+            category: "CIS Benchmark",
+            remediation: "Disable Bonjour advertising service by going to System Settings > Sharing and unchecking all sharing services.",
             severity: "Medium",
             documentation: "https://support.apple.com/guide/mac-help/set-up-file-sharing-on-mac-mchlp1657/mac",
             mitigation: "Disabling Bonjour advertising service reduces the attack surface and helps prevent unauthorized access to your computer.",
             checkstatus: "",
-            docID: 27
+            docID: 27, cisID: "4.1"
         )
     }
 
@@ -29,6 +29,7 @@ class BonjourCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()
