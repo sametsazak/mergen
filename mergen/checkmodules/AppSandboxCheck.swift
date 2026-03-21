@@ -10,7 +10,7 @@ import Foundation
 class AppSandboxCheck: Vulnerability {
     init() {
         super.init(
-            name: "App Sandbox Check",
+            name: "App sandbox enforced",
             description: "Check if App Sandbox is enabled for the current app",
             category: "Security",
             remediation: "Enable App Sandbox for the app using the entitlements file",

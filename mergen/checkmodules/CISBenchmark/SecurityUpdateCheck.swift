@@ -12,15 +12,15 @@ import Foundation
 class SecurityUpdatesCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Install Security Responses and System Files Is Enabled",
+            name: "Security responses auto-install enabled",
             description: "Check if 'Install system data files and security updates' is enabled in the App Store preferences",
-            category: "Security",
+            category: "CIS Benchmark",
             remediation: "Enable 'Install system data files and security updates' in the App Store preferences",
             severity: "Medium",
             documentation: "https://support.apple.com/en-us/HT202180",
             mitigation: "Enabling automatic installation of system data files and security updates helps ensure that security patches and software updates are installed in a timely manner.",
             checkstatus: "",
-            docID: 10
+            docID: 10, cisID: "1.5"
         )
     }
 
@@ -31,6 +31,7 @@ class SecurityUpdatesCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

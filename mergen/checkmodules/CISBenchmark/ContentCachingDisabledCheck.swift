@@ -19,14 +19,14 @@ import Foundation
 class ContentCachingDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Content Caching Is Disabled",
+            name: "Content caching disabled",
             description: "This check ensures that Content Caching is disabled to prevent your computer from being a server on untrusted networks, which could expose it to unauthorized access.",
             category: "CIS Benchmark",
-            remediation: "To disable Content Caching, go to System Preferences > Sharing and uncheck the 'Content Caching' option.",
+            remediation: "To disable Content Caching, go to System Settings > Sharing and uncheck the 'Content Caching' option.",
             severity: "Medium",
             documentation: "https://support.apple.com/guide/mac-help/use-content-caching-on-mac-mchl7f772b81/mac",
             mitigation: "Disabling Content Caching lowers the risk of unauthorized access to your computer by reducing the ways an attacker can access cached content from your system.",
-            docID: 42
+            docID: 42, cisID: "2.3.3.8"
         )
     }
 
@@ -38,23 +38,23 @@ class ContentCachingDisabledCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 
-            if task.terminationStatus == 0 {
-                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-                let outputString = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
-                if outputString == "1" {
-                    status = "Content Caching is Enabled"
-                    checkstatus = "Red"
-                } else {
-                    status = "Content Caching is Disabled"
-                    checkstatus = "Green"
-                }
+            let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+            let outputString = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if task.terminationStatus != 0 || outputString == nil || outputString == "" {
+                // Plist absent = Content Caching has never been activated.
+                status = "Content Caching is disabled."
+                checkstatus = "Green"
+            } else if outputString == "1" {
+                status = "Content Caching is enabled."
+                checkstatus = "Red"
             } else {
-                status = "Error checking Content Caching status"
-                checkstatus = "Yellow"
-                self.error = NSError(domain: NSPOSIXErrorDomain, code: Int(task.terminationStatus), userInfo: nil)
+                status = "Content Caching is disabled."
+                checkstatus = "Green"
             }
         } catch let e {
             print("Error checking \(name): \(e)")

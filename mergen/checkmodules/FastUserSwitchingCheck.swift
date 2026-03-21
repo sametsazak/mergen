@@ -10,10 +10,10 @@ import Foundation
 class FastUserSwitchingCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Fast User Switching Status",
+            name: "Fast user switching disabled",
             description: "This check ensures that Fast User Switching is disabled on your system, which helps prevent unauthorized access to your computer.",
             category: "Security",
-            remediation: "To disable Fast User Switching, go to System Preferences > Users & Groups > Login Options, and uncheck the 'Show fast user switching menu as' option.",
+            remediation: "To disable Fast User Switching, go to System Settings > Users & Groups > Login Options, and uncheck the 'Show fast user switching menu as' option.",
             severity: "Medium",
             documentation: "For more information on disabling Fast User Switching, visit: https://support.apple.com/guide/mac-help/manage-users-groups-mtusr001/mac",
             mitigation: "By disabling Fast User Switching, you reduce the risk of unauthorized access to your computer when multiple user accounts are in use, enhancing its security.",
@@ -27,6 +27,7 @@ class FastUserSwitchingCheck: Vulnerability {
 
           let outputPipe = Pipe()
           task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
           do {
               try task.run()

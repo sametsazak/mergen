@@ -9,14 +9,14 @@ import Foundation
 class TimeWithinLimitsCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Time Is Set Within Appropriate Limits",
+            name: "Time within appropriate limits",
             description: "This check verifies that your computer's system time is set within acceptable limits. Accurate system time is essential for the proper functioning of various applications and security features.",
             category: "CIS Benchmark",
-            remediation: "To set the system time correctly, go to System Preferences > Date & Time, and make sure the 'Set date and time automatically' option is enabled. If necessary, manually adjust the date and time to match the current time.",
+            remediation: "To set the system time correctly, go to System Settings > Date & Time, and make sure the 'Set date and time automatically' option is enabled. If necessary, manually adjust the date and time to match the current time.",
             severity: "High",
             documentation: "https://support.apple.com/guide/mac-help/set-the-date-and-time-mh35851/mac",
             mitigation: "Maintaining accurate system time is crucial for the proper operation of your computer and its applications. It also helps prevent potential security issues related to incorrect timekeeping, such as expired certificates or time-sensitive authentication mechanisms.",
-            docID: 16
+            docID: 16, cisID: "2.3.2.2"
         )
     }
 
@@ -29,6 +29,7 @@ class TimeWithinLimitsCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

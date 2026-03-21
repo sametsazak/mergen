@@ -10,14 +10,14 @@ import Foundation
 class SafariSafeFilesCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Automatic Run of Safe Files in Safari",
+            name: "Safari auto-open safe files disabled",
             description: "This check ensures that the automatic run of safe files in Safari is disabled, which helps prevent the execution of malicious code.",
-            category: "Security",
+            category: "CIS Benchmark",
             remediation: "To disable the automatic run of safe files in Safari, go to Safari > Preferences > General, and uncheck the 'Open “safe” files after downloading' option.",
             severity: "Medium",
             documentation: "For more information on disabling the automatic run of safe files in Safari, visit: https://support.apple.com/guide/safari/preference-settings-for-security-ibrw1093/mac",
             mitigation: "Disabling the automatic run of safe files helps protect your system from the execution of malicious code that may be disguised as a safe file.",
-            docID: 33
+            docID: 33, cisID: "6.3.1"
         )
     }
 
@@ -28,6 +28,7 @@ class SafariSafeFilesCheck: Vulnerability {
 
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
             do {
                 try task.run()

@@ -10,7 +10,7 @@ import Foundation
 class Java6Check: Vulnerability {
     init() {
         super.init(
-            name: "Check Java 6 Default Runtime Status",
+            name: "Java 6 runtime disabled",
             description: "Check if Java 6 is the default Java runtime. Java 6 is an outdated version and may expose your system to security risks.",
             category: "Security",
             remediation: "Install a newer version of Java and set it as the default runtime. Follow the instructions at https://www.java.com/en/download/help/download_options.xml to download and install the latest version of Java.",

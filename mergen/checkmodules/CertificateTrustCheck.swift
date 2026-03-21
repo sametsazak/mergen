@@ -10,7 +10,7 @@ import Foundation
 class CertificateTrustCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Certificate Trust Settings",
+            name: "Certificate trust settings valid",
             description: "Check for potential issues with trusted certificates",
             category: "Security",
             remediation: "Review certificate trust settings and remove any untrusted or expired certificates",
@@ -39,13 +39,9 @@ class CertificateTrustCheck: Vulnerability {
 
             let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            
-            print("Output: \(output)")
-            
-            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-            let errorOutput = String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            print("errorData: \(errorData)")
-            print("errorOutput: \(errorOutput)")
+            let errorOutput = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
             if output.contains("No Trust Settings were found.") || errorOutput.contains("No Trust Settings were found.") {
                 status = "Certificate trust is OK."
                 checkstatus = "Green"
@@ -57,6 +53,7 @@ class CertificateTrustCheck: Vulnerability {
             print("Error checking \(name): \(e)")
             self.error = e
             checkstatus = "Yellow"
+            status = "Error checking certificate trust settings"
         }
     }
 }

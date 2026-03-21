@@ -12,14 +12,14 @@ import Foundation
 class RemoteManagementDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Remote Management(ARDagent) Is Disabled",
+            name: "Remote management disabled",
             description: "This check ensures that the Remote Management (ARDagent) feature is disabled to prevent unauthorized access to your computer.",
             category: "CIS Benchmark",
-            remediation: "To disable Remote Management, go to System Preferences > Sharing and uncheck the 'Remote Management' option.",
+            remediation: "To disable Remote Management, go to System Settings > Sharing and uncheck the 'Remote Management' option.",
             severity: "Medium",
             documentation: "https://support.apple.com/guide/mac-help/remote-management-mh14074/mac",
             mitigation: "Disabling Remote Management minimizes the risk of unauthorized access to your computer by reducing the ways an attacker can remotely control your system.",
-            docID: 39
+            docID: 39, cisID: "2.3.3.5"
         )
     }
 
@@ -34,6 +34,7 @@ class RemoteManagementDisabledCheck: Vulnerability {
         
         let pipe = Pipe()
         task.standardOutput = pipe
+        task.standardError = Pipe()
         grepTask.standardInput = pipe
         
         do {

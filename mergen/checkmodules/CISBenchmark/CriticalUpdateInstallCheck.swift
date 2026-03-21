@@ -13,14 +13,14 @@ import Foundation
 class CriticalUpdateInstallCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check 'Install system data files and security updates' Is Enabled",
+            name: "Critical updates auto-install enabled",
             description: "Check if 'Install system data files and security updates' is enabled in the Software Update preferences",
             category: "CIS Benchmark",
             remediation: "Enable 'Install system data files and security updates' in the Software Update preferences",
             severity: "Medium",
             documentation: "https://support.apple.com/en-us/HT202180",
             mitigation: "Enabling the installation of system data files and security updates helps ensure that critical updates are installed in a timely manner.",
-            docID: 12
+            docID: 12, cisID: "1.2"
         )
     }
 
@@ -31,6 +31,7 @@ class CriticalUpdateInstallCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

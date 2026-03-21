@@ -10,14 +10,14 @@ import Foundation
 class PrinterSharingDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Printer Sharing Is Disabled",
+            name: "Printer sharing disabled",
             description: "Printer Sharing allows you to share printers with other users over a network. This check ensures that Printer Sharing is disabled to prevent unauthorized access to your printers.",
             category: "CIS Benchmark",
-            remediation: "To disable Printer Sharing, go to 'System Preferences', click on 'Sharing', and uncheck the 'Printer Sharing' option.",
+            remediation: "To disable Printer Sharing, go to 'System Settings', click on 'Sharing', and uncheck the 'Printer Sharing' option.",
             severity: "Medium",
             documentation: "For more information about Printer Sharing and how to disable it, visit: https://support.apple.com/guide/mac-help/share-mac-printers-with-other-users-mchlp1011/mac",
             mitigation: "Disabling Printer Sharing reduces the risk of unauthorized access to your printers and printer resources. This minimizes the ways an attacker can connect to your system and helps protect your printer resources from unauthorized access.",
-            docID: 37
+            docID: 37, cisID: "2.3.3.3"
         )
     }
 
@@ -27,6 +27,7 @@ class PrinterSharingDisabledCheck: Vulnerability {
         
         let pipe = Pipe()
         task.standardOutput = pipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

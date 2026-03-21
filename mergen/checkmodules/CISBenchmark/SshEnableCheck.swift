@@ -11,7 +11,7 @@ import Foundation
 class SSHCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check If SSH Is Enabled",
+            name: "SSH disabled",
             description: "Check if SSH is enabled and running",
             category: "CIS Benchmark",
             remediation: "Disable SSH or configure it securely by following the recommended practices",
@@ -30,6 +30,7 @@ class SSHCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+            task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 
@@ -45,15 +46,14 @@ class SSHCheck: Vulnerability {
                     checkstatus = "Red"
                 }
             } else {
-                status = "Error checking Remote Apple Events status"
+                status = "Error checking SSH status"
                 checkstatus = "Yellow"
             }
         } catch let e {
             print("Error checking \(name): \(e)")
             checkstatus = "Yellow"
-            status = "Error checking Remote Apple Events status"
+            status = "Error checking SSH status"
             self.error = e
-            print(e)
         }
     }
 }

@@ -10,14 +10,14 @@ import Foundation
 class SetTimeAndDateAutomaticallyEnabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check 'Set Time and Date Automatically' Is Enabled",
+            name: "Time set automatically",
             description: "This check ensures that your computer automatically updates its date and time settings. This helps maintain accurate timekeeping and prevent potential security issues.",
             category: "CIS Benchmark",
-            remediation: "To enable automatic date and time updates, go to System Preferences > Date & Time and check the box next to 'Set date and time automatically'.",
+            remediation: "To enable automatic date and time updates, go to System Settings > Date & Time and check the box next to 'Set date and time automatically'.",
             severity: "Medium",
             documentation: "https://support.apple.com/guide/mac-help/set-the-date-and-time-mh35851/mac",
             mitigation: "Keeping your computer's date and time accurate helps ensure proper functioning of the system and its applications. It also helps avoid potential security issues related to incorrect timekeeping.",
-            docID: 15
+            docID: 15, cisID: "2.3.2.1"
         )
     }
 
@@ -28,6 +28,7 @@ class SetTimeAndDateAutomaticallyEnabledCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

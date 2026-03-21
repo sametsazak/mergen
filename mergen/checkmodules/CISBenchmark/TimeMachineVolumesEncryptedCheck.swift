@@ -10,7 +10,7 @@ import Foundation
 class TimeMachineVolumesEncryptedCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Time Machine Volumes Are Encrypted If Time Machine Is Enabled",
+            name: "Time Machine volumes encrypted",
             description: "Check if Time Machine volumes are encrypted when Time Machine is enabled",
             category: "CIS Benchmark",
             remediation: "Enable encryption for Time Machine volumes",

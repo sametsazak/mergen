@@ -11,10 +11,10 @@ import Foundation
 class BluetoothMenuBarCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Show Bluetooth Status in Menu Bar Is Enabled",
+            name: "Bluetooth status shown in menu bar",
             description: "This check ensures that the Bluetooth menu bar icon is displayed, allowing you to quickly check the status of your Bluetooth devices and disconnect any devices that you're not using.",
             category: "CIS Benchmark",
-            remediation: "To enable 'Show Bluetooth in menu bar', go to System Preferences > Bluetooth and check the option.",
+            remediation: "To enable 'Show Bluetooth in menu bar', go to System Settings > Bluetooth and check the option.",
             severity: "Low",
             documentation: "For more information on how to use Bluetooth devices with your Mac, visit: https://support.apple.com/guide/mac-help/use-bluetooth-devices-mchlpt1030/mac",
             mitigation: "Displaying the Bluetooth menu bar icon helps you quickly monitor and manage your Bluetooth devices.",
@@ -30,6 +30,7 @@ class BluetoothMenuBarCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 

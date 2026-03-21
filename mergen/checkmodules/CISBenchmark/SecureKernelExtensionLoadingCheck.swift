@@ -11,7 +11,7 @@ import Foundation
 class SecureKernelExtensionLoadingCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Secure Kernel Extension Loading",
+            name: "Secure kernel extension loading enforced",
             description: "Verify that Secure Kernel Extension Loading is enabled to protect your Mac from potentially harmful kernel extensions",
             category: "CIS Benchmark",
             remediation: "Enable Secure Kernel Extension Loading by booting into Recovery Mode, opening Terminal, and running 'csrutil enable', then restart your Mac",
@@ -19,7 +19,7 @@ class SecureKernelExtensionLoadingCheck: Vulnerability {
             documentation: "https://support.apple.com/en-us/HT204899",
             mitigation: "Secure Kernel Extension Loading prevents unsigned kernel extensions from being loaded, providing an additional layer of security against potentially malicious software.",
             checkstatus: "",
-            docID: 1
+            docID: 1, cisID: "5.1.x"
         )
     }
 
@@ -30,6 +30,7 @@ class SecureKernelExtensionLoadingCheck: Vulnerability {
 
         let pipe = Pipe()
         task.standardOutput = pipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

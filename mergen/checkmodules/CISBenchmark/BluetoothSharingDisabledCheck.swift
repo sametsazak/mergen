@@ -13,14 +13,14 @@ import Foundation
 class BluetoothSharingDisabledCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Bluetooth Sharing Is Disabled",
+            name: "Bluetooth sharing disabled",
             description: "Check if Bluetooth Sharing is disabled",
             category: "CIS Benchmark",
-            remediation: "Disable Bluetooth Sharing in System Preferences",
+            remediation: "Disable Bluetooth Sharing in System Settings",
             severity: "Medium",
             documentation: "This check runs the defaults read command with the com.apple.Bluetooth domain and the PrefKeyServicesEnabled key to check the status of Bluetooth Sharing. If the value of the key is 0, it sets the status to 'Bluetooth Sharing is Disabled'",
             mitigation: "Disabling Bluetooth Sharing reduces the attack surface and helps prevent unauthorized access to your computer.",
-            docID: 44
+            docID: 44, cisID: "2.3.3.10"
         )
     }
 
@@ -32,6 +32,7 @@ class BluetoothSharingDisabledCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 

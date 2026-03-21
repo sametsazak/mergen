@@ -10,14 +10,14 @@ import Foundation
 class PasswordHintsCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check 'Show Password Hints' Status",
+            name: "Password hints disabled",
             description: "This check verifies if the 'Show password hints' option is disabled on your system, which helps protect against unauthorized access to your computer.",
-            category: "Security",
-            remediation: "To disable 'Show password hints', go to System Preferences > Users & Groups > Login Options, and uncheck the 'Show password hints' option.",
+            category: "CIS Benchmark",
+            remediation: "To disable 'Show password hints', go to System Settings > Users & Groups > Login Options, and uncheck the 'Show password hints' option.",
             severity: "Medium",
             documentation: "For more information on disabling 'Show password hints', visit: https://support.apple.com/guide/mac-help/change-password-preferences-mchlp2818/mac",
             mitigation: "By disabling 'Show password hints', you reduce the risk of unauthorized access to your computer, enhancing its security.",
-            docID: 30
+            docID: 30, cisID: "2.11.5"
         )
     }
 
@@ -28,6 +28,7 @@ class PasswordHintsCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

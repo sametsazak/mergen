@@ -17,12 +17,12 @@ class GuestLoginCheck: Vulnerability {
             name: "Guest Login Status Check",
             description: "Verify that guest login is disabled to protect your Mac from unauthorized access",
             category: "CIS Benchmark",
-            remediation: "Disable guest login by going to System Preferences > Users & Groups > Guest User and unchecking 'Allow guests to log in to this computer'",
+            remediation: "Disable guest login by going to System Settings > Users & Groups > Guest User and unchecking 'Allow guests to log in to this computer'",
             severity: "Medium",
             documentation: "https://support.apple.com/guide/mac-help/set-up-other-users-on-your-mac-mtusr001/mac",
             mitigation: "Disabling guest login minimizes the risk of unauthorized access to your Mac by preventing users without a valid account from logging in.",
             checkstatus: "",
-            docID: 2
+            docID: 2, cisID: "2.13.1"
         )
     }
 
@@ -33,6 +33,7 @@ class GuestLoginCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

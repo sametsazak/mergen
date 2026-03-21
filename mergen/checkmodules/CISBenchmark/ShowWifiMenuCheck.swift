@@ -12,10 +12,10 @@ import Foundation
 class ShowWiFiStatusCheck: Vulnerability {
     init() {
         super.init(
-            name: "Check Show Wi-Fi status in Menu Bar Is Enabled",
+            name: "Wi-Fi status shown in menu bar",
             description: "This check ensures that the Wi-Fi status is shown in the menu bar, allowing you to quickly check the Wi-Fi status and connect to available networks.",
             category: "CIS Benchmark",
-            remediation: "To enable 'Show Wi-Fi status in menu bar', go to System Preferences > Network and check the option.",
+            remediation: "To enable 'Show Wi-Fi status in menu bar', go to System Settings > Network and check the option.",
             severity: "Low",
             documentation: "For more information on how to use the Wi-Fi status menu, visit: https://support.apple.com/guide/mac-help/use-the-wi-fi-status-menu-mchlp1540/mac",
             mitigation: "Displaying Wi-Fi status in the menu bar provides an accessible way to monitor your connection and manage Wi-Fi networks.",
@@ -31,6 +31,7 @@ class ShowWiFiStatusCheck: Vulnerability {
         do {
             let outputPipe = Pipe()
             task.standardOutput = outputPipe
+        task.standardError = Pipe()
             try task.run()
             task.waitUntilExit()
 
