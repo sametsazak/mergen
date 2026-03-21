@@ -1,6 +1,18 @@
+## A note from the author
+
+I started Mergen as a side project to learn Swift and build something real out of it. It reached more people than I expected and got great feedback but after the initial release, it sat untouched for a long time.
+
+Recently I've been experimenting with vibe-coded scripts and tools, and I realized I could use Claude to bring Mergen back up to date. So here we are. The CLI is new, everything is synced with the latest macOS version, auto-fix is in, and a few other things got polished along the way.
+
+That said, AI-assisted code is still code. It can have bugs, and it won't always be the cleanest solution. I've tested on a couple of different systems and things are holding up, but there may still be rough edges. All checks are based on the latest CIS Benchmark. You can fix issues with one click in the app or via the CLI.
+
+I'm keeping the releases updated. If you find a bug or something feels off, please open an issue on GitHub, it's genuinely appreciated.
+
+---
+
 <div align="center">
 
-# 🛡️ Mergen
+# 🛡️ Mergen v2
 
 **Native macOS security audit — CIS Apple macOS 26 Tahoe Benchmark v1.0.0**
 
@@ -8,6 +20,7 @@
 [![Swift](https://img.shields.io/badge/swift-5.9-orange?style=flat-square)](https://swift.org)
 [![Go](https://img.shields.io/badge/go-1.21+-00ADD8?style=flat-square)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
 [![CIS Benchmark](https://img.shields.io/badge/CIS-macOS%2026%20Tahoe%20v1.0.0-red?style=flat-square)](https://www.cisecurity.org)
 
 Mergen audits your Mac against 85 CIS Benchmark controls and **fixes most failures automatically**.
@@ -44,7 +57,7 @@ Unlike shell scripts that only report findings, Mergen can **remediate failures 
 
 ## SwiftUI App
 
-The GUI option — point and click, no Terminal needed. Full feature parity with the CLI.
+The GUI option — point and click, no Terminal needed. Covers the same 85 checks as the CLI with a visual interface, Fix All sheet, and in-app audit log viewer.
 
 ### Features
 
@@ -73,7 +86,7 @@ The GUI option — point and click, no Terminal needed. Full feature parity with
 - Filter pills: All / Failed / Passed / Warnings / Advisory
 - Sort by CIS ID, Severity, Name, or Status
 - Search across name, CIS ID, description, and finding text
-- Security score ring with pass/fail/warn counts
+- Security score ring with percentage, GOOD / FAIR / AT RISK label, and pass/fail/warn counts
 
 ### Installation
 
@@ -107,7 +120,7 @@ When using **Fix All**, all admin fixes are batched into a **single password pro
 
 ## CLI (`mergen-cli`)
 
-A fully-featured Go CLI that runs the same 85 checks from your terminal. Designed for power users, sysadmins, and CI pipelines.
+A fully-featured Go CLI covering the same 85 CIS checks, built for power users, sysadmins, and CI pipelines.
 
 ```
   ███╗   ███╗███████╗██████╗  ██████╗ ███████╗███╗   ██╗
@@ -250,7 +263,8 @@ mergen scan --json | jq -e '[.[] | select(.status == "fail")] | length == 0' || 
 
 | CIS ID | Check | Severity | Auto-Fix |
 |--------|-------|----------|----------|
-| 1.2 | Critical updates auto-install enabled | Critical | ✓ Admin |
+| 1.1 | Apple software updated within 30 days | High | — |
+| 1.2 | Critical updates auto-install enabled | Medium | ✓ Admin |
 | 1.3 | Auto-update enabled | High | ✓ Admin |
 | 1.4 | App Store auto-updates enabled | Medium | ✓ Admin |
 | 1.5 | Security responses auto-install enabled | High | ✓ Admin |
@@ -313,7 +327,7 @@ mergen scan --json | jq -e '[.[] | select(.status == "fail")] | length == 0' || 
 | CIS ID | Check | Severity | Auto-Fix |
 |--------|-------|----------|----------|
 | 3.1 | Security auditing enabled | Medium | — |
-| 3.2 | Audit flags configured | Medium | — |
+| 3.3 | Audit flags configured | Medium | — |
 
 ### §4 — Network
 
@@ -378,7 +392,7 @@ Mergen applies fixes at two privilege levels:
 
 After every fix attempt the original check re-runs. The result — Fixed or Still failing — reflects the actual check outcome, not just whether the command exited cleanly.
 
-In the CLI, all admin fixes within a single `mergen fix` run are batched into **one password prompt**.
+In both the app and CLI, all admin fixes within a single session are batched into **one password prompt**.
 
 ---
 
@@ -408,7 +422,7 @@ Issues, pull requests, and new checks are all welcome.
 
 ## License
 
-MIT License — Copyright (c) 2023 Samet Sazak
+MIT License — Copyright (c) 2023–2026 Samet Sazak
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
