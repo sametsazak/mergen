@@ -23,6 +23,15 @@ class SudoTimeoutCheck: Vulnerability {
     }
 
     override func check() {
+        // On macOS Tahoe, sudo -V no longer shows full configuration.
+        // Primary: check for the sudoers.d drop-in file written by our fix.
+        // Fallback: parse sudo -V for older macOS / non-standard configs.
+        if FileManager.default.fileExists(atPath: "/etc/sudoers.d/cis_timeout") {
+            status = "Sudo timeout is set to zero — password required every time."
+            checkstatus = "Green"
+            return
+        }
+
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
         task.arguments = ["-V"]

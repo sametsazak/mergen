@@ -135,7 +135,7 @@ class ScanManager: ObservableObject {
 
             // ── User-level fixes (no password) ──────────────────────────────
             for v in userFixes {
-                let result = FixManager.runUserCommand(v.fixCommand!)
+                _ = FixManager.runUserCommand(v.fixCommand!)
                 v.check()
                 let success = v.checkstatus == "Green"
                 AuditLogger.shared.logFixResult(v, success: success)

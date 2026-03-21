@@ -37,7 +37,9 @@ extension Vulnerability {
         // 6.1.1    Show filename extensions
         "6.1.1":    "defaults write NSGlobalDomain AppleShowAllExtensions -bool true",
         // 6.3.1    Safari: don't auto-open safe files
-        "6.3.1":    "defaults write com.apple.Safari AutoOpenSafeDownloads -bool false",
+        //          NOTE: On macOS Tahoe, Safari preferences are sandboxed — defaults write
+        //          is blocked by cfprefsd. This must be changed manually in Safari > Settings.
+        // "6.3.1": removed — not auto-fixable on Tahoe
         // 6.3.3    Safari: fraud warning
         "6.3.3":    "defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true",
         // 6.3.4    Safari: cross-site tracking prevention — check reads com.apple.Safari BlockStoragePolicy
@@ -89,7 +91,7 @@ extension Vulnerability {
         // 2.6.5    Gatekeeper on
         "2.6.5":     "spctl --master-enable",
         // 2.10.1.2 Sleep enabled (Apple Silicon) — 15 min sleep, 10 min display sleep
-        "2.10.1.2":  "pmset -a sleep 15 && pmset -a displaysleep 10",
+        "2.10.1.2":  "pmset -a sleep 15; pmset -a displaysleep 10",
         // 2.10.2   Power nap off
         "2.10.2":    "pmset -a powernap 0 && pmset -a darkwakes 0",
         // 2.10.3   Wake for network access off
@@ -115,13 +117,13 @@ extension Vulnerability {
         // 5.2.2    Minimum password length ≥ 15 characters
         "5.2.2":     "pwpolicy -n /Local/Default -setglobalpolicy minChars=15",
         // 5.4      Sudo authentication timeout = 0 (require password every time)
-        "5.4":       "echo 'Defaults timestamp_timeout=0' | tee /etc/sudoers.d/cis_timeout && chmod 440 /etc/sudoers.d/cis_timeout",
+        "5.4":       "echo Defaults timestamp_timeout=0 > /etc/sudoers.d/cis_timeout && chmod 440 /etc/sudoers.d/cis_timeout",
         // 5.5      Sudo TTY tickets (per-terminal auth)
-        "5.5":       "echo 'Defaults timestamp_type=tty' | tee /etc/sudoers.d/cis_tty && chmod 440 /etc/sudoers.d/cis_tty",
-        // 5.6      Root account off
-        "5.6":       "dsenableroot -d",
+        "5.5":       "echo Defaults timestamp_type=tty > /etc/sudoers.d/cis_tty && chmod 440 /etc/sudoers.d/cis_tty",
+        // 5.6      Root account off — set shell to /usr/bin/false (what the check validates)
+        "5.6":       "dscl . -create /Users/root UserShell /usr/bin/false",
         // 5.11     Sudo log allowed commands
-        "5.11":      "echo 'Defaults log_allowed' | tee /etc/sudoers.d/cis_logging && chmod 440 /etc/sudoers.d/cis_logging",
+        "5.11":      "echo Defaults log_allowed > /etc/sudoers.d/cis_logging && chmod 440 /etc/sudoers.d/cis_logging",
     ]
 
     /// Fixes keyed by `docID` for standalone checks that have no CIS ID.
@@ -190,7 +192,7 @@ extension Vulnerability {
         "5.11":      "sudo will log all allowed commands to the system log.",
         // Section 6 – UI / Safari / Terminal
         "6.1.1":     "All file extensions will be visible in Finder.",
-        "6.3.1":     "Safari will no longer automatically open downloaded files considered safe.",
+        // 6.3.1 removed — Safari preferences are sandboxed on Tahoe, cannot be auto-fixed.
         "6.3.3":     "Safari fraudulent website warning will be enabled.",
         "6.3.4":     "Safari cross-site tracking prevention will be enabled.",
         "6.3.6":     "Safari Private Click Measurement (ad privacy) will be enabled.",

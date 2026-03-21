@@ -63,13 +63,13 @@ class SleepEnabledAppleSiliconCheck: Vulnerability {
 
             for line in pmsetOutput.components(separatedBy: "\n") {
                 let trimmed = line.trimmingCharacters(in: .whitespaces)
+                // Split on whitespace runs (pmset output uses multiple spaces for alignment)
+                let parts = trimmed.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
                 if trimmed.hasPrefix("sleep") {
-                    let parts = trimmed.components(separatedBy: .whitespaces)
                     if let val = parts.dropFirst().first.flatMap({ Int($0) }), val <= 15 {
                         sleepOk = true
                     }
                 } else if trimmed.hasPrefix("displaysleep") {
-                    let parts = trimmed.components(separatedBy: .whitespaces)
                     if let val = parts.dropFirst().first.flatMap({ Int($0) }), val <= 10 {
                         displaySleepOk = true
                     }
