@@ -27,6 +27,7 @@ Mergen audits your Mac against 85 CIS Benchmark controls and **fixes most failur
 Available as a native **SwiftUI app** and a **Go CLI** — pick whichever fits your workflow.
 
 ![Screenshot](img/main.png)
+![Screenshot](img/main2.png)
 
 </div>
 
