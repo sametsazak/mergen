@@ -95,8 +95,7 @@ The GUI option — point and click, no Terminal needed. Covers the same 85 check
 
 **Via Homebrew (recommended):**
 ```bash
-brew tap sametsazak/mergen
-brew install --cask mergen-app
+brew install --cask sametsazak/mergen/mergen-app
 ```
 
 **Or download the DMG** from the [latest release](https://github.com/sametsazak/mergen/releases/latest).
@@ -148,8 +147,7 @@ A fully-featured Go CLI covering the same 85 CIS checks, built for power users, 
 
 **Via Homebrew (recommended):**
 ```bash
-brew tap sametsazak/mergen
-brew install mergen
+brew install sametsazak/mergen/mergen
 ```
 
 **Build from source:**
