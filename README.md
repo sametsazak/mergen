@@ -20,8 +20,9 @@ I'm keeping the releases updated. If you find a bug or something feels off, plea
 [![Swift](https://img.shields.io/badge/swift-5.9-orange?style=flat-square)](https://swift.org)
 [![Go](https://img.shields.io/badge/go-1.21+-00ADD8?style=flat-square)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
+[![Version](https://img.shields.io/badge/version-2.2-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
 [![CIS Benchmark](https://img.shields.io/badge/CIS-macOS%2026%20Tahoe%20v1.0.0-red?style=flat-square)](https://www.cisecurity.org)
+[![Homebrew](https://img.shields.io/badge/homebrew-install-FBB040?style=flat-square&logo=homebrew&logoColor=white)](https://github.com/sametsazak/homebrew-mergen)
 
 Mergen audits your Mac against 85 CIS Benchmark controls and **fixes most failures automatically**.
 Available as a native **SwiftUI app** and a **Go CLI** — pick whichever fits your workflow.
@@ -92,10 +93,18 @@ The GUI option — point and click, no Terminal needed. Covers the same 85 check
 
 ### Installation
 
+**Via Homebrew (recommended):**
+```bash
+brew tap sametsazak/mergen
+brew install --cask mergen-app
+```
+
+**Or download the DMG** from the [latest release](https://github.com/sametsazak/mergen/releases/latest).
+
+**Build from source:**
 ```bash
 git clone https://github.com/sametsazak/mergen.git
 ```
-
 Open `mergen.xcodeproj` in Xcode and run. No third-party dependencies. No network calls.
 
 **Requirements:** macOS 13 Ventura or later · Tested on macOS 26 Tahoe
@@ -137,14 +146,21 @@ A fully-featured Go CLI covering the same 85 CIS checks, built for power users, 
 ![Screenshot](img/mergen-cli.png)
 ### Installation
 
-**Requirements:** Go 1.21+, macOS 13+
+**Via Homebrew (recommended):**
+```bash
+brew tap sametsazak/mergen
+brew install mergen
+```
 
+**Build from source:**
 ```bash
 git clone https://github.com/sametsazak/mergen.git
 cd mergen/mergen-cli
 go build -o mergen .
 sudo mv mergen /usr/local/bin/   # optional: install system-wide
 ```
+
+**Requirements:** Go 1.21+, macOS 13+
 
 ### Commands
 
