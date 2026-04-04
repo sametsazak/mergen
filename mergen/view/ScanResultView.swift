@@ -448,6 +448,13 @@ struct ExportButtons: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.mini)
+
+            Button(action: exportScript) {
+                Label("Script", systemImage: "terminal")
+                    .font(.system(size: 11))
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.mini)
         }
         .padding(.trailing, 8)
     }
@@ -469,6 +476,16 @@ struct ExportButtons: View {
         panel.allowedContentTypes = [.json]
         if panel.runModal() == .OK, let url = panel.url {
             try? data.write(to: url)
+        }
+    }
+
+    private func exportScript() {
+        let script = ShellScriptReportGenerator(scanResults: scanResults).generateScript()
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "MergenRemediate.sh"
+        panel.allowedContentTypes = [UTType(filenameExtension: "sh") ?? .plainText]
+        if panel.runModal() == .OK, let url = panel.url {
+            try? script.write(to: url, atomically: true, encoding: .utf8)
         }
     }
 }

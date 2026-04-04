@@ -118,6 +118,7 @@
 		BCEA581D2F6CA33300814E2E /* SudoTTYTicketsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57F92F6CA33300814E2E /* SudoTTYTicketsCheck.swift */; };
 		BCEA581E2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DD2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift */; };
 		BCEA581F2F6CA33300814E2E /* LoginScreenMessageCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E52F6CA33300814E2E /* LoginScreenMessageCheck.swift */; };
+		CC111111111111111111CC02 /* ShellScriptReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC111111111111111111CC01 /* ShellScriptReportGenerator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -236,6 +237,7 @@
 		BCEA57FA2F6CA33300814E2E /* TerminalSecureKeyboardCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSecureKeyboardCheck.swift; sourceTree = "<group>"; };
 		BCEA57FB2F6CA33300814E2E /* WritingToolsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingToolsCheck.swift; sourceTree = "<group>"; };
 		BCEA57FC2F6CA33300814E2E /* XProtectStatusCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XProtectStatusCheck.swift; sourceTree = "<group>"; };
+		CC111111111111111111CC01 /* ShellScriptReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellScriptReportGenerator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -385,6 +387,7 @@
 				AA0005112F6CA33300814E2E /* LogViewerSheet.swift */,
 				BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */,
 				BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */,
+				CC111111111111111111CC01 /* ShellScriptReportGenerator.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -454,7 +457,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1420;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					BCD734C729CDF6A000C0B779 = {
 						CreatedOnToolsVersion = 14.2;
@@ -503,6 +506,7 @@
 				BC6C518A29D7845300B85797 /* SecurityUpdateCheck.swift in Sources */,
 				BCA6499429DB2776002FB952 /* SlowModule.swift in Sources */,
 				BC876C1829E0322D002127F2 /* JSONReportGenerator.swift in Sources */,
+				CC111111111111111111CC02 /* ShellScriptReportGenerator.swift in Sources */,
 				BC6C519229D78A6700B85797 /* AirPlayReceiverDisabledCheck.swift in Sources */,
 				BC6C516929D3934500B85797 /* SecureKernelExtensionLoadingCheck.swift in Sources */,
 				BC6C518729D782EA00B85797 /* AppStoreUpdateCheck.swift in Sources */,
@@ -646,6 +650,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = HK2X69GGZH;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -709,6 +714,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HK2X69GGZH;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -743,7 +749,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = mergen/Preview;
-				DEVELOPMENT_TEAM = HK2X69GGZH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Mergen v2 - Mac Security";
@@ -774,7 +779,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = mergen/Preview;
-				DEVELOPMENT_TEAM = HK2X69GGZH;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

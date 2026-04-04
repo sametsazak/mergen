@@ -134,6 +134,7 @@ class Scanner {
         modules.append(BluetoothMenuBarCheck())
         modules.append(FastUserSwitchingCheck())
 
+
         // Removed in Tahoe benchmark: Java6Check, EFIVersionCheck, DVDOrCDSharingDisabledCheck
 
         // Filter modules by category if specified
