@@ -119,6 +119,10 @@
 		BCEA581E2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57DD2F6CA33300814E2E /* AutomaticLoginDisabledCheck.swift */; };
 		BCEA581F2F6CA33300814E2E /* LoginScreenMessageCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCEA57E52F6CA33300814E2E /* LoginScreenMessageCheck.swift */; };
 		CC111111111111111111CC02 /* ShellScriptReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC111111111111111111CC01 /* ShellScriptReportGenerator.swift */; };
+		SC000000000000000000SC01 /* SupplyChainModels.swift in Sources */    = {isa = PBXBuildFile; fileRef = SC000000000000000000SR01 /* SupplyChainModels.swift */; };
+		SC000000000000000000SC02 /* OSVClient.swift in Sources */            = {isa = PBXBuildFile; fileRef = SC000000000000000000SR02 /* OSVClient.swift */; };
+		SC000000000000000000SC03 /* SupplyChainScanner.swift in Sources */   = {isa = PBXBuildFile; fileRef = SC000000000000000000SR03 /* SupplyChainScanner.swift */; };
+		SC000000000000000000SC04 /* SupplyChainView.swift in Sources */      = {isa = PBXBuildFile; fileRef = SC000000000000000000SR04 /* SupplyChainView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -238,6 +242,10 @@
 		BCEA57FB2F6CA33300814E2E /* WritingToolsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingToolsCheck.swift; sourceTree = "<group>"; };
 		BCEA57FC2F6CA33300814E2E /* XProtectStatusCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XProtectStatusCheck.swift; sourceTree = "<group>"; };
 		CC111111111111111111CC01 /* ShellScriptReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellScriptReportGenerator.swift; sourceTree = "<group>"; };
+		SC000000000000000000SR01 /* SupplyChainModels.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyChainModels.swift;   sourceTree = "<group>"; };
+		SC000000000000000000SR02 /* OSVClient.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSVClient.swift;           sourceTree = "<group>"; };
+		SC000000000000000000SR03 /* SupplyChainScanner.swift */  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyChainScanner.swift;  sourceTree = "<group>"; };
+		SC000000000000000000SR04 /* SupplyChainView.swift */     = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplyChainView.swift;     sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -388,6 +396,7 @@
 				BC876C1529E0307E002127F2 /* HTMLReportGenerator.swift */,
 				BC876C1729E0322D002127F2 /* JSONReportGenerator.swift */,
 				CC111111111111111111CC01 /* ShellScriptReportGenerator.swift */,
+				SC000000000000000000SR04 /* SupplyChainView.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -425,6 +434,9 @@
 				AA0001112F6CA33300814E2E /* FixCommands.swift */,
 				AA0002112F6CA33300814E2E /* FixManager.swift */,
 				AA0004112F6CA33300814E2E /* AuditLogger.swift */,
+				SC000000000000000000SR01 /* SupplyChainModels.swift */,
+				SC000000000000000000SR02 /* OSVClient.swift */,
+				SC000000000000000000SR03 /* SupplyChainScanner.swift */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -507,6 +519,10 @@
 				BCA6499429DB2776002FB952 /* SlowModule.swift in Sources */,
 				BC876C1829E0322D002127F2 /* JSONReportGenerator.swift in Sources */,
 				CC111111111111111111CC02 /* ShellScriptReportGenerator.swift in Sources */,
+				SC000000000000000000SC01 /* SupplyChainModels.swift in Sources */,
+				SC000000000000000000SC02 /* OSVClient.swift in Sources */,
+				SC000000000000000000SC03 /* SupplyChainScanner.swift in Sources */,
+				SC000000000000000000SC04 /* SupplyChainView.swift in Sources */,
 				BC6C519229D78A6700B85797 /* AirPlayReceiverDisabledCheck.swift in Sources */,
 				BC6C516929D3934500B85797 /* SecureKernelExtensionLoadingCheck.swift in Sources */,
 				BC6C518729D782EA00B85797 /* AppStoreUpdateCheck.swift in Sources */,

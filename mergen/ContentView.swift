@@ -6,44 +6,64 @@
 import SwiftUI
 import AppKit
 
+enum AppTab { case cis, supplyChain }
+
 struct ContentView: View {
-    @StateObject private var scanManager = ScanManager()
+    @StateObject private var scanManager          = ScanManager()
+    @StateObject private var supplyChainScanner   = SupplyChainScanner()
     @State private var selectedVulnerability: Vulnerability? = nil
-    @State private var searchText = ""
+    @State private var searchText    = ""
     @State private var showLogViewer = false
+    @State private var activeTab: AppTab = .cis
 
     private var isWelcome: Bool {
         scanManager.scanResults.isEmpty && !scanManager.scanning
+        && !supplyChainScanner.hasResults && !supplyChainScanner.isScanning
+    }
+
+    private var showSupplyChainTab: Bool {
+        supplyChainScanner.hasResults || supplyChainScanner.isScanning
     }
 
     var body: some View {
         Group {
             if isWelcome {
-                WelcomeView {
-                    scanManager.startScan(category: nil)
+                WelcomeView { scanCIS, scanSupplyChain in
+                    if scanCIS         { scanManager.startScan(category: nil) }
+                    if scanSupplyChain { supplyChainScanner.startScan() }
+                    if !scanCIS && scanSupplyChain { activeTab = .supplyChain }
                 }
             } else {
                 VStack(spacing: 0) {
-                    ResultsTopBar(scanManager: scanManager)
+                    ResultsTopBar(
+                        scanManager:        scanManager,
+                        supplyChainScanner: supplyChainScanner,
+                        activeTab:          $activeTab,
+                        showSupplyChainTab: showSupplyChainTab
+                    )
 
                     Divider()
 
-                    HStack(spacing: 0) {
-                        ResultsListView(
-                            scanManager: scanManager,
-                            selectedCategory: nil,
-                            selectedVulnerability: $selectedVulnerability,
-                            searchText: $searchText
-                        )
-                        .frame(minWidth: 300, idealWidth: 380)
+                    if activeTab == .supplyChain {
+                        SupplyChainView(scanner: supplyChainScanner)
+                    } else {
+                        HStack(spacing: 0) {
+                            ResultsListView(
+                                scanManager: scanManager,
+                                selectedCategory: nil,
+                                selectedVulnerability: $selectedVulnerability,
+                                searchText: $searchText
+                            )
+                            .frame(minWidth: 300, idealWidth: 380)
 
-                        Divider()
+                            Divider()
 
-                        DetailPanelView(
-                            vulnerability: selectedVulnerability,
-                            scanManager: scanManager
-                        )
-                        .frame(minWidth: 280)
+                            DetailPanelView(
+                                vulnerability: selectedVulnerability,
+                                scanManager: scanManager
+                            )
+                            .frame(minWidth: 280)
+                        }
                     }
                 }
             }
@@ -68,6 +88,9 @@ struct ContentView: View {
 
 struct ResultsTopBar: View {
     @ObservedObject var scanManager: ScanManager
+    @ObservedObject var supplyChainScanner: SupplyChainScanner
+    @Binding var activeTab: AppTab
+    let showSupplyChainTab: Bool
     @State private var showFixSheet = false
 
     private let accent = Color(red: 0.42, green: 0.26, blue: 0.88)
@@ -144,6 +167,16 @@ struct ResultsTopBar: View {
                 statChip(warnCount, "Warnings", Color(red: 0.80, green: 0.55, blue: 0.10))
             }
             .padding(.horizontal, 14)
+
+            // ── Tab switcher (shown when supply chain has data) ────────────
+            if showSupplyChainTab {
+                divider()
+                HStack(spacing: 2) {
+                    TabPill(label: "CIS Benchmark",   icon: "shield.fill",           isActive: activeTab == .cis)          { activeTab = .cis }
+                    TabPill(label: "Supply Chain",    icon: "checkerboard.shield",   isActive: activeTab == .supplyChain)  { activeTab = .supplyChain }
+                }
+                .padding(.horizontal, 10)
+            }
 
             Spacer()
 
@@ -224,16 +257,48 @@ struct ResultsTopBar: View {
     }
 }
 
+// MARK: - Tab Pill
+
+struct TabPill: View {
+    let label    : String
+    let icon     : String
+    let isActive : Bool
+    let action   : () -> Void
+
+    private let accent = Color(red: 0.42, green: 0.26, blue: 0.88)
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 10))
+                Text(label).font(.system(size: 11, weight: .medium))
+            }
+            .foregroundColor(isActive ? accent : .secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(
+                RoundedRectangle(cornerRadius: 7)
+                    .fill(isActive ? accent.opacity(0.12) : Color.clear)
+                    .overlay(RoundedRectangle(cornerRadius: 7)
+                        .stroke(isActive ? accent.opacity(0.3) : Color.clear, lineWidth: 1))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 // MARK: - Welcome View
 
 struct WelcomeView: View {
-    let onScan: () -> Void
+    let onScan: (Bool, Bool) -> Void   // (scanCIS, scanSupplyChain)
 
-    @State private var pulse1     = false
-    @State private var pulse2     = false
-    @State private var appeared   = false
-    @State private var btnHovered = false
-    @State private var btnGlow    = false
+    @State private var pulse1          = false
+    @State private var pulse2          = false
+    @State private var appeared        = false
+    @State private var btnHovered      = false
+    @State private var btnGlow         = false
+    @State private var scanCIS         = true
+    @State private var scanSupplyChain = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -291,8 +356,20 @@ struct WelcomeView: View {
             .offset(y: appeared ? 0 : 10)
             .animation(.easeOut(duration: 0.5).delay(0.15), value: appeared)
 
+            // ── Scan mode selection ───────────────────────────────────────
+            HStack(spacing: 8) {
+                ScanModeToggle(icon: "shield.fill", label: "CIS Benchmark",
+                               subtitle: "85 security checks",
+                               isOn: $scanCIS, canToggleOff: scanSupplyChain)
+                ScanModeToggle(icon: "checkerboard.shield", label: "Supply Chain",
+                               subtitle: "Packages & persistence",
+                               isOn: $scanSupplyChain, canToggleOff: scanCIS)
+            }
+            .opacity(appeared ? 1 : 0)
+            .animation(.easeOut(duration: 0.5).delay(0.22), value: appeared)
+
             // ── Circular scan button ──────────────────────────────────────
-            Button(action: onScan) {
+            Button(action: { onScan(scanCIS, scanSupplyChain) }) {
                 ZStack {
                     Circle()
                         .stroke(Color.primary.opacity(0.10), lineWidth: 1)
@@ -356,6 +433,63 @@ struct WelcomeView: View {
         .onAppear { appeared = true }
     }
 }
+
+// MARK: - Scan Mode Toggle
+
+struct ScanModeToggle: View {
+    let icon        : String
+    let label       : String
+    let subtitle    : String
+    @Binding var isOn: Bool
+    let canToggleOff: Bool   // prevent turning off the last active option
+
+    private let accent = Color(red: 0.42, green: 0.26, blue: 0.88)
+    @State private var hovered = false
+
+    var body: some View {
+        Button(action: {
+            if isOn && !canToggleOff { return }
+            isOn.toggle()
+        }) {
+            HStack(spacing: 10) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(isOn ? accent.opacity(0.12) : Color(NSColor.windowBackgroundColor))
+                        .frame(width: 30, height: 30)
+                    Image(systemName: icon)
+                        .font(.system(size: 13))
+                        .foregroundColor(isOn ? accent : .secondary)
+                }
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(label).font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isOn ? .primary : .secondary)
+                    Text(subtitle).font(.system(size: 10)).foregroundColor(.secondary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 14))
+                    .foregroundColor(isOn ? accent : Color.secondary.opacity(0.4))
+            }
+            .padding(10)
+            .frame(width: 190)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(NSColor.windowBackgroundColor))
+                    .shadow(color: .black.opacity(hovered ? 0.10 : 0.05), radius: hovered ? 8 : 4, y: 2)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isOn ? accent.opacity(0.35) : Color(NSColor.separatorColor).opacity(0.6), lineWidth: 1)
+            )
+            .scaleEffect(hovered ? 1.02 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: hovered)
+        }
+        .buttonStyle(.plain)
+        .onHover { h in hovered = h }
+    }
+}
+
+// MARK: - Feature Card
 
 struct FeatureCard: View {
     let emoji: String
