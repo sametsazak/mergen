@@ -1,18 +1,6 @@
-## A note from the author
-
-I started Mergen as a side project to learn Swift and build something real out of it. It reached more people than I expected and got great feedback but after the initial release, it sat untouched for a long time.
-
-Recently I've been experimenting with vibe-coded scripts and tools, and I realized I could use Claude to bring Mergen back up to date. So here we are. The CLI is new, everything is synced with the latest macOS version, auto-fix is in, and a few other things got polished along the way.
-
-That said, AI-assisted code is still code. It can have bugs, and it won't always be the cleanest solution. I've tested on a couple of different systems and things are holding up, but there may still be rough edges. All checks are based on the latest CIS Benchmark. You can fix issues with one click in the app or via the CLI.
-
-I'm keeping the releases updated. If you find a bug or something feels off, please open an issue on GitHub, it's genuinely appreciated.
-
----
-
 <div align="center">
 
-# 🛡️ Mergen v2
+# 🛡️ Mergen v3
 
 **Native macOS security audit — CIS Apple macOS 26 Tahoe Benchmark v1.0.0**
 
@@ -20,11 +8,11 @@ I'm keeping the releases updated. If you find a bug or something feels off, plea
 [![Swift](https://img.shields.io/badge/swift-5.9-orange?style=flat-square)](https://swift.org)
 [![Go](https://img.shields.io/badge/go-1.21+-00ADD8?style=flat-square)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.2-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
+[![Version](https://img.shields.io/badge/version-3.0-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
 [![CIS Benchmark](https://img.shields.io/badge/CIS-macOS%2026%20Tahoe%20v1.0.0-red?style=flat-square)](https://www.cisecurity.org)
 [![Homebrew](https://img.shields.io/badge/homebrew-install-FBB040?style=flat-square&logo=homebrew&logoColor=white)](https://github.com/sametsazak/homebrew-mergen)
 
-Mergen audits your Mac against 85 CIS Benchmark controls and **fixes most failures automatically**.
+Mergen audits your Mac against 85 CIS Benchmark controls, **fixes most failures automatically**, and scans your installed packages for supply chain threats.
 Available as a native **SwiftUI app** and a **Go CLI** — pick whichever fits your workflow.
 
 ![Screenshot](img/main.png)
@@ -38,8 +26,10 @@ Available as a native **SwiftUI app** and a **Go CLI** — pick whichever fits y
 ## Table of Contents
 
 - [Overview](#overview)
+- [What's New in v3](#whats-new-in-v3)
 - [SwiftUI App](#swiftui-app)
 - [CLI (`mergen-cli`)](#cli-mergen-cli)
+- [Supply Chain Threat Surface](#supply-chain-threat-surface)
 - [Checks Reference](#checks-reference)
 - [How Auto-Fix Works](#how-auto-fix-works)
 - [macOS 26 Tahoe Compatibility](#macos-26-tahoe-compatibility)
@@ -50,7 +40,7 @@ Available as a native **SwiftUI app** and a **Go CLI** — pick whichever fits y
 
 ## Overview
 
-Mergen audits macOS security configuration against the **CIS Apple macOS 26 Tahoe Benchmark v1.0.0**. It covers software updates, firewall, sharing services, privacy, authentication, encryption, and more.
+Mergen audits macOS security configuration against the **CIS Apple macOS 26 Tahoe Benchmark v1.0.0** and scans your installed software supply chain for threats.
 
 Unlike shell scripts that only report findings, Mergen can **remediate failures directly** — applying the correct system change and immediately re-verifying the result.
 
@@ -58,17 +48,42 @@ Unlike shell scripts that only report findings, Mergen can **remediate failures 
 
 ---
 
+## What's New in v3
+
+**Supply Chain Threat Surface module** — a dedicated scanner that goes beyond CVE databases and checks for active threats in your installed packages and system persistence mechanisms:
+
+- Persistent Launch Agent / Daemon analysis (writable paths, missing binaries, recently added)
+- Cron job detection
+- LLM model file scanning (pickle/PyTorch files that execute arbitrary code on load)
+- Homebrew unofficial tap review
+- npm postinstall script analysis for suspicious patterns
+- Typosquatting detection against 100+ popular PyPI and npm packages
+- Python `.pth` file analysis (files that execute code on every Python startup)
+- CVE scanning via the OSV database (PyPI + npm, no API key required)
+- **Confirmed malicious package detection** via the OSSF malicious-packages feed — flags packages confirmed as malware, not just vulnerable ones
+- pip-audit integration when installed
+- Per-finding auto-fix (upgrade, uninstall, or remove persistence)
+- Fix All sheet for supply chain findings — batches all admin fixes into one password prompt
+
+---
+
 ## SwiftUI App
 
-The GUI option — point and click, no Terminal needed. Covers the same 85 checks as the CLI with a visual interface, Fix All sheet, and in-app audit log viewer.
+The GUI option — point and click, no Terminal needed.
 
 ### Features
 
-**Scanning**
+**CIS Benchmark Scanning**
 - 85 automated checks across CIS sections 1–6
 - Live results — list populates as checks complete
 - 15-second per-check timeout so hung checks never stall the scan
 - Apple Intelligence / AI privacy checks (CIS 2.5.x, new in Tahoe)
+
+**Supply Chain Threat Surface**
+- Layered scanning: local analysis → OSV vulnerability database → pip-audit
+- Two-pane layout: findings list with severity and source badges, detail panel with full advisory text, CVE IDs, published date, fixed version, and reference links
+- Source badges distinguish Local analysis, OSV advisories, OSSF-confirmed malware, and pip-audit findings
+- Auto-fix per finding or Fix All in one sheet
 
 **Auto-Remediation**
 - Fix individual checks from the detail panel
@@ -81,7 +96,7 @@ The GUI option — point and click, no Terminal needed. Covers the same 85 check
 - In-app log viewer: color-coded entries, filter by type, search, copy-all
 
 **Reporting**
-- HTML report: styled, standalone, shareable — dark purple gradient theme
+- HTML report: styled, standalone, shareable
 - JSON export: full metadata per check including CIS ID, status, severity, and remediation
 
 **Interface**
@@ -104,7 +119,7 @@ brew install --cask sametsazak/mergen/mergen-app
 ```bash
 git clone https://github.com/sametsazak/mergen.git
 ```
-Open `mergen.xcodeproj` in Xcode and run. No third-party dependencies. No network calls.
+Open `mergen.xcodeproj` in Xcode and run. No third-party dependencies.
 
 **Requirements:** macOS 13 Ventura or later · Tested on macOS 26 Tahoe
 
@@ -115,6 +130,7 @@ Open `mergen.xcodeproj` in Xcode and run. No third-party dependencies. No networ
 3. Click any check to see description, finding, and remediation steps
 4. Press **Fix N** in the top bar to open the Fix All sheet
 5. Export results as **HTML** or **JSON**
+6. Open the **Threat Surface** tab to scan your installed packages
 
 ### Admin Privilege Notice
 
@@ -143,6 +159,7 @@ A fully-featured Go CLI covering the same 85 CIS checks, built for power users, 
 ```
 
 ![Screenshot](img/mergen-cli.png)
+
 ### Installation
 
 **Via Homebrew (recommended):**
@@ -271,6 +288,66 @@ mergen report --format html -o ~/Desktop/security-audit.html
 # Fail CI if any checks fail
 mergen scan --json | jq -e '[.[] | select(.status == "fail")] | length == 0' || exit 1
 ```
+
+---
+
+## Supply Chain Threat Surface
+
+The Threat Surface tab scans your installed packages and system for supply chain risks that traditional vulnerability scanners miss.
+
+### How It Works
+
+Scanning runs in three layers:
+
+**Layer 1 — Local analysis (no network)**
+
+| Check | What it looks for |
+|-------|-------------------|
+| Launch Agents & Daemons | Entries pointing to writable/temp paths, missing binaries, or added in the last 14 days |
+| Cron jobs | Any user crontab entries (uncommon on macOS, worth reviewing) |
+| LLM model files | Pickle / PyTorch files (execute arbitrary code on load), model files outside known app directories with no quarantine flag |
+| Homebrew taps | Unofficial taps (unvetted Ruby scripts that run as root during install) |
+| npm postinstall scripts | `preinstall` / `install` / `postinstall` hooks containing `curl`, `wget`, `base64`, `eval`, or shell calls |
+| Typosquatting | Installed packages within one character of 100+ popular PyPI and npm packages |
+| Python `.pth` files | Files in site-packages containing `import` statements — execute code on every Python startup |
+
+**Layer 2 — OSV database (PyPI + npm)**
+
+Queries the [OSV.dev](https://osv.dev) API for every installed package. No API key required. Returns two types of findings:
+
+- **CVE advisories** — known vulnerabilities with fix version and references
+- **Confirmed malicious packages** — entries from the [OSSF malicious-packages](https://github.com/ossf/malicious-packages) feed, identified by `MAL-` prefixed IDs. These are packages confirmed as intentional malware (infostealers, backdoors, typosquats), shown as Critical severity with an OSSF badge.
+
+**Layer 3 — pip-audit (if installed)**
+
+Runs `pip-audit` for a second opinion on Python packages. Findings that overlap with Layer 2 are deduplicated automatically.
+
+### Optional Tools
+
+Install these to extend coverage:
+
+```bash
+pip3 install pip-audit
+```
+
+pip-audit is not required — Layers 1 and 2 run without it.
+
+### Auto-Fix
+
+Most supply chain findings have a one-click fix:
+
+| Finding type | Fix action |
+|---|---|
+| CVE in pip package | `pip3 install --upgrade <package>` |
+| CVE in npm package | `npm update -g <package>` |
+| Confirmed malicious package | `pip3 uninstall -y <package>` / `npm uninstall -g <package>` |
+| Unofficial Homebrew tap | `brew untap <tap>` |
+| Suspicious npm postinstall | `npm uninstall -g <package>` |
+| Possible typosquat | `pip3 uninstall -y <package>` / `npm uninstall -g <package>` |
+| Launch Agent (writable path) | `launchctl unload && rm` |
+| Launch Agent (missing binary) | `rm <plist>` |
+
+**Fix All** batches all admin-level fixes into a single password prompt.
 
 ---
 

@@ -108,9 +108,10 @@ enum FindingSeverity: String, CaseIterable, Comparable {
 // MARK: - Source
 
 enum FindingSource: String {
-    case localAnalysis = "Local"
-    case osv           = "OSV"
-    case pipAudit      = "pip-audit"
+    case localAnalysis  = "Local"
+    case osv            = "OSV"
+    case ossfMalicious  = "OSSF"   // Confirmed malicious via OSSF malicious-packages feed
+    case pipAudit       = "pip-audit"
 }
 
 // MARK: - Tool availability

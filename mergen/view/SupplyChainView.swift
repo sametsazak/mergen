@@ -549,6 +549,7 @@ struct SourceBadge: View {
         switch source {
         case .localAnalysis: return Color(red: 0.42, green: 0.26, blue: 0.88)
         case .osv:           return Color(red: 0.07, green: 0.66, blue: 0.47)
+        case .ossfMalicious: return Color(red: 0.90, green: 0.15, blue: 0.15)
         case .pipAudit:      return Color(red: 0.20, green: 0.52, blue: 0.85)
         }
     }

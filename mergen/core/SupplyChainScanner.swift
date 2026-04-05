@@ -131,17 +131,15 @@ class SupplyChainScanner: ObservableObject {
         advance(to: 0.12)
 
         // ── Layer 1: Local analysis (all in parallel) ────────────────────
-        async let launchF   = Task.detached { scanLaunchAgents()  }.value
-        async let cronF     = Task.detached { scanCronJobs()      }.value
-        async let llmF      = Task.detached { scanLLMModels()     }.value
-        async let brewF     = Task.detached { status.brewInstalled ? scanHomebrewTaps(brewPath: status.brewPath!)         : [] }.value
-        async let npmLF     = Task.detached { status.npmInstalled  ? scanNpmPostinstall(npmPath: status.npmPath!)          : [] }.value
-        async let typoF     = Task.detached { scanTyposquatting(pip: pipPkgs, npm: npmPkgs) }.value
-        async let pthF      = Task.detached { status.pipInstalled  ? scanPythonPthFiles(pipPath: status.pipPath!)          : [] }.value
-        async let pySourceF = Task.detached { status.pipInstalled  ? scanInstalledPythonPackages(pipPath: status.pipPath!) : [] }.value
-        async let npmSrcF   = Task.detached { status.npmInstalled  ? scanNpmSourceFiles(npmPath: status.npmPath!)          : [] }.value
+        async let launchF  = Task.detached { scanLaunchAgents()  }.value
+        async let cronF    = Task.detached { scanCronJobs()      }.value
+        async let llmF     = Task.detached { scanLLMModels()     }.value
+        async let brewF    = Task.detached { status.brewInstalled ? scanHomebrewTaps(brewPath: status.brewPath!) : [] }.value
+        async let npmLF    = Task.detached { status.npmInstalled  ? scanNpmPostinstall(npmPath: status.npmPath!)  : [] }.value
+        async let typoF    = Task.detached { scanTyposquatting(pip: pipPkgs, npm: npmPkgs) }.value
+        async let pthF     = Task.detached { status.pipInstalled  ? scanPythonPthFiles(pipPath: status.pipPath!)  : [] }.value
 
-        let local = await launchF + cronF + llmF + brewF + npmLF + typoF + pthF + pySourceF + npmSrcF
+        let local = await launchF + cronF + llmF + brewF + npmLF + typoF + pthF
         append(local)
         advance(to: 0.40)
 
@@ -613,215 +611,6 @@ private func scanPythonPthFiles(pipPath: String) -> [ThreatFinding] {
     return findings
 }
 
-// MARK: - Layer 1: Python Package Source Analysis
-
-/// Scans installed Python packages' __init__.py files for obfuscated execution
-/// patterns — base64-encoded payloads, exec+network, and env-var exfiltration.
-private func scanInstalledPythonPackages(pipPath: String) -> [ThreatFinding] {
-    // Resolve site-packages dir via pip show
-    let showOut = shell(pipPath, ["show", "pip"])
-    var siteDir = ""
-    for line in showOut.components(separatedBy: "\n") {
-        if line.hasPrefix("Location:") {
-            siteDir = line.replacingOccurrences(of: "Location:", with: "").trimmingCharacters(in: .whitespaces)
-            break
-        }
-    }
-    guard !siteDir.isEmpty,
-          let pkgDirs = try? FileManager.default.contentsOfDirectory(atPath: siteDir)
-    else { return [] }
-
-    // Definitive obfuscation patterns — any one alone is highly suspicious
-    let highConfidencePatterns: [(pattern: String, label: String)] = [
-        ("exec(base64.b64decode(",  "executes base64-encoded payload"),
-        ("eval(base64.b64decode(",  "evaluates base64-encoded payload"),
-        ("exec(base64.b85decode(",  "executes base85-encoded payload"),
-        ("eval(base64.",            "evaluates base64-decoded code"),
-        ("exec(zlib.decompress(",   "executes zlib-compressed payload"),
-        ("exec(bytes.fromhex(",     "executes hex-encoded payload"),
-    ]
-
-    // Medium-confidence: dangerous combos (exec + network OR env + network)
-    let execPatterns    = ["__import__('subprocess')", "import subprocess", "os.system(", "os.popen("]
-    let networkPatterns = ["urllib", "requests.get", "requests.post", "socket.connect", "http.client"]
-    let envPatterns     = ["os.environ", "os.getenv("]
-
-    var findings: [ThreatFinding] = []
-
-    for pkgDir in pkgDirs {
-        guard !pkgDir.hasSuffix(".dist-info"),
-              !pkgDir.hasSuffix(".data"),
-              !pkgDir.hasSuffix(".egg-info"),
-              !pkgDir.hasSuffix(".pth")
-        else { continue }
-
-        let initPath = siteDir + "/" + pkgDir + "/__init__.py"
-        guard let raw = try? String(contentsOfFile: initPath, encoding: .utf8),
-              raw.count > 50 else { continue }
-
-        // Cap scan size — avoids long I/O on large generated inits
-        let content  = raw.count > 60_000 ? String(raw.prefix(60_000)) : raw
-        let pkgName  = pkgDir.components(separatedBy: "-").first ?? pkgDir
-
-        // ── High-confidence single-pattern check ────────────────────────
-        var flaggedHigh = false
-        for (pattern, label) in highConfidencePatterns {
-            if content.contains(pattern) {
-                let snippet = extractSnippet(from: content, around: pattern)
-                findings.append(ThreatFinding(
-                    category:    .python,
-                    severity:    .critical,
-                    title:       "Malicious Python package: \(pkgName) — obfuscated code",
-                    detail:      "'\(pkgDir)/__init__.py' \(label). Legitimate packages never encode executable payloads this way — this is a strong indicator of malware.\n\nSnippet: \(snippet)",
-                    source:      .localAnalysis,
-                    location:    initPath,
-                    cveIDs:      [],
-                    remediation: "This package shows signs of malicious obfuscation. Uninstall immediately: pip3 uninstall -y \(pkgName)",
-                    fixCommand:  "pip3 uninstall -y \(pkgName)"
-                ))
-                flaggedHigh = true
-                break
-            }
-        }
-        guard !flaggedHigh else { continue }
-
-        // ── Medium-confidence combo checks ───────────────────────────────
-        let hasExec    = execPatterns.contains(where:    { content.contains($0) })
-        let hasNetwork = networkPatterns.contains(where: { content.contains($0) })
-        let hasEnv     = envPatterns.contains(where:     { content.contains($0) })
-
-        if hasExec && hasNetwork {
-            let matchE = execPatterns.first    { content.contains($0) }!
-            let matchN = networkPatterns.first { content.contains($0) }!
-            findings.append(ThreatFinding(
-                category:    .python,
-                severity:    .high,
-                title:       "Suspicious Python package: \(pkgName) — exec + network in __init__",
-                detail:      "'\(pkgDir)/__init__.py' combines process execution (\(matchE)) with network activity (\(matchN)) at import time. Legitimate packages do not spawn processes or make network calls in their __init__.py.",
-                source:      .localAnalysis,
-                location:    initPath,
-                cveIDs:      [],
-                remediation: "Inspect \(initPath). If unexpected, uninstall: pip3 uninstall -y \(pkgName)",
-                fixCommand:  "pip3 uninstall -y \(pkgName)"
-            ))
-        } else if hasEnv && hasNetwork {
-            let matchV = envPatterns.first     { content.contains($0) }!
-            let matchN = networkPatterns.first { content.contains($0) }!
-            findings.append(ThreatFinding(
-                category:    .python,
-                severity:    .high,
-                title:       "Suspicious Python package: \(pkgName) — env vars + network in __init__",
-                detail:      "'\(pkgDir)/__init__.py' reads environment variables (\(matchV)) and makes network calls (\(matchN)) at import time — a pattern used by credential-stealing malware.",
-                source:      .localAnalysis,
-                location:    initPath,
-                cveIDs:      [],
-                remediation: "Inspect \(initPath). If unexpected, uninstall: pip3 uninstall -y \(pkgName)",
-                fixCommand:  "pip3 uninstall -y \(pkgName)"
-            ))
-        }
-    }
-    return findings
-}
-
-// MARK: - Layer 1: npm Source File Analysis
-
-/// Scans installed global npm packages' main JS files for obfuscation patterns —
-/// eval(Buffer.from(), eval(atob(), child_process + env + network combos.
-private func scanNpmSourceFiles(npmPath: String) -> [ThreatFinding] {
-    let rootOutput = shell(npmPath, ["root", "-g"])
-    let root = rootOutput.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !root.isEmpty, FileManager.default.fileExists(atPath: root) else { return [] }
-
-    let highConfidencePatterns: [(pattern: String, label: String)] = [
-        ("eval(Buffer.from(",    "evaluates a base64-encoded Node.js payload"),
-        ("eval(atob(",           "evaluates a base64-decoded payload"),
-        ("eval(require(",        "dynamically evaluates a required module"),
-        ("Function(atob(",       "constructs a Function from a base64 payload"),
-        ("Function(Buffer.from(","constructs a Function from a Buffer payload"),
-    ]
-
-    let execPatterns    = ["child_process", "execSync(", "spawnSync(", ".exec("]
-    let networkPatterns = ["http.get(", "https.get(", "fetch(", "axios", "require('request')"]
-    let envPatterns     = ["process.env"]
-
-    var findings: [ThreatFinding] = []
-    let fm = FileManager.default
-
-    guard let packages = try? fm.contentsOfDirectory(atPath: root) else { return [] }
-
-    for pkg in packages {
-        let pkgJsonPath = root + "/" + pkg + "/package.json"
-        guard let data = fm.contents(atPath: pkgJsonPath),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else { continue }
-
-        let mainRelative = (json["main"] as? String) ?? "index.js"
-        let mainPath     = root + "/" + pkg + "/" + mainRelative
-        guard let raw = try? String(contentsOfFile: mainPath, encoding: .utf8),
-              raw.count > 20 else { continue }
-
-        let content = raw.count > 80_000 ? String(raw.prefix(80_000)) : raw
-        let version = (json["version"] as? String) ?? "unknown"
-
-        // ── High-confidence single-pattern check ────────────────────────
-        var flaggedHigh = false
-        for (pattern, label) in highConfidencePatterns {
-            if content.contains(pattern) {
-                findings.append(ThreatFinding(
-                    category:    .npm,
-                    severity:    .critical,
-                    title:       "Malicious npm package: \(pkg)@\(version) — obfuscated code",
-                    detail:      "'\(mainRelative)' in \(pkg) \(label). This pattern is never present in legitimate packages and is a definitive sign of a malicious payload.",
-                    source:      .localAnalysis,
-                    location:    mainPath,
-                    cveIDs:      [],
-                    remediation: "This package shows signs of malicious obfuscation. Uninstall immediately: npm uninstall -g \(pkg)",
-                    fixCommand:  "npm uninstall -g \(pkg)"
-                ))
-                flaggedHigh = true
-                break
-            }
-        }
-        guard !flaggedHigh else { continue }
-
-        // ── Medium-confidence: child_process + network + env combo ───────
-        let hasExec    = execPatterns.contains(where:    { content.contains($0) })
-        let hasNetwork = networkPatterns.contains(where: { content.contains($0) })
-        let hasEnv     = envPatterns.contains(where:     { content.contains($0) })
-
-        // Require all three — child_process alone is normal in many build tools
-        if hasExec && hasNetwork && hasEnv {
-            let matchE = execPatterns.first    { content.contains($0) }!
-            let matchN = networkPatterns.first { content.contains($0) }!
-            findings.append(ThreatFinding(
-                category:    .npm,
-                severity:    .high,
-                title:       "Suspicious npm package: \(pkg)@\(version) — exec + network + env",
-                detail:      "'\(mainRelative)' uses \(matchE), network calls (\(matchN)), and reads process.env — a combination used by credential-exfiltrating malware.",
-                source:      .localAnalysis,
-                location:    mainPath,
-                cveIDs:      [],
-                remediation: "Inspect \(mainPath). If unexpected, uninstall: npm uninstall -g \(pkg)",
-                fixCommand:  "npm uninstall -g \(pkg)"
-            ))
-        }
-    }
-    return findings
-}
-
-// MARK: - Snippet extractor (shared)
-
-private func extractSnippet(from content: String, around pattern: String, context: Int = 80) -> String {
-    let ns      = content as NSString
-    let nsRange = (content as NSString).range(of: pattern)
-    guard nsRange.location != NSNotFound else { return "" }
-    let start   = max(0, nsRange.location - 20)
-    let length  = min(ns.length - start, 20 + nsRange.length + context)
-    let snippet = ns.substring(with: NSRange(location: start, length: length))
-        .replacingOccurrences(of: "\n", with: " ")
-    return (start > 0 ? "…" : "") + snippet + (start + length < ns.length ? "…" : "")
-}
-
 // MARK: - Layer 2: Package list helpers
 
 private struct SimplePackage { let name: String; let version: String }
@@ -855,10 +644,32 @@ private func buildOSVFindings(from vulnMap: [String: [OSVClient.Vulnerability]],
     let cat: ThreatCategory = ecosystem == "PyPI" ? .python : .npm
     return vulnMap.flatMap { pkgName, vulns in
         vulns.map { v in
-            let ids = v.cveIDs.isEmpty ? v.id : v.cveIDs.joined(separator: ", ")
-            // Use full details if available, fall back to summary
             let detail = v.details ?? v.summary
 
+            // ── Confirmed malicious package (OSSF feed) ──────────────────
+            // OSV IDs from the OSSF malicious-packages dataset are prefixed MAL-
+            if v.id.hasPrefix("MAL-") {
+                let uninstallCmd = ecosystem == "PyPI"
+                    ? "pip3 uninstall -y \(pkgName)"
+                    : "npm uninstall -g \(pkgName)"
+                return ThreatFinding(
+                    category:      cat,
+                    severity:      .critical,
+                    title:         "Confirmed malicious package: \(pkgName)",
+                    detail:        detail,
+                    source:        .ossfMalicious,
+                    location:      pkgName,
+                    cveIDs:        v.cveIDs,
+                    remediation:   "This package has been confirmed as malicious by the Open Source Security Foundation (OSSF).\n\nUninstall immediately:\n\(uninstallCmd)",
+                    fixCommand:    uninstallCmd,
+                    references:    v.references,
+                    publishedDate: v.publishedDate,
+                    fixedVersion:  nil
+                )
+            }
+
+            // ── Known CVE vulnerability ───────────────────────────────────
+            let ids = v.cveIDs.isEmpty ? v.id : v.cveIDs.joined(separator: ", ")
             var remediation = ecosystem == "PyPI"
                 ? "Upgrade with: pip3 install --upgrade \(pkgName)"
                 : "Upgrade with: npm update -g \(pkgName)"
