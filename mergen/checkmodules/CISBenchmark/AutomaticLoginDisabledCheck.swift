@@ -13,7 +13,7 @@ class AutomaticLoginDisabledCheck: Vulnerability {
             description: "Automatic login allows a computer to bypass the login window and log in as a specific user. This exposes the system to anyone with physical access.",
             category: "CIS Benchmark",
             remediation: "Go to System Settings > Lock Screen and disable 'Automatically log in as'. Or run: sudo defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser",
-            severity: "High",
+            severity: "Critical",
             documentation: "CIS Apple macOS 26 Tahoe Benchmark v1.0.0 - Recommendation 2.13.3",
             mitigation: "Disabling automatic login ensures physical access to the machine does not grant immediate access to the user session.",
             checkstatus: "",

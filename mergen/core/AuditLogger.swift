@@ -14,10 +14,9 @@ final class AuditLogger {
 
     private let logURL: URL
     private let queue  = DispatchQueue(label: "com.mergen.logger", qos: .background)
-    private let stamp  = DateFormatter()
 
     private init() {
-        stamp.dateFormat = "yyyy-MM-dd HH:mm:ss"
+
 
         let lib = FileManager.default
             .urls(for: .libraryDirectory, in: .userDomainMask).first!
@@ -75,6 +74,8 @@ final class AuditLogger {
     // MARK: - Private
 
     private func write(_ body: String) {
+        let stamp = DateFormatter()
+        stamp.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let line = "[\(stamp.string(from: Date()))] \(body)\n"
         queue.async {
             guard let data = line.data(using: .utf8) else { return }

@@ -60,7 +60,6 @@ Examples:
 		)
 
 		// Print section header tracker
-		currentSection := ""
 		sectionNames := map[string]string{
 			"1": "Software Updates",
 			"2": "System Settings",
@@ -126,10 +125,7 @@ Examples:
 					}
 					output.PrintCheckResult(r)
 				}
-				if sec == currentSection {
-					_ = currentSection
-				}
-				currentSection = sec
+
 			}
 		}
 

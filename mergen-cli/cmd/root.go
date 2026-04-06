@@ -10,7 +10,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "mergen",
 	Short: "macOS security audit — CIS Apple macOS 26 Tahoe Benchmark",
-	Long: `Mergen audits your Mac against 90+ CIS Benchmark controls.
+	Long: `Mergen audits your Mac against 85 CIS Benchmark controls.
 
   mergen              Launch interactive menu
   mergen scan         Run all security checks

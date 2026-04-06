@@ -106,9 +106,15 @@ class SupplyChainScanner: ObservableObject {
                     for f in adminFixes {
                         self.fixingIDs.remove(f.id)
                         switch result {
-                        case .success:     self.fixResults[f.id]   = true
-                        case .scriptError: self.fixResults[f.id]   = false
-                        case .cancelled:   self.fixCancelled.insert(f.id)
+                        case .success:
+                            // Admin batch ran — individual command outcomes are unknown
+                            // since they're batched. Mark as success (best-effort).
+                            self.fixResults[f.id] = true
+                        case .scriptError:
+                            // The entire batch failed to execute
+                            self.fixResults[f.id] = false
+                        case .cancelled:
+                            self.fixCancelled.insert(f.id)
                         }
                     }
                 }

@@ -287,6 +287,9 @@ struct TabPill: View {
     }
 }
 
+
+
+
 // MARK: - Welcome View
 
 struct WelcomeView: View {
@@ -533,7 +536,6 @@ struct FeatureCard: View {
         .onHover { h in hovered = h }
     }
 }
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

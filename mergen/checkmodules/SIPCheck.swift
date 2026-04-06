@@ -14,10 +14,10 @@ class SIPStatusCheck: Vulnerability {
             description: "This check verifies if System Integrity Protection (SIP) is enabled on your computer. SIP helps protect your computer from unauthorized changes and enhances security.",
             category: "CIS Benchmark",
             remediation: "To enable SIP, restart your computer in Recovery Mode and run `csrutil enable` in Terminal.",
-            severity: "High",
+            severity: "Critical",
             documentation: "For more information about SIP and how to enable it, visit: https://support.apple.com/en-us/HT204899",
             mitigation: "System Integrity Protection is a crucial security feature and should remain enabled to protect your system from unauthorized changes.",
-            docID: 20, cisID: "5.1.2"
+            docID: 20, cisID: "5.1.1"
         )
     }
     

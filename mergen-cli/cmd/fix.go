@@ -199,10 +199,13 @@ func applyAdminFixes(adminFixes []checks.CheckResult) {
 	for _, r := range adminFixes {
 		cmds = append(cmds, r.Check.Fix().Command)
 	}
-	batched := strings.Join(cmds, " && ")
+	batched := strings.Join(cmds, " ; ")
+	// Wrap in bash -c with exit 0 so individual command failures don't abort
+	// the batch — matches the SwiftUI app's FixManager behaviour.
+	shellCmd := strings.ReplaceAll(batched, "'", "'\\''")
+	bashWrapped := fmt.Sprintf("bash -c '%s; exit 0'", shellCmd)
 	script := fmt.Sprintf(`do shell script "%s" with administrator privileges`,
-		strings.ReplaceAll(batched, `"`, `\"`),
-	)
+		strings.ReplaceAll(bashWrapped, `"`, `\"`))
 
 	cmd := exec.Command("/usr/bin/osascript", "-e", script)
 	out, err := cmd.CombinedOutput()

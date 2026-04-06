@@ -16,7 +16,7 @@ class PasswordOnWakeCheck: Vulnerability {
             description: "Checks whether a password is required to wake the computer from sleep or screen saver",
             category: "CIS Benchmark",
             remediation: "Enable a password requirement to wake the computer from sleep or screen saver",
-            severity: "Low",
+            severity: "High",
             documentation: "This code checks whether a password is required to wake the computer from sleep or screen saver. If not enabled, it can allow unauthorized access to a user's system and potentially sensitive data.",
             mitigation: "Enable a password requirement to wake the computer from sleep or screen saver to ensure that only authorized users can access the system.",
             docID: 58, cisID: "2.11.2"

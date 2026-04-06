@@ -12,12 +12,12 @@ class SafariInternetPluginsCheck: Vulnerability {
         super.init(
             name: "Safari Internet plugins disabled",
             description: "This check ensures that Internet plugins are disabled for global use in Safari, which helps prevent the execution of malicious code.",
-            category: "Security",
+            category: "CIS Benchmark",
             remediation: "To disable Internet plugins for global use in Safari, go to Safari > Preferences > Security, and uncheck the 'Allow Plug-ins' option.",
             severity: "Medium",
             documentation: "For more information on disabling Internet plugins for global use in Safari, visit: https://support.apple.com/guide/safari/preference-settings-for-security-ibrw1093/mac",
             mitigation: "By disabling Internet plugins for global use, you reduce the risk of malicious code execution through vulnerable plugins, enhancing your system's security.",
-            docID: 34
+            docID: 34, cisID: "6.3.8"
         )
     }
 
@@ -28,6 +28,7 @@ class SafariInternetPluginsCheck: Vulnerability {
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()

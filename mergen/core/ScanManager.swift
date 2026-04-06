@@ -30,36 +30,52 @@ class ScanManager: ObservableObject {
             }
             self.totalModules = scanner.moduleCount
             var completedModules = 0
+            let completedLock = NSLock()
 
-            scanner.modules.forEach { module in
-                let timeout: DispatchTimeInterval = .seconds(15)
+            // Run checks concurrently — up to 8 at a time, matching the Go CLI.
+            let concurrency = DispatchSemaphore(value: 8)
+            let group = DispatchGroup()
 
-                let semaphore = DispatchSemaphore(value: 0)
+            for module in scanner.modules {
+                concurrency.wait()
+                group.enter()
 
-                let taskQueue = DispatchQueue(label: "com.sametsazak.mergen", qos: .userInteractive)
-                taskQueue.async {
-                    module.check()
-                    semaphore.signal()
-                }
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let timeout: DispatchTimeInterval = .seconds(15)
+                    let checkSemaphore = DispatchSemaphore(value: 0)
 
-                let result = semaphore.wait(timeout: DispatchTime.now() + timeout)
-
-                if result == .timedOut {
-                    module.checkstatus = "Yellow"
-                    module.status = "Check timed out"
-                }
-
-                AuditLogger.shared.logCheckResult(module)
-
-                DispatchQueue.main.async {
-                    self.scanResults.append(module)
-                    completedModules += 1
-                    self.progress = Double(completedModules) / Double(self.totalModules)
-
-                    if self.progress >= 0.9999 {
-                        self.scanning = false
-                        AuditLogger.shared.logScanComplete(self.scanResults)
+                    let taskQueue = DispatchQueue(label: "com.sametsazak.mergen.check", qos: .userInteractive)
+                    taskQueue.async {
+                        module.check()
+                        checkSemaphore.signal()
                     }
+
+                    let result = checkSemaphore.wait(timeout: DispatchTime.now() + timeout)
+
+                    if result == .timedOut {
+                        module.checkstatus = "Yellow"
+                        module.status = "Check timed out"
+                    }
+
+                    AuditLogger.shared.logCheckResult(module)
+
+                    completedLock.lock()
+                    completedModules += 1
+                    let current = completedModules
+                    completedLock.unlock()
+
+                    DispatchQueue.main.async {
+                        self.scanResults.append(module)
+                        self.progress = Double(current) / Double(self.totalModules)
+
+                        if self.progress >= 0.9999 {
+                            self.scanning = false
+                            AuditLogger.shared.logScanComplete(self.scanResults)
+                        }
+                    }
+
+                    concurrency.signal()
+                    group.leave()
                 }
             }
         }
@@ -67,12 +83,19 @@ class ScanManager: ObservableObject {
 
 
     func resetScan() {
-        scanning = false
-        progress = 0.0
-        scanResults = []
-        fixingIDs    = []
-        fixResults   = [:]
-        fixCancelled = []
+        let reset = {
+            self.scanning = false
+            self.progress = 0.0
+            self.scanResults = []
+            self.fixingIDs    = []
+            self.fixResults   = [:]
+            self.fixCancelled = []
+        }
+        if Thread.isMainThread {
+            reset()
+        } else {
+            DispatchQueue.main.async { reset() }
+        }
     }
 
     // MARK: - Auto-Remediation

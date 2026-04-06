@@ -66,8 +66,8 @@ class Scanner {
         modules.append(LimitAdTrackingCheck())            // 2.6.4
         modules.append(GatekeeperBypassCheck())           // 2.6.5
         modules.append(FileVaultCheck())                  // 2.6.6
-        modules.append(AdminPasswordForSystemPrefsCheck()) // 2.6.8
         modules.append(LockdownModeCheck())               // 2.6.7 (advisory)
+        modules.append(AdminPasswordForSystemPrefsCheck()) // 2.6.8
 
         // MARK: - Section 2.7: Screen Saver
         modules.append(ScreenSaverCornersCheck())         // 2.7.1
@@ -102,7 +102,7 @@ class Scanner {
         modules.append(NfsServerCheck())                  // 4.3
 
         // MARK: - Section 5: System Access, Authentication and Authorization
-        modules.append(SIPStatusCheck())                  // 5.1.2
+        modules.append(SIPStatusCheck())                  // 5.1.1
         modules.append(SecureKernelExtensionLoadingCheck()) // 5.1.x
         modules.append(AMFIEnabledCheck())                // 5.1.3
         modules.append(SSVEnabledCheck())                 // 5.1.4
@@ -122,7 +122,8 @@ class Scanner {
         modules.append(SafariFraudWarningCheck())         // 6.3.3
         modules.append(SafariCrossSiteTrackingCheck())    // 6.3.4
         modules.append(SafariAdvertisingPrivacyCheck())   // 6.3.6
-        modules.append(SafariStatusBarCheck())            // 6.3.10
+        modules.append(SafariInternetPluginsCheck())       // 6.3.8
+        modules.append(SafariStatusBarCheck())             // 6.3.10
         modules.append(TerminalSecureKeyboardCheck())     // 6.4.1
 
         // MARK: - Standalone Security Checks
@@ -133,7 +134,6 @@ class Scanner {
         modules.append(ShowWiFiStatusCheck())
         modules.append(BluetoothMenuBarCheck())
         modules.append(FastUserSwitchingCheck())
-
 
         // Removed in Tahoe benchmark: Java6Check, EFIVersionCheck, DVDOrCDSharingDisabledCheck
 
