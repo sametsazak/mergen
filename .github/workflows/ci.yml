@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift-app:
+    name: Swift app — build & test
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show available Xcodes
+        run: ls /Applications | grep -i 'Xcode'
+
+      - name: Select latest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -Vr | head -n1)"
+
+      - name: Show Xcode + Swift versions
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build (Debug)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project mergen.xcodeproj \
+            -scheme mergen \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            clean build
+
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project mergen.xcodeproj \
+            -scheme mergen \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -testPlan mergen \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
+  go-cli:
+    name: Go CLI — build & test
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: mergen-cli/go.mod
+          cache-dependency-path: mergen-cli/go.sum
+
+      - name: Verify module is tidy
+        working-directory: mergen-cli
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum
+
+      - name: Vet
+        working-directory: mergen-cli
+        run: go vet ./...
+
+      - name: Test
+        working-directory: mergen-cli
+        run: make test
+
+      - name: Build current-platform binary
+        working-directory: mergen-cli
+        run: make build
+
+      - name: Build universal macOS binary
+        working-directory: mergen-cli
+        run: make release
+
+      - name: Smoke-test --version
+        working-directory: mergen-cli
+        run: ./mergen --version
