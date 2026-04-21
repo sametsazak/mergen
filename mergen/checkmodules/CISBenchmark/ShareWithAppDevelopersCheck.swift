@@ -7,6 +7,12 @@
 import Foundation
 
 class ShareWithAppDevelopersCheck: Vulnerability {
+    // Authoritative, world-readable plist the system writes when the user
+    // toggles "Share with app developers" in System Settings.
+    private static let diagnosticsPlistPath =
+        "/Library/Application Support/CrashReporter/DiagnosticMessagesHistory.plist"
+    private static let thirdPartyKey = "ThirdPartyDataSubmit"
+
     init() {
         super.init(
             name: "Share with App Developers Is Disabled",
@@ -23,38 +29,83 @@ class ShareWithAppDevelopersCheck: Vulnerability {
     }
 
     override func check() {
+        // 1) Prefer an MDM-forced value if one is present (higher priority).
+        if let mdmValue = readMDMValue() {
+            if mdmValue {
+                status = "Share with App Developers is enabled (forced by MDM profile)."
+                checkstatus = "Red"
+            } else {
+                status = "Share with App Developers is disabled (enforced by MDM profile)."
+                checkstatus = "Green"
+            }
+            return
+        }
+
+        // 2) Otherwise read the world-readable authoritative plist.
+        let path = ShareWithAppDevelopersCheck.diagnosticsPlistPath
+
+        if !FileManager.default.fileExists(atPath: path) {
+            // Fresh user: file isn't written until Analytics & Improvements
+            // has been visited, which is equivalent to "never submitted".
+            status = "Share with App Developers is disabled (no diagnostics history plist present)."
+            checkstatus = "Green"
+            return
+        }
+
+        guard let dict = NSDictionary(contentsOfFile: path) else {
+            status = "Share with App Developers state could not be determined (plist unreadable)."
+            checkstatus = "Yellow"
+            return
+        }
+
+        // Key absent or 0 -> disabled (Green). 1 -> enabled (Red).
+        if let raw = dict[ShareWithAppDevelopersCheck.thirdPartyKey] as? NSNumber {
+            if raw.intValue == 1 {
+                status = "Share with App Developers is enabled."
+                checkstatus = "Red"
+            } else {
+                status = "Share with App Developers is disabled."
+                checkstatus = "Green"
+            }
+        } else {
+            status = "Share with App Developers is disabled (ThirdPartyDataSubmit key absent)."
+            checkstatus = "Green"
+        }
+    }
+
+    /// Check whether an MDM configuration profile is forcing
+    /// allowDiagnosticSubmission for com.apple.applicationaccess. Returns
+    /// nil when no profile enforces it.
+    ///
+    /// Note: the MDM key is inverted semantically
+    /// (allowDiagnosticSubmission == false means sharing is disabled), so
+    /// we normalize it to "is sharing enabled?".
+    private func readMDMValue() -> Bool? {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         task.arguments = ["-l", "JavaScript", "-e",
             "$.NSUserDefaults.alloc.initWithSuiteName('com.apple.applicationaccess').objectForKey('allowDiagnosticSubmission').js"]
 
         let outputPipe = Pipe()
-        let errorPipe = Pipe()
         task.standardOutput = outputPipe
-        task.standardError = errorPipe
+        task.standardError = Pipe()
 
         do {
             try task.run()
             task.waitUntilExit()
+        } catch {
+            return nil
+        }
 
-            let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
-                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-            if output == "false" {
-                status = "Share with App Developers is disabled."
-                checkstatus = "Green"
-            } else if output == "true" {
-                status = "Share with App Developers is enabled."
-                checkstatus = "Red"
-            } else {
-                status = "Share with App Developers state unknown (may require MDM profile)."
-                checkstatus = "Yellow"
-            }
-        } catch let e {
-            print("Error checking \(name): \(e)")
-            self.error = e
-            checkstatus = "Yellow"
-            status = "Error checking Share with App Developers setting"
+        switch output {
+        // allowDiagnosticSubmission true  -> sharing allowed  -> enabled
+        case "true", "1":  return true
+        // allowDiagnosticSubmission false -> sharing blocked  -> disabled
+        case "false", "0": return false
+        default:           return nil
         }
     }
 }

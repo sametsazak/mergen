@@ -39,17 +39,16 @@ class BluetoothSharingDisabledCheck: Vulnerability {
             if task.terminationStatus == 0 {
                 let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
                 let outputString = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
-                if outputString == "0" {
-                    status = "Bluetooth Sharing is Disabled"
-                    checkstatus = "Green"
-                } else {
-                    status = "Bluetooth Sharing is Enabled"
+                if outputString == "1" {
+                    status = "Bluetooth Sharing is enabled"
                     checkstatus = "Red"
+                } else {
+                    status = "Bluetooth Sharing is disabled"
+                    checkstatus = "Green"
                 }
             } else {
-                status = "Error checking Bluetooth Sharing status"
-                checkstatus = "Yellow"
-                self.error = NSError(domain: NSPOSIXErrorDomain, code: Int(task.terminationStatus), userInfo: nil)
+                status = "Bluetooth Sharing is disabled (default, preference key not set)"
+                checkstatus = "Green"
             }
         } catch let e {
             print("Error checking \(name): \(e)")

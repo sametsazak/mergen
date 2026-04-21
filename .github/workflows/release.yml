@@ -1,0 +1,137 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to release (e.g. v2.2.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    name: Build and publish release
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      RAW_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+    steps:
+      - name: Validate tag format
+        run: |
+          if ! printf '%s' "$RAW_TAG" | grep -Eq '^v[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+            echo "Refusing to release from malformed tag: $RAW_TAG"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RAW_TAG }}
+          fetch-depth: 0
+
+      - name: Derive version from tag
+        id: version
+        run: |
+          MARKETING_VERSION="${RAW_TAG#v}"
+          BUILD_NUMBER=$(git rev-list --count "$RAW_TAG")
+          echo "marketing=$MARKETING_VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+
+      - name: Select latest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -Vr | head -n1)"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: mergen-cli/go.mod
+          cache-dependency-path: mergen-cli/go.sum
+
+      - name: Build Release app
+        env:
+          MARKETING: ${{ steps.version.outputs.marketing }}
+          BUILD: ${{ steps.version.outputs.build }}
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project mergen.xcodeproj \
+            -scheme mergen \
+            -configuration Release \
+            -derivedDataPath build \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            MARKETING_VERSION="$MARKETING" \
+            CURRENT_PROJECT_VERSION="$BUILD" \
+            clean build
+
+      - name: Confirm embedded version
+        run: |
+          APP=build/Build/Products/Release/mergen.app
+          defaults read "$PWD/$APP/Contents/Info.plist" CFBundleShortVersionString
+          defaults read "$PWD/$APP/Contents/Info.plist" CFBundleVersion
+
+      - name: Create app zip
+        run: |
+          cd build/Build/Products/Release
+          ditto -c -k --keepParent --sequesterRsrc mergen.app "$GITHUB_WORKSPACE/mergen.app.zip"
+
+      - name: Create DMG
+        run: |
+          mkdir -p dmg-staging
+          cp -R build/Build/Products/Release/mergen.app dmg-staging/
+          ln -s /Applications dmg-staging/Applications
+          hdiutil create \
+            -volname "Mergen" \
+            -srcfolder dmg-staging \
+            -ov -format UDZO \
+            Mergen.dmg
+
+      - name: Build CLI universal + per-arch binaries
+        working-directory: mergen-cli
+        env:
+          VERSION: ${{ env.RAW_TAG }}
+        run: make release
+
+      - name: Stage CLI artifacts with versioned names
+        env:
+          MARKETING: ${{ steps.version.outputs.marketing }}
+        run: |
+          mkdir -p release-artifacts
+          cp mergen.app.zip release-artifacts/mergen-${MARKETING}.app.zip
+          cp Mergen.dmg     release-artifacts/Mergen-${MARKETING}.dmg
+          cp mergen-cli/dist/mergen-darwin-arm64      release-artifacts/mergen-cli-${MARKETING}-darwin-arm64
+          cp mergen-cli/dist/mergen-darwin-amd64      release-artifacts/mergen-cli-${MARKETING}-darwin-amd64
+          cp mergen-cli/dist/mergen-darwin-universal  release-artifacts/mergen-cli-${MARKETING}-darwin-universal
+
+      - name: Generate checksums
+        run: |
+          cd release-artifacts
+          shasum -a 256 * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RAW_TAG }}
+          name: Mergen ${{ env.RAW_TAG }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            release-artifacts/mergen-${{ steps.version.outputs.marketing }}.app.zip
+            release-artifacts/Mergen-${{ steps.version.outputs.marketing }}.dmg
+            release-artifacts/mergen-cli-${{ steps.version.outputs.marketing }}-darwin-arm64
+            release-artifacts/mergen-cli-${{ steps.version.outputs.marketing }}-darwin-amd64
+            release-artifacts/mergen-cli-${{ steps.version.outputs.marketing }}-darwin-universal
+            release-artifacts/SHA256SUMS.txt
