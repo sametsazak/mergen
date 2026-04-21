@@ -23,7 +23,7 @@ jobs:
   build-and-publish:
     name: Build and publish release
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       RAW_TAG: ${{ github.event.inputs.tag || github.ref_name }}
 
@@ -32,6 +32,26 @@ jobs:
         run: |
           if ! printf '%s' "$RAW_TAG" | grep -Eq '^v[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
             echo "Refusing to release from malformed tag: $RAW_TAG"
+            exit 1
+          fi
+
+      - name: Require signing secrets
+        env:
+          APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_ID_EMAIL: ${{ secrets.APPLE_ID_EMAIL }}
+          APPLE_ID_APP_PASSWORD: ${{ secrets.APPLE_ID_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          missing=()
+          [ -z "${APPLE_CERT_P12_BASE64:-}" ]   && missing+=("APPLE_CERT_P12_BASE64")
+          [ -z "${APPLE_CERT_PASSWORD:-}" ]     && missing+=("APPLE_CERT_PASSWORD")
+          [ -z "${APPLE_ID_EMAIL:-}" ]          && missing+=("APPLE_ID_EMAIL")
+          [ -z "${APPLE_ID_APP_PASSWORD:-}" ]   && missing+=("APPLE_ID_APP_PASSWORD")
+          [ -z "${APPLE_TEAM_ID:-}" ]           && missing+=("APPLE_TEAM_ID")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Release workflow refuses to produce an unsigned build."
+            echo "Missing required repository secrets: ${missing[*]}"
             exit 1
           fi
 
@@ -56,10 +76,52 @@ jobs:
           go-version-file: mergen-cli/go.mod
           cache-dependency-path: mergen-cli/go.sum
 
-      - name: Build Release app
+      - name: Import Developer ID certificate
+        env:
+          CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+          echo "::add-mask::$KEYCHAIN_PASSWORD"
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+
+          CERT_P12_PATH="$RUNNER_TEMP/cert.p12"
+          printf '%s' "$CERT_P12_BASE64" | base64 --decode > "$CERT_P12_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_P12_PATH" \
+            -P "$CERT_PASSWORD" \
+            -A -t cert -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychain -d user | tr -d '"')
+          rm -f "$CERT_P12_PATH"
+
+          SIGN_IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
+            | grep 'Developer ID Application' \
+            | head -n1 \
+            | awk -F'"' '{print $2}')
+          if [ -z "$SIGN_IDENTITY" ]; then
+            echo "No 'Developer ID Application' certificate found in the imported keychain."
+            exit 1
+          fi
+          echo "SIGN_IDENTITY=$SIGN_IDENTITY" >> "$GITHUB_ENV"
+          echo "Will sign with: $SIGN_IDENTITY"
+
+      - name: Build Release app (signed + hardened runtime)
         env:
           MARKETING: ${{ steps.version.outputs.marketing }}
           BUILD: ${{ steps.version.outputs.build }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -o pipefail
           xcodebuild \
@@ -68,20 +130,42 @@ jobs:
             -configuration Release \
             -derivedDataPath build \
             -destination 'platform=macOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="$SIGN_IDENTITY" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            OTHER_CODE_SIGN_FLAGS="--timestamp" \
             MARKETING_VERSION="$MARKETING" \
             CURRENT_PROJECT_VERSION="$BUILD" \
             clean build
 
-      - name: Confirm embedded version
+      - name: Confirm embedded version + signature
         run: |
           APP=build/Build/Products/Release/mergen.app
           defaults read "$PWD/$APP/Contents/Info.plist" CFBundleShortVersionString
           defaults read "$PWD/$APP/Contents/Info.plist" CFBundleVersion
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          codesign -dvv "$APP" 2>&1 | grep -E 'Authority|TeamIdentifier|Identifier|Signature'
 
-      - name: Create app zip
+      - name: Notarize and staple .app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID_EMAIL }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_APP_PASSWORD }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          APP=build/Build/Products/Release/mergen.app
+          NOTARIZE_ZIP="$RUNNER_TEMP/notarize.zip"
+          ditto -c -k --keepParent --sequesterRsrc "$APP" "$NOTARIZE_ZIP"
+          xcrun notarytool submit "$NOTARIZE_ZIP" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_ID_PASSWORD" \
+            --team-id "$TEAM_ID" \
+            --wait
+          xcrun stapler staple "$APP"
+          xcrun stapler validate "$APP"
+          rm -f "$NOTARIZE_ZIP"
+
+      - name: Create app zip from stapled app
         run: |
           cd build/Build/Products/Release
           ditto -c -k --keepParent --sequesterRsrc mergen.app "$GITHUB_WORKSPACE/mergen.app.zip"
@@ -96,6 +180,22 @@ jobs:
             -srcfolder dmg-staging \
             -ov -format UDZO \
             Mergen.dmg
+
+      - name: Sign, notarize, and staple DMG
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID_EMAIL }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_APP_PASSWORD }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          codesign --force --sign "$SIGN_IDENTITY" --timestamp Mergen.dmg
+          xcrun notarytool submit Mergen.dmg \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_ID_PASSWORD" \
+            --team-id "$TEAM_ID" \
+            --wait
+          xcrun stapler staple Mergen.dmg
+          xcrun stapler validate Mergen.dmg
 
       - name: Build CLI universal + per-arch binaries
         working-directory: mergen-cli
@@ -135,3 +235,10 @@ jobs:
             release-artifacts/mergen-cli-${{ steps.version.outputs.marketing }}-darwin-amd64
             release-artifacts/mergen-cli-${{ steps.version.outputs.marketing }}-darwin-universal
             release-artifacts/SHA256SUMS.txt
+
+      - name: Delete temporary keychain
+        if: always()
+        run: |
+          if [ -n "${KEYCHAIN_PATH:-}" ] && [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
