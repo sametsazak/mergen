@@ -468,7 +468,7 @@ struct ExportButtons: View {
         panel.nameFieldStringValue = "MergenReport.json"
         panel.allowedContentTypes = [.json]
         if panel.runModal() == .OK, let url = panel.url {
-            try? data.write(to: url)
+            try? data.write(to: url, options: [.atomic])
         }
     }
 }
