@@ -23,7 +23,10 @@ class SafariFraudWarningCheck: Vulnerability {
     }
 
     override func check() {
-        // Check via system_profiler for MDM profile first
+        // On macOS Tahoe, Safari preferences are fully sandboxed and cannot be
+        // read from an external process via `defaults`. MDM-managed profiles
+        // are still visible through system_profiler, so prefer that signal
+        // when present; otherwise fall back to a manual-verification warning.
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/sbin/system_profiler")
         task.arguments = ["SPConfigurationProfileDataType"]
@@ -48,46 +51,16 @@ class SafariFraudWarningCheck: Vulnerability {
                     checkstatus = "Red"
                 }
             } else {
-                // Fall back to user defaults
-                checkViaDefaults()
+                // Cannot verify from outside Safari's sandbox on macOS Tahoe.
+                // Manual review required.
+                status = "Cannot verify from outside Safari's sandbox. Check Safari > Settings > Privacy > enable 'Warn when visiting a fraudulent website'."
+                checkstatus = "Yellow"
             }
         } catch let e {
             print("Error checking \(name): \(e)")
             self.error = e
             checkstatus = "Yellow"
             status = "Error checking Safari fraud warning"
-        }
-    }
-
-    private func checkViaDefaults() {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        task.arguments = ["defaults", "read", "com.apple.Safari", "WarnAboutFraudulentWebsites"]
-
-        let outputPipe = Pipe()
-        task.standardOutput = outputPipe
-        task.standardError = Pipe()
-
-        do {
-            try task.run()
-            task.waitUntilExit()
-
-            let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
-                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-
-            if output == "1" {
-                status = "Safari fraudulent website warning is enabled."
-                checkstatus = "Green"
-            } else if output == "0" {
-                status = "Safari fraudulent website warning is disabled."
-                checkstatus = "Red"
-            } else {
-                status = "Safari fraudulent website warning state unknown (default is enabled)."
-                checkstatus = "Yellow"
-            }
-        } catch {
-            checkstatus = "Yellow"
-            status = "Could not verify Safari fraud warning status."
         }
     }
 }
