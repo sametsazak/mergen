@@ -7,6 +7,12 @@
 import Foundation
 
 class ShareMacAnalyticsCheck: Vulnerability {
+    // Authoritative, world-readable plist the system writes when the user
+    // toggles Share Mac Analytics in System Settings.
+    private static let diagnosticsPlistPath =
+        "/Library/Application Support/CrashReporter/DiagnosticMessagesHistory.plist"
+    private static let autoSubmitKey = "AutoSubmit"
+
     init() {
         super.init(
             name: "Share Mac Analytics Is Disabled",
@@ -23,45 +29,57 @@ class ShareMacAnalyticsCheck: Vulnerability {
     }
 
     override func check() {
+        // 1) Prefer an MDM-forced value if one is present (higher priority).
+        if let mdmValue = readMDMValue() {
+            if mdmValue {
+                status = "Share Mac Analytics is enabled (forced by MDM profile)."
+                checkstatus = "Red"
+            } else {
+                status = "Share Mac Analytics is disabled (enforced by MDM profile)."
+                checkstatus = "Green"
+            }
+            return
+        }
+
+        // 2) Otherwise read the world-readable authoritative plist.
+        let path = ShareMacAnalyticsCheck.diagnosticsPlistPath
+
+        if !FileManager.default.fileExists(atPath: path) {
+            // Fresh user: file isn't written until Analytics & Improvements
+            // has been visited, which is equivalent to "never submitted".
+            status = "Share Mac Analytics is disabled (no diagnostics history plist present)."
+            checkstatus = "Green"
+            return
+        }
+
+        guard let dict = NSDictionary(contentsOfFile: path) else {
+            status = "Share Mac Analytics state could not be determined (plist unreadable)."
+            checkstatus = "Yellow"
+            return
+        }
+
+        // Key absent or 0 -> disabled (Green). 1 -> enabled (Red).
+        if let raw = dict[ShareMacAnalyticsCheck.autoSubmitKey] as? NSNumber {
+            if raw.intValue == 1 {
+                status = "Share Mac Analytics is enabled."
+                checkstatus = "Red"
+            } else {
+                status = "Share Mac Analytics is disabled."
+                checkstatus = "Green"
+            }
+        } else {
+            status = "Share Mac Analytics is disabled (AutoSubmit key absent)."
+            checkstatus = "Green"
+        }
+    }
+
+    /// Check whether an MDM configuration profile is forcing AutoSubmit for
+    /// com.apple.SubmitDiagInfo. Returns nil when no profile enforces it.
+    private func readMDMValue() -> Bool? {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         task.arguments = ["-l", "JavaScript", "-e",
             "$.NSUserDefaults.alloc.initWithSuiteName('com.apple.SubmitDiagInfo').objectForKey('AutoSubmit').js"]
-
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
-        task.standardOutput = outputPipe
-        task.standardError = errorPipe
-
-        do {
-            try task.run()
-            task.waitUntilExit()
-
-            let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
-                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-
-            if output == "false" {
-                status = "Share Mac Analytics is disabled."
-                checkstatus = "Green"
-            } else if output == "true" {
-                status = "Share Mac Analytics is enabled."
-                checkstatus = "Red"
-            } else {
-                // Fall back to direct defaults read (user-level)
-                checkViaDefaults()
-            }
-        } catch let e {
-            print("Error checking \(name): \(e)")
-            self.error = e
-            checkstatus = "Yellow"
-            status = "Error checking Share Mac Analytics"
-        }
-    }
-
-    private func checkViaDefaults() {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        task.arguments = ["defaults", "read", "com.apple.SubmitDiagInfo", "AutoSubmit"]
 
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
@@ -70,23 +88,17 @@ class ShareMacAnalyticsCheck: Vulnerability {
         do {
             try task.run()
             task.waitUntilExit()
-
-            let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
-                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-
-            if output == "0" {
-                status = "Share Mac Analytics is disabled."
-                checkstatus = "Green"
-            } else if output == "1" {
-                status = "Share Mac Analytics is enabled."
-                checkstatus = "Red"
-            } else {
-                status = "Share Mac Analytics state could not be determined."
-                checkstatus = "Yellow"
-            }
         } catch {
-            checkstatus = "Yellow"
-            status = "Share Mac Analytics state could not be determined."
+            return nil
+        }
+
+        let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        switch output {
+        case "true", "1":  return true
+        case "false", "0": return false
+        default:           return nil
         }
     }
 }
