@@ -38,8 +38,9 @@ class LocationServicesMenuBarCheck: Vulnerability {
         task.arguments = ["read", "/Library/Preferences/com.apple.locationmenu.plist", "ShowSystemServices"]
 
         let outputPipe = Pipe()
+        let errorPipe = Pipe()
         task.standardOutput = outputPipe
-        task.standardError = Pipe()
+        task.standardError = errorPipe
 
         do {
             try task.run()
@@ -57,10 +58,29 @@ class LocationServicesMenuBarCheck: Vulnerability {
                     checkstatus = "Red"
                 }
             } else {
-                // `defaults read` exited non-zero — typically means the plist
-                // or key is absent, which is treated as disabled.
-                status = "Location Services indicator is disabled (menu bar, or Control Center on macOS 26 Tahoe or later)"
-                checkstatus = "Red"
+                // `defaults read` can exit non-zero for reasons other than a
+                // missing plist/key (invalid domain, exec failure, permissions)
+                // — reporting Red unconditionally would be a false negative.
+                // Surface the failure as Yellow with an error.
+                let stderr = String(
+                    data: errorPipe.fileHandleForReading.readDataToEndOfFile(),
+                    encoding: .utf8
+                )?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let detail = stderr.isEmpty
+                    ? "exit status \(task.terminationStatus)"
+                    : stderr
+                let readError = NSError(
+                    domain: "LocationServicesMenuBarCheck",
+                    code: Int(task.terminationStatus),
+                    userInfo: [
+                        NSLocalizedDescriptionKey:
+                            "defaults read failed for /Library/Preferences/com.apple.locationmenu.plist ShowSystemServices: \(detail)"
+                    ]
+                )
+                print("Error checking \(name): \(readError)")
+                self.error = readError
+                checkstatus = "Yellow"
+                status = "Could not verify Location Services indicator status: \(detail)"
             }
         } catch let e {
             print("Error checking \(name): \(e)")

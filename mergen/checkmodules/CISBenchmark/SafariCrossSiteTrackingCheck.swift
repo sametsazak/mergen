@@ -23,10 +23,13 @@ class SafariCrossSiteTrackingCheck: Vulnerability {
     }
 
     override func check() {
-        // On macOS Tahoe, Safari preferences are fully sandboxed and cannot be
-        // read from an external process via `defaults`. MDM-managed profiles
-        // are still visible through system_profiler, so prefer that signal
-        // when present; otherwise fall back to a manual-verification warning.
+        if ProcessInfo.processInfo.operatingSystemVersion.majorVersion < 26 {
+            checkViaDefaults()
+            return
+        }
+
+        // On macOS Tahoe and newer, Safari preferences are sandboxed and
+        // cannot be read from an external process via `defaults`.
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/sbin/system_profiler")
         task.arguments = ["SPConfigurationProfileDataType"]
@@ -52,8 +55,8 @@ class SafariCrossSiteTrackingCheck: Vulnerability {
                     checkstatus = "Red"
                 }
             } else {
-                // Cannot verify from outside Safari's sandbox on macOS Tahoe.
-                // Manual review required.
+                // Cannot verify from outside Safari's sandbox on Tahoe+ when
+                // the setting is not enforced via MDM. Manual review required.
                 status = "Cannot verify from outside Safari's sandbox. Check Safari > Settings > Privacy > enable 'Prevent cross-site tracking'."
                 checkstatus = "Yellow"
             }
@@ -62,6 +65,35 @@ class SafariCrossSiteTrackingCheck: Vulnerability {
             self.error = e
             checkstatus = "Yellow"
             status = "Error checking Safari cross-site tracking prevention"
+        }
+    }
+
+    private func checkViaDefaults() {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
+        task.arguments = ["read", "com.apple.Safari", "BlockStoragePolicy"]
+
+        let outputPipe = Pipe()
+        task.standardOutput = outputPipe
+        task.standardError = Pipe()
+
+        do {
+            try task.run()
+            task.waitUntilExit()
+
+            let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+            if output == "2" {
+                status = "Safari cross-site tracking prevention is enabled."
+                checkstatus = "Green"
+            } else {
+                status = "Safari cross-site tracking prevention is not fully configured."
+                checkstatus = "Yellow"
+            }
+        } catch {
+            checkstatus = "Yellow"
+            status = "Could not verify Safari cross-site tracking status."
         }
     }
 }

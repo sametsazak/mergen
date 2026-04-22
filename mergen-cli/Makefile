@@ -18,6 +18,7 @@ install: build
 
 ## release: build universal macOS binary (arm64 + amd64)
 release:
+	mkdir -p dist
 	GOOS=darwin GOARCH=arm64  go build $(GOFLAGS) $(LDFLAGS) -o dist/$(BINARY)-darwin-arm64 .
 	GOOS=darwin GOARCH=amd64  go build $(GOFLAGS) $(LDFLAGS) -o dist/$(BINARY)-darwin-amd64 .
 	lipo -create -output dist/$(BINARY)-darwin-universal \

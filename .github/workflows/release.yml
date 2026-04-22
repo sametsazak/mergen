@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to release (e.g. v2.2.0)'
+        description: 'Existing tag to release (e.g. v2.2.0 or v2.2.0-rc.1)'
         required: true
         type: string
 
@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Validate tag format
         run: |
-          if ! printf '%s' "$RAW_TAG" | grep -Eq '^v[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+          if ! printf '%s' "$RAW_TAG" | grep -Eq '^v[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$'; then
             echo "Refusing to release from malformed tag: $RAW_TAG"
             exit 1
           fi
@@ -64,10 +64,9 @@ jobs:
           set -o pipefail
           xcodebuild \
             -project mergen.xcodeproj \
-            -scheme mergen \
+            -target mergen \
             -configuration Release \
             -derivedDataPath build \
-            -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -76,10 +75,24 @@ jobs:
             clean build
 
       - name: Confirm embedded version
+        env:
+          EXPECTED_MARKETING: ${{ steps.version.outputs.marketing }}
+          EXPECTED_BUILD: ${{ steps.version.outputs.build }}
         run: |
           APP=build/Build/Products/Release/mergen.app
-          defaults read "$PWD/$APP/Contents/Info.plist" CFBundleShortVersionString
-          defaults read "$PWD/$APP/Contents/Info.plist" CFBundleVersion
+          INFO_PLIST="$PWD/$APP/Contents/Info.plist"
+          ACTUAL_MARKETING=$(defaults read "$INFO_PLIST" CFBundleShortVersionString)
+          ACTUAL_BUILD=$(defaults read "$INFO_PLIST" CFBundleVersion)
+
+          echo "Expected CFBundleShortVersionString: $EXPECTED_MARKETING"
+          echo "Actual   CFBundleShortVersionString: $ACTUAL_MARKETING"
+          echo "Expected CFBundleVersion: $EXPECTED_BUILD"
+          echo "Actual   CFBundleVersion: $ACTUAL_BUILD"
+
+          if [ "$ACTUAL_MARKETING" != "$EXPECTED_MARKETING" ] || [ "$ACTUAL_BUILD" != "$EXPECTED_BUILD" ]; then
+            echo "Embedded app version metadata does not match derived release version."
+            exit 1
+          fi
 
       - name: Create app zip
         run: |
@@ -126,7 +139,7 @@ jobs:
           tag_name: ${{ env.RAW_TAG }}
           name: Mergen ${{ env.RAW_TAG }}
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(env.RAW_TAG, '-') }}
           generate_release_notes: true
           files: |
             release-artifacts/mergen-${{ steps.version.outputs.marketing }}.app.zip

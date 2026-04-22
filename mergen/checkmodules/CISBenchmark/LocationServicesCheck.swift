@@ -15,7 +15,7 @@ class LocationServicesCheck: Vulnerability {
             category: "CIS Benchmark",
             remediation: "To enable Location Services, go to System Settings > Security & Privacy > Privacy and check the option.",
             severity: "Low",
-            documentation: "This check inspects the com.apple.locationd system LaunchDaemon. On macOS 26 Tahoe, `launchctl list` (no domain) no longer surfaces system daemons, so we probe `launchctl print system/com.apple.locationd` instead and look for `state = running`. A legacy `launchctl list | grep locationd` fallback keeps older macOS versions working.",
+            documentation: "This check inspects the com.apple.locationd system LaunchDaemon. On macOS 26 Tahoe, `launchctl list` (no domain) no longer surfaces system daemons, so we probe `launchctl print system/com.apple.locationd` instead and look for `state = running`. A legacy `launchctl list com.apple.locationd` fallback (exit code 0 = loaded) keeps older macOS versions working.",
             mitigation: "Enabling Location Services allows applications to provide location-based features and services.",
             docID: 50, cisID: "2.6.1.1"
         )

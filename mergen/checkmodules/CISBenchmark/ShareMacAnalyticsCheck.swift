@@ -30,15 +30,24 @@ class ShareMacAnalyticsCheck: Vulnerability {
 
     override func check() {
         // 1) Prefer an MDM-forced value if one is present (higher priority).
-        if let mdmValue = readMDMValue() {
-            if mdmValue {
-                status = "Share Mac Analytics is enabled (forced by MDM profile)."
-                checkstatus = "Red"
-            } else {
-                status = "Share Mac Analytics is disabled (enforced by MDM profile)."
-                checkstatus = "Green"
-            }
+        switch readMDMValue() {
+        case .enforced(true):
+            status = "Share Mac Analytics is enabled (forced by MDM profile)."
+            checkstatus = "Red"
             return
+        case .enforced(false):
+            status = "Share Mac Analytics is disabled (enforced by MDM profile)."
+            checkstatus = "Green"
+            return
+        case .probeError(let message):
+            // Probe itself failed — don't silently fall through to the plist
+            // path, because we can't tell whether an MDM profile is forcing
+            // the value or not.
+            status = "MDM probe for Share Mac Analytics failed: \(message)"
+            checkstatus = "Yellow"
+            return
+        case .unset:
+            break
         }
 
         // 2) Otherwise read the world-readable authoritative plist.
@@ -73,32 +82,50 @@ class ShareMacAnalyticsCheck: Vulnerability {
         }
     }
 
+    /// Result of probing an MDM-forced preference. Separates "no value
+    /// enforced" from "probe itself failed" so callers can surface the latter
+    /// as Yellow instead of silently falling back to other signals.
+    enum MDMProbeResult {
+        case enforced(Bool)
+        case unset
+        case probeError(String)
+    }
+
     /// Check whether an MDM configuration profile is forcing AutoSubmit for
-    /// com.apple.SubmitDiagInfo. Returns nil when no profile enforces it.
-    private func readMDMValue() -> Bool? {
+    /// com.apple.SubmitDiagInfo.
+    private func readMDMValue() -> MDMProbeResult {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         task.arguments = ["-l", "JavaScript", "-e",
             "$.NSUserDefaults.alloc.initWithSuiteName('com.apple.SubmitDiagInfo').objectForKey('AutoSubmit').js"]
 
         let outputPipe = Pipe()
+        let errorPipe = Pipe()
         task.standardOutput = outputPipe
-        task.standardError = Pipe()
+        task.standardError = errorPipe
 
         do {
             try task.run()
             task.waitUntilExit()
         } catch {
-            return nil
+            return .probeError("osascript launch failed: \(error.localizedDescription)")
         }
 
         let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
+        if task.terminationStatus != 0 {
+            let stderr = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let detail = stderr.isEmpty ? "exit status \(task.terminationStatus)" : stderr
+            return .probeError(detail)
+        }
+
         switch output {
-        case "true", "1":  return true
-        case "false", "0": return false
-        default:           return nil
+        case "true", "1":            return .enforced(true)
+        case "false", "0":           return .enforced(false)
+        case "", "undefined", "null": return .unset
+        default:                     return .probeError("unrecognized osascript output: \(output)")
         }
     }
 }

@@ -57,9 +57,15 @@ class PasswordMinLengthCheck: Vulnerability {
                 }
             }
 
-            // Fallback: older/MDM-style profile keys.
+            // Fallback: older/MDM-style profile keys. `minLength` is the MDM
+            // key referenced in the remediation text; `minimumLength` and
+            // `minChars` cover other profile/pwpolicy shapes.
             if lengths.isEmpty {
-                let fallbackPatterns = ["minimumLength\\D+(\\d+)", "minChars\\D+(\\d+)"]
+                let fallbackPatterns = [
+                    "minimumLength\\D+(\\d+)",
+                    "minChars\\D+(\\d+)",
+                    "minLength\\D+(\\d+)",
+                ]
                 for pattern in fallbackPatterns {
                     if let regex = try? NSRegularExpression(pattern: pattern) {
                         let range = NSRange(output.startIndex..., in: output)
@@ -81,7 +87,7 @@ class PasswordMinLengthCheck: Vulnerability {
                     status = "Minimum length: \(maxLen) (< 15 required)"
                     checkstatus = "Red"
                 }
-            } else if output.contains("policyAttributePassword matches") || output.contains("minimumLength") || output.contains("minChars") {
+            } else if output.contains("policyAttributePassword matches") || output.contains("minimumLength") || output.contains("minChars") || output.contains("minLength") {
                 status = "Password length policy found but no minimum-length predicate could be parsed from pwpolicy output."
                 checkstatus = "Yellow"
             } else {
