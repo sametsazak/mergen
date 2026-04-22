@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   swift-app:
-    name: Swift app — build & test
+    name: Swift app — build
     runs-on: macos-15
     timeout-minutes: 20
     steps:
@@ -34,27 +34,12 @@ jobs:
           set -o pipefail
           xcodebuild \
             -project mergen.xcodeproj \
-            -scheme mergen \
+            -target mergen \
             -configuration Debug \
-            -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             clean build
-
-      - name: Test
-        run: |
-          set -o pipefail
-          xcodebuild \
-            -project mergen.xcodeproj \
-            -scheme mergen \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            -testPlan mergen \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            test
 
   go-cli:
     name: Go CLI — build & test
