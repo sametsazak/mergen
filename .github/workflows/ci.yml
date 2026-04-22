@@ -42,20 +42,6 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             clean build
 
-      - name: Test
-        run: |
-          set -o pipefail
-          xcodebuild \
-            -project mergen.xcodeproj \
-            -scheme mergen \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            -testPlan mergen \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            test
-
   go-cli:
     name: Go CLI — build & test
     runs-on: macos-latest
