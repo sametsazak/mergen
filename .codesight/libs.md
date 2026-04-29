@@ -1,0 +1,24 @@
+# Libraries
+
+- `mergen-cli\cmd\root.go` — function SetVersion: (v string), function Execute: ()
+- `mergen-cli\internal\checks\registry.go`
+  - function Register: (c Check)
+  - function All: () []Check
+  - function ByCategory: (cat string) []Check
+  - function BySection: (sec string) []Check
+- `mergen-cli\internal\checks\types.go`
+  - class Result
+  - class FixInfo
+  - class CheckResult
+  - interface Check
+- `mergen-cli\internal\output\printer.go`
+  - function PrintBanner: ()
+  - function StatusBadge: (s checks.Status) string
+  - function StatusIcon: (s checks.Status) string
+  - function PrintCheckResult: (cr checks.CheckResult)
+  - function PrintSectionHeader: (section, title string, count int)
+  - function PrintProgress: (done, total int) string
+  - _...4 more_
+- `mergen-cli\internal\output\styles.go` — function SeverityColor: (sev string) lipgloss.Style
+- `mergen-cli\internal\report\report.go` — function JSON: (results []checks.CheckResult) ([]byte, error), function HTML: (results []checks.CheckResult) string
+- `mergen-cli\internal\runner\runner.go` — function Run: (cs []checks.Check, workers int) <-chan Progress, class Progress
