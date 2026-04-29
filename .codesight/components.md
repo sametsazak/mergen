@@ -1,0 +1,26 @@
+# Components
+
+- **ContentView** [client] — props: selectedVulnerability, isWelcome, scanManager, automated, passCount, failCount, warnCount, score, fixable, scoreColor — `mergen\ContentView.swift`
+- **ResultsTopBar** [client] — props: selectedVulnerability, isWelcome, scanManager, automated, passCount, failCount, warnCount, score, fixable, scoreColor — `mergen\ContentView.swift`
+- **WelcomeView** [client] — props: selectedVulnerability, isWelcome, scanManager, automated, passCount, failCount, warnCount, score, fixable, scoreColor — `mergen\ContentView.swift`
+- **FeatureCard** [client] — props: selectedVulnerability, isWelcome, scanManager, automated, passCount, failCount, warnCount, score, fixable, scoreColor — `mergen\ContentView.swift`
+- **FixAllSheet** [client] — props: scanManager, fixable, adminCount, userCount, isFixing, hasFailures, result, isFixed, isCancelled, rowIcon — `mergen\view\FixAllSheet.swift`
+- **FixRowItem** [client] — props: scanManager, fixable, adminCount, userCount, isFixing, hasFailures, result, isFixed, isCancelled, rowIcon — `mergen\view\FixAllSheet.swift`
+- **LogViewerSheet** [client] — props: lines, filter, keyword, color, filtered, lineColor, timestamp, body_ — `mergen\view\LogViewerSheet.swift`
+- **LogLine** [client] — props: lines, filter, keyword, color, filtered, lineColor, timestamp, body_ — `mergen\view\LogViewerSheet.swift`
+- **ResultsListView** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **FilterSortBar** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **FilterPill** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **ScanProgressBanner** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **ExportButtons** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **EmptyFilterView** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **SectionHeader** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **StatusBadge** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **VulnerabilityRow** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **SeverityDistributionBar** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **SevLegendDot** [client] — props: id, icon, color, scanManager, selectedVulnerability, searchText, statusFilter, sortOrder, base, results — `mergen\view\ScanResultView.swift`
+- **DetailPanelView** [client] — props: scanManager, statusColor, statusIcon, statusLabel, severityColor, hasShellCommands, isFixing, result, isFixed, isCancelled — `mergen\view\VulnerabilityDetailView.swift`
+- **EmptyDetailView** [client] — props: scanManager, statusColor, statusIcon, statusLabel, severityColor, hasShellCommands, isFixing, result, isFixed, isCancelled — `mergen\view\VulnerabilityDetailView.swift`
+- **VulnerabilityDetailView** [client] — props: scanManager, statusColor, statusIcon, statusLabel, severityColor, hasShellCommands, isFixing, result, isFixed, isCancelled — `mergen\view\VulnerabilityDetailView.swift`
+- **AutoFixButton** [client] — props: scanManager, statusColor, statusIcon, statusLabel, severityColor, hasShellCommands, isFixing, result, isFixed, isCancelled — `mergen\view\VulnerabilityDetailView.swift`
+- **BadgeView** [client] — props: scanManager, statusColor, statusIcon, statusLabel, severityColor, hasShellCommands, isFixing, result, isFixed, isCancelled — `mergen\view\VulnerabilityDetailView.swift`
