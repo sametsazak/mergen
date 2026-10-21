@@ -19,11 +19,11 @@ var (
 
 // Status badges (used in detail view)
 var (
-	PassBadge = lipgloss.NewStyle().Bold(true).Foreground(colPass).Render("✓ PASS")
-	FailBadge = lipgloss.NewStyle().Bold(true).Foreground(colFail).Render("✗ FAIL")
-	WarnBadge = lipgloss.NewStyle().Bold(true).Foreground(colWarn).Render("⚠ WARN")
+	PassBadge   = lipgloss.NewStyle().Bold(true).Foreground(colPass).Render("✓ PASS")
+	FailBadge   = lipgloss.NewStyle().Bold(true).Foreground(colFail).Render("✗ FAIL")
+	WarnBadge   = lipgloss.NewStyle().Bold(true).Foreground(colWarn).Render("⚠ WARN")
 	ManualBadge = lipgloss.NewStyle().Bold(true).Foreground(colManual).Render("ℹ INFO")
-	ErrorBadge = lipgloss.NewStyle().Bold(true).Foreground(colError).Render("? ERROR")
+	ErrorBadge  = lipgloss.NewStyle().Bold(true).Foreground(colError).Render("? ERROR")
 )
 
 // Text styles

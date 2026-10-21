@@ -13,13 +13,9 @@ import (
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 var (
-	tuiAccent  = lipgloss.Color("#a78bfa")
-	tuiMuted   = lipgloss.Color("#6b7280")
+	tuiAccent   = lipgloss.Color("#a78bfa")
+	tuiMuted    = lipgloss.Color("#6b7280")
 	tuiSelected = lipgloss.Color("#f9fafb")
-	tuiBorder  = lipgloss.Color("#374151")
-	tuiGreen   = lipgloss.Color("#22c55e")
-	tuiRed     = lipgloss.Color("#ef4444")
-	tuiOrange  = lipgloss.Color("#f97316")
 
 	styleBanner = lipgloss.NewStyle().
 			Foreground(tuiAccent).
@@ -64,11 +60,6 @@ var (
 				Foreground(lipgloss.Color("#9ca3af")).
 				Padding(0, 2)
 
-	styleBox = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(tuiBorder).
-			Padding(1, 3)
-
 	styleTitle = lipgloss.NewStyle().
 			Foreground(tuiAccent).
 			Bold(true).
@@ -78,11 +69,11 @@ var (
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 type menuEntry struct {
-	icon    string
-	label   string
-	desc    string
+	icon     string
+	label    string
+	desc     string
 	shortcut string
-	action  string // cobra subcommand or special key
+	action   string // cobra subcommand or special key
 }
 
 var mainMenu = []menuEntry{
@@ -116,11 +107,11 @@ const (
 )
 
 type tuiModel struct {
-	screen      screen
-	cursor      int
-	secCursor   int
-	chosen      string // set when user makes a selection
-	quitting    bool
+	screen    screen
+	cursor    int
+	secCursor int
+	chosen    string // set when user makes a selection
+	quitting  bool
 }
 
 func initialModel() tuiModel {
@@ -255,7 +246,7 @@ func (m tuiModel) mainMenuView() string {
 		shortcut := styleShortcut.Render("[" + item.shortcut + "]")
 		desc := styleMenuDesc.Render(item.desc)
 
-		b.WriteString(fmt.Sprintf("%s %s  %s  %s\n", cursor, label, shortcut, desc))
+		fmt.Fprintf(&b, "%s %s  %s  %s\n", cursor, label, shortcut, desc)
 	}
 
 	b.WriteString(styleHelp.Render("\n  ↑↓ / jk navigate  ·  enter select  ·  shortcut key  ·  q quit"))
@@ -278,7 +269,7 @@ func (m tuiModel) sectionView() string {
 		} else {
 			label = styleSectionNormal.Render(sec.label)
 		}
-		b.WriteString(fmt.Sprintf("%s %s\n", cursor, label))
+		fmt.Fprintf(&b, "%s %s\n", cursor, label)
 	}
 
 	b.WriteString(styleHelp.Render("\n  ↑↓ navigate  ·  enter select  ·  esc / b back  ·  q quit"))

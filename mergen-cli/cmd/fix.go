@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	flagFixID    string
-	flagFixAll   bool
+	flagFixID     string
+	flagFixAll    bool
 	flagFixDryRun bool
 )
 

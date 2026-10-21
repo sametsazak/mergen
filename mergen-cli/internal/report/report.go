@@ -140,7 +140,7 @@ func HTML(results []checks.CheckResult) string {
 			fixTag = `<span class="fix-badge">auto-fix</span>`
 		}
 
-		rows.WriteString(fmt.Sprintf(`
+		fmt.Fprintf(&rows, `
 		<tr class="%s">
 		  <td class="cis">%s</td>
 		  <td>%s %s</td>
@@ -158,7 +158,7 @@ func HTML(results []checks.CheckResult) string {
 			html.EscapeString(r.Check.Severity()),
 			statusLabel,
 			html.EscapeString(r.Result.Output),
-		))
+		)
 	}
 
 	return fmt.Sprintf(`<!DOCTYPE html>
