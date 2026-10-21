@@ -1,0 +1,11 @@
+# golangci-lint configuration for mergen-cli.
+# Used by `make lint` locally and by .github/workflows/lint.yml on pull requests.
+version: "2"
+
+linters:
+  # errcheck, govet, ineffassign, staticcheck, unused
+  default: standard
+
+formatters:
+  enable:
+    - gofmt

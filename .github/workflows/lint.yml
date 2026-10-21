@@ -1,0 +1,68 @@
+name: Lint & Quality
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go-lint:
+    name: Go CLI — golangci-lint
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: mergen-cli/go.mod
+          cache-dependency-path: mergen-cli/go.sum
+
+      # Only issues introduced by the PR fail the job. `make lint` gives the
+      # full report locally.
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.14.0
+          working-directory: mergen-cli
+          only-new-issues: true
+
+  swift-lint:
+    name: Swift app — SwiftLint
+    runs-on: macos-15
+    timeout-minutes: 10
+    env:
+      SWIFTLINT_VERSION: 0.65.1
+      SWIFTLINT_SHA256: c1e429b0599cf1b516f369a2d9ec04eaf0e436f3c12b637df8851fa52ff694d0
+    steps:
+      # The PR merge commit and its first parent (the base branch).
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install SwiftLint
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip"
+          echo "${SWIFTLINT_SHA256}  $RUNNER_TEMP/swiftlint.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/swiftlint.zip" -d "$RUNNER_TEMP/swiftlint"
+          echo "$RUNNER_TEMP/swiftlint" >> "$GITHUB_PATH"
+
+      # Errors fail the job; warnings are shown as annotations on the PR.
+      - name: Lint Swift files changed in this PR
+        run: |
+          git diff --name-only --diff-filter=ACMR HEAD^1 HEAD -- '*.swift' > "$RUNNER_TEMP/changed.txt"
+          if [ ! -s "$RUNNER_TEMP/changed.txt" ]; then
+            echo "No Swift files changed."
+            exit 0
+          fi
+          cat "$RUNNER_TEMP/changed.txt"
+          tr '\n' '\0' < "$RUNNER_TEMP/changed.txt" \
+            | xargs -0 swiftlint lint --quiet --reporter github-actions-logging

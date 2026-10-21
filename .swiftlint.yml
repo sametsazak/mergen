@@ -1,0 +1,32 @@
+# SwiftLint configuration for the Mergen app.
+# Used locally (`swiftlint lint` from the repo root) and by
+# .github/workflows/lint.yml on pull requests.
+#
+# Default rules apply. The overrides below match conventions already used
+# across the codebase, so the current sources lint with zero errors; style
+# findings stay as warnings. Tighten them as the code gets cleaned up.
+
+included:
+  - mergen
+
+# `catch let e`, `{ v in ... }` and similar short names are used throughout.
+identifier_name:
+  min_length: 1
+  allowed_symbols: ["_"]
+
+# Product names that start with a lowercase letter.
+type_name:
+  excluded:
+    - iCloudDriveCheck
+    - iCloudKeychainCheck
+
+# FixCommands.swift aligns dictionary values into columns.
+colon:
+  flexible_right_spacing: true
+
+# HTMLReportGenerator builds its whole template in one function.
+function_body_length:
+  error: 300
+
+type_body_length:
+  error: 450

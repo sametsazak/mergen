@@ -3,7 +3,7 @@ VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "d
 LDFLAGS   = -ldflags "-X main.version=$(VERSION) -s -w"
 GOFLAGS   = -trimpath
 
-.PHONY: all build install clean test tidy release
+.PHONY: all build install clean test lint tidy release
 
 all: build
 
@@ -28,6 +28,10 @@ release:
 ## test: run all tests
 test:
 	go test ./...
+
+## lint: run golangci-lint with .golangci.yml (same linters as CI)
+lint:
+	golangci-lint run ./...
 
 ## tidy: tidy and vendor modules
 tidy:

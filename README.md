@@ -18,7 +18,7 @@ I'm keeping the releases updated. If you find a bug or something feels off, plea
 
 [![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-lightgrey?style=flat-square)](https://github.com/sametsazak/mergen)
 [![Swift](https://img.shields.io/badge/swift-5.9-orange?style=flat-square)](https://swift.org)
-[![Go](https://img.shields.io/badge/go-1.21+-00ADD8?style=flat-square)](https://go.dev)
+[![Go](https://img.shields.io/badge/go-1.24+-00ADD8?style=flat-square)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.2-brightgreen?style=flat-square)](https://github.com/sametsazak/mergen/releases)
 [![CIS Benchmark](https://img.shields.io/badge/CIS-macOS%2026%20Tahoe%20v1.0.0-red?style=flat-square)](https://www.cisecurity.org)
@@ -43,6 +43,7 @@ Available as a native **SwiftUI app** and a **Go CLI** — pick whichever fits y
 - [Checks Reference](#checks-reference)
 - [How Auto-Fix Works](#how-auto-fix-works)
 - [macOS 26 Tahoe Compatibility](#macos-26-tahoe-compatibility)
+- [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -158,7 +159,7 @@ go build -o mergen .
 sudo mv mergen /usr/local/bin/   # optional: install system-wide
 ```
 
-**Requirements:** Go 1.21+, macOS 13+
+**Requirements:** Go 1.24+, macOS 13+
 
 ### Commands
 
@@ -425,9 +426,68 @@ In both the app and CLI, all admin fixes within a single session are batched int
 
 ---
 
+## Development
+
+### Prerequisites
+
+- macOS with Xcode (CI uses the newest Xcode on the `macos-15` runner)
+- Go — the version declared in [`mergen-cli/go.mod`](mergen-cli/go.mod) (1.24+)
+- To reproduce the pull-request checks locally: [golangci-lint](https://golangci-lint.run) v2.14.0 and [SwiftLint](https://github.com/realm/SwiftLint) 0.65.1
+
+```bash
+brew install golangci-lint swiftlint   # latest releases; CI pins the versions above
+```
+
+### Build
+
+```bash
+# SwiftUI app — unsigned Debug build, same command as CI
+xcodebuild -project mergen.xcodeproj -scheme mergen -configuration Debug \
+  -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
+
+# CLI — produces ./mergen
+cd mergen-cli
+make build
+```
+
+### Run the tests
+
+```bash
+cd mergen-cli
+make test                        # go test ./...
+go test -v ./internal/checks/    # verbose, checks package only
+```
+
+Keep the parsing of command output in plain functions next to each check and cover them with table-driven tests (`*_test.go`), so tests never run system commands. The SwiftUI app has no unit-test target yet; a clean `xcodebuild` build is the current check.
+
+### Lint
+
+```bash
+# Go — run from mergen-cli/
+make lint                                            # full report
+golangci-lint run --new-from-rev=origin/main ./...   # only new issues, like CI
+golangci-lint fmt                                    # apply gofmt
+
+# Swift — run from the repository root
+swiftlint lint                                       # whole app
+swiftlint lint mergen/core/FixCommands.swift         # given files, like CI
+```
+
+Configuration lives in [`mergen-cli/.golangci.yml`](mergen-cli/.golangci.yml) (errcheck, govet, ineffassign, staticcheck, unused, gofmt) and [`.swiftlint.yml`](.swiftlint.yml) (default rules, adjusted to the existing code so it lints with zero errors).
+
+### Continuous integration
+
+| Workflow | Runs on | What it checks |
+|----------|---------|----------------|
+| [CI](.github/workflows/ci.yml) | Pushes to `main`, pull requests | App build; `go mod tidy`, `go vet`, `go test`; CLI builds |
+| [Lint & Quality](.github/workflows/lint.yml) | Pull requests only | golangci-lint on issues introduced by the PR; SwiftLint on the Swift files the PR changes (errors fail the job, warnings are annotated) |
+| [Release](.github/workflows/release.yml) | Version tags | Signed and notarized release artifacts |
+
+---
+
 ## Contributing
 
-Issues, pull requests, and new checks are all welcome.
+Issues, pull requests, and new checks are all welcome. Before opening a pull request, run the build, tests and linters described in [Development](#development).
 
 **To add a check to the SwiftUI app:** subclass `Vulnerability` in `mergen/checkmodules/`, register it in `Scanner.swift`, and optionally add a fix command to `FixCommands.swift`.
 

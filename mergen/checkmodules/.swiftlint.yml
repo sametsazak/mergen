@@ -1,0 +1,4 @@
+# Check modules keep their user-facing name, description and remediation
+# strings on a single line, so line length is not enforced here.
+disabled_rules:
+  - line_length
