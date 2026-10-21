@@ -7,15 +7,17 @@
 
 import Foundation
 
-//This implementation uses two separate processes to execute the ps and grep commands, and passes output from the first process to the second process using a pipe. The grep command searches the output for the ARDAgent process, which is an indicator that Remote Management is enabled.
+// Remote Management is on while the ARDAgent process runs, so the check looks for its binary in `ps -ef` output.
 
 class RemoteManagementDisabledCheck: Vulnerability {
+    private static let ardAgentPath = "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/ARDAgent"
+
     init() {
         super.init(
             name: "Remote management disabled",
             description: "This check ensures that the Remote Management (ARDagent) feature is disabled to prevent unauthorized access to your computer.",
             category: "CIS Benchmark",
-            remediation: "To disable Remote Management, go to System Settings > Sharing and uncheck the 'Remote Management' option.",
+            remediation: "Go to System Settings > General > Sharing and turn off 'Remote Management'. Or run: sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop",
             severity: "Medium",
             documentation: "https://support.apple.com/guide/mac-help/remote-management-mh14074/mac",
             mitigation: "Disabling Remote Management minimizes the risk of unauthorized access to your computer by reducing the ways an attacker can remotely control your system.",
@@ -27,23 +29,23 @@ class RemoteManagementDisabledCheck: Vulnerability {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/ps")
         task.arguments = ["-ef"]
-        
-        let grepTask = Process()
-        grepTask.executableURL = URL(fileURLWithPath: "/usr/bin/grep")
-        grepTask.arguments = ["-e", "ARDAgent", "-v", "grep"]
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
+
+        let outputPipe = Pipe()
+        task.standardOutput = outputPipe
         task.standardError = Pipe()
-        grepTask.standardInput = pipe
-        
+
         do {
             try task.run()
-            try grepTask.run()
+            // Read before waiting: the process list can exceed the pipe buffer.
+            let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
             task.waitUntilExit()
-            grepTask.waitUntilExit()
-            
-            if grepTask.terminationStatus == 0 {
+
+            let output = String(data: outputData, encoding: .utf8) ?? ""
+
+            if task.terminationStatus != 0 {
+                status = "Error checking Remote Management status (ps exited with \(task.terminationStatus))"
+                checkstatus = "Yellow"
+            } else if output.contains(Self.ardAgentPath) {
                 status = "Remote Management is Enabled"
                 checkstatus = "Red"
             } else {

@@ -1,7 +1,17 @@
 package checks
 
+import "strings"
+
 // CIS 2.3.3.5 — Remote Management (ARD) disabled
 // CIS 2.3.3.6 — Remote Apple Events disabled
+
+// ardAgentPath is the process that runs while Remote Management is on.
+const ardAgentPath = "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/ARDAgent"
+
+// ardAgentRunning reports whether `ps -ef` output lists the ARDAgent process.
+func ardAgentRunning(ps string) bool {
+	return strings.Contains(ps, ardAgentPath)
+}
 
 func init() {
 	Register(newCheck(
@@ -15,8 +25,12 @@ func init() {
 			"Remote Management (ARD) will be deactivated and stopped.",
 		),
 		func() Result {
-			if launchctlRunning("com.apple.RemoteDesktop.agent") {
-				return Result{StatusFail, "Remote Management (ARD) is running"}
+			out, err := run("/bin/ps", "-ef")
+			if err != nil {
+				return unknownWarn("ps -ef: " + err.Error())
+			}
+			if ardAgentRunning(out) {
+				return Result{StatusFail, "Remote Management (ARDAgent) is running"}
 			}
 			return Result{StatusPass, "Remote Management is not running"}
 		},
