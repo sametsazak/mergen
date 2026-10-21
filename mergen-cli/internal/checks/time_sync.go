@@ -1,25 +1,48 @@
 package checks
 
-// CIS 2.3.2.1 — Time set automatically
+import "regexp"
+
+// CIS 2.3.2.1 — Time set automatically (network time)
 // CIS 2.3.2.2 — Time within appropriate limits (manual)
+
+// networkTimeFix keeps an already configured time server and only falls back
+// to time.apple.com (the CIS example) when /etc/ntp.conf has none.
+const networkTimeFix = "(grep -qE '^[[:space:]]*server[[:space:]]' /etc/ntp.conf 2>/dev/null || systemsetup -setnetworktimeserver time.apple.com; systemsetup -setusingnetworktime on)"
+
+var networkTimeRe = regexp.MustCompile(`Network Time:\s*(On|Off)\b`)
+
+// networkTimeResult interprets `systemsetup -getusingnetworktime`. Without
+// root, systemsetup exits 0 and prints a notice instead of the setting.
+func networkTimeResult(out string) Result {
+	if m := networkTimeRe.FindStringSubmatch(out); m != nil {
+		if m[1] == "On" {
+			return Result{StatusPass, "Network time sync is on"}
+		}
+		return Result{StatusFail, "Network time sync is off"}
+	}
+	if contains(out, "administrator access") {
+		return Result{StatusWarn, "Requires admin to verify — run: sudo systemsetup -getusingnetworktime"}
+	}
+	return unknownWarn("unexpected systemsetup output: " + out)
+}
 
 func init() {
 	Register(newCheck(
 		"2.3.2.1", "Time set automatically",
 		"2", "CIS Benchmark", "Medium",
-		"Automatic NTP sync prevents clock skew that can affect authentication and logging.",
-		"sudo defaults write /Library/Preferences/com.apple.timezone.auto.plist Active -int 1",
+		"Automatic network time sync prevents clock skew that can affect authentication and logging.",
+		"sudo systemsetup -setnetworktimeserver time.apple.com && sudo systemsetup -setusingnetworktime on",
 		false,
 		adminFix(
-			"defaults write /Library/Preferences/com.apple.timezone.auto.plist Active -int 1",
+			networkTimeFix,
 			"System clock will sync automatically with a network time server.",
 		),
 		func() Result {
-			out, err := defaultsRead("/Library/Preferences/com.apple.timezone.auto.plist", "Active")
-			if err != nil || trim(out) != "1" {
-				return Result{StatusFail, "Automatic time is not enabled"}
+			out, err := run("/usr/sbin/systemsetup", "-getusingnetworktime")
+			if err != nil && out == "" {
+				return unknownWarn("systemsetup: " + err.Error())
 			}
-			return Result{StatusPass, "Automatic time sync is active"}
+			return networkTimeResult(out)
 		},
 	))
 

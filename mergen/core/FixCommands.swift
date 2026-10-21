@@ -66,8 +66,8 @@ extension Vulnerability {
         "2.2.1":     "/usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on",
         // 2.2.2  Stealth mode on
         "2.2.2":     "/usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on",
-        // 2.3.2.1  Set time automatically — check reads com.apple.timezone.auto.plist Active
-        "2.3.2.1":   "defaults write /Library/Preferences/com.apple.timezone.auto.plist Active -int 1",
+        // 2.3.2.1  Network time on — keeps an existing NTP server, else time.apple.com (CIS example)
+        "2.3.2.1":   "(grep -qE '^[[:space:]]*server[[:space:]]' /etc/ntp.conf 2>/dev/null || systemsetup -setnetworktimeserver time.apple.com; systemsetup -setusingnetworktime on)",
         // 2.3.3.1  Screen sharing off (stop is best-effort; disable persists across reboot)
         "2.3.3.1":   "launchctl disable system/com.apple.screensharing; launchctl stop com.apple.screensharing 2>/dev/null; true",
         // 2.3.3.2  File sharing off
