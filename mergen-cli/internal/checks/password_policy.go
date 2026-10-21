@@ -2,12 +2,65 @@ package checks
 
 import (
 	"fmt"
+	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 // CIS 5.2.1 — Password lockout threshold ≤ 5
 // CIS 5.2.2 — Minimum password length ≥ 15
+
+var (
+	// policyAttributePassword matches '.{15,}' — with an optional ? or + quantifier.
+	minLengthPredicateRe = regexp.MustCompile(`policyAttributePassword matches '\.\{(\d+),\}[?+]?'`)
+	// Policy parameters, used when no length predicate is present.
+	minLengthParamRes = []*regexp.Regexp{
+		regexp.MustCompile(`minimumLength\D+(\d+)`),
+		regexp.MustCompile(`minChars\D+(\d+)`),
+	}
+)
+
+// passwordMinLength returns the effective minimum length in
+// `pwpolicy -getaccountpolicies` output, with the same rules as
+// PasswordMinLengthCheck.swift: the largest `.{N,}` predicate, else the
+// largest minimumLength / minChars parameter.
+func passwordMinLength(out string) (int, bool) {
+	lengths := submatchInts(minLengthPredicateRe, out)
+	if len(lengths) == 0 {
+		for _, re := range minLengthParamRes {
+			lengths = append(lengths, submatchInts(re, out)...)
+		}
+	}
+	if len(lengths) == 0 {
+		return 0, false
+	}
+	return slices.Max(lengths), true
+}
+
+// submatchInts returns the first capture group of every match of re in s.
+func submatchInts(re *regexp.Regexp, s string) []int {
+	var ns []int
+	for _, m := range re.FindAllStringSubmatch(s, -1) {
+		if n, err := strconv.Atoi(m[1]); err == nil {
+			ns = append(ns, n)
+		}
+	}
+	return ns
+}
+
+func passwordMinLengthResult(out string) Result {
+	n, ok := passwordMinLength(out)
+	switch {
+	case ok && n >= 15:
+		return Result{StatusPass, fmt.Sprintf("Minimum password length is %d", n)}
+	case ok:
+		return Result{StatusFail, fmt.Sprintf("Minimum password length is %d (should be ≥ 15)", n)}
+	case contains(out, "policyAttributePassword matches") || contains(out, "minimumLength") || contains(out, "minChars"):
+		return Result{StatusWarn, "Password length policy found but its minimum could not be parsed"}
+	}
+	return Result{StatusFail, "No minimum password length policy is configured"}
+}
 
 func init() {
 	Register(newCheck(
@@ -61,10 +114,7 @@ func init() {
 			if err != nil || out == "" {
 				return Result{StatusWarn, "Could not read password policy (may require admin)"}
 			}
-			if !contains(out, "minChars") {
-				return Result{StatusFail, "No minimum password length policy is configured"}
-			}
-			return Result{StatusPass, "Minimum password length policy is configured"}
+			return passwordMinLengthResult(out)
 		},
 	))
 }
