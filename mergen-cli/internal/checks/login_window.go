@@ -7,6 +7,18 @@ package checks
 // CIS 2.13.2 — Guest access to shared folders disabled
 // CIS 2.13.3 — Automatic login disabled
 
+// smbGuestAccessResult interprets `sysadminctl -smbGuestAccess status`, which
+// reports on stderr and does not require root.
+func smbGuestAccessResult(out string) Result {
+	switch {
+	case contains(out, "SMB guest access disabled"):
+		return Result{StatusPass, "Guest access to shared folders is disabled"}
+	case contains(out, "SMB guest access enabled"):
+		return Result{StatusFail, "Guest access to shared folders is enabled"}
+	}
+	return unknownWarn("unexpected sysadminctl output: " + out)
+}
+
 func init() {
 	Register(newCheck(
 		"2.11.3", "Login window message configured",
@@ -84,18 +96,18 @@ func init() {
 		"2.13.2", "Guest access to shared folders disabled",
 		"2", "CIS Benchmark", "Medium",
 		"Guests can read shared folders without any authentication when this is enabled.",
-		"sudo defaults write /Library/Preferences/com.apple.AppleFileServer guestAccess -int 0",
+		"sudo sysadminctl -smbGuestAccess off",
 		false,
 		adminFix(
-			"defaults write /Library/Preferences/com.apple.AppleFileServer guestAccess -int 0",
+			"sysadminctl -smbGuestAccess off",
 			"Guest access to shared folders will be disabled.",
 		),
 		func() Result {
-			out, err := defaultsRead("/Library/Preferences/com.apple.AppleFileServer", "guestAccess")
-			if err == nil && trim(out) == "1" {
-				return Result{StatusFail, "Guest access to shared folders is enabled"}
+			out, err := run("/usr/sbin/sysadminctl", "-smbGuestAccess", "status")
+			if err != nil && out == "" {
+				return unknownWarn("sysadminctl: " + err.Error())
 			}
-			return Result{StatusPass, "Guest access to shared folders is disabled"}
+			return smbGuestAccessResult(out)
 		},
 	))
 

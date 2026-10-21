@@ -13,7 +13,7 @@ class GuestConnectCheck: Vulnerability {
             name: "Guest access to shared folders disabled",
             description: "This check ensures that the 'Allow guests to connect to shared folders' option is disabled on your system, which helps protect against unauthorized access to your computer.",
             category: "CIS Benchmark",
-            remediation: "To disable 'Allow guests to connect to shared folders', go to System Settings > Sharing, and uncheck the 'Allow guests to connect to shared folders' option.",
+            remediation: "Go to System Settings > Users & Groups, click the info button next to Guest User, and turn off 'Allow guests to connect to shared folders'. Or run: sudo sysadminctl -smbGuestAccess off",
             severity: "Medium",
             documentation: "For more information on disabling 'Allow guests to connect to shared folders', visit: https://support.apple.com/guide/mac-help/share-mac-files-with-windows-users-mh14132/mac",
             mitigation: "By disabling 'Allow guests to connect to shared folders', you reduce the risk of unauthorized access to your computer's shared folders, enhancing its security.",
@@ -23,12 +23,13 @@ class GuestConnectCheck: Vulnerability {
 
     override func check() {
         let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
-        task.arguments = ["read", "/Library/Preferences/com.apple.AppleFileServer", "guestAccess"]
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/sysadminctl")
+        task.arguments = ["-smbGuestAccess", "status"]
 
+        // sysadminctl reports on stderr.
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
-        task.standardError = Pipe()
+        task.standardError = outputPipe
 
         do {
             try task.run()
@@ -37,13 +38,15 @@ class GuestConnectCheck: Vulnerability {
             let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-            // defaults read returns "0" (disabled) or "1" (enabled)
-            if output == "0" || task.terminationStatus != 0 {
+            if output.contains("SMB guest access disabled") {
                 status = "Guest access to shared folders is disabled"
                 checkstatus = "Green"
-            } else {
+            } else if output.contains("SMB guest access enabled") {
                 status = "Guest access to shared folders is enabled"
                 checkstatus = "Red"
+            } else {
+                status = "Unexpected sysadminctl output: \(output)"
+                checkstatus = "Yellow"
             }
         } catch let e {
             print("Error checking \(name): \(e)")
@@ -53,4 +56,3 @@ class GuestConnectCheck: Vulnerability {
         }
     }
 }
-

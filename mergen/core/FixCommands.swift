@@ -102,8 +102,8 @@ extension Vulnerability {
         "2.11.5":    "defaults write /Library/Preferences/com.apple.loginwindow RetriesUntilHint -int 0",
         // 2.13.1   Guest login off — check reads com.apple.loginwindow.plist GuestEnabled
         "2.13.1":    "defaults write /Library/Preferences/com.apple.loginwindow.plist GuestEnabled -bool false",
-        // 2.13.2   Guest network access off — check reads com.apple.AppleFileServer guestAccess
-        "2.13.2":    "defaults write /Library/Preferences/com.apple.AppleFileServer guestAccess -int 0",
+        // 2.13.2   SMB guest access to shared folders off — check reads sysadminctl -smbGuestAccess status
+        "2.13.2":    "sysadminctl -smbGuestAccess off",
         // 2.13.3   Auto-login off (delete is best-effort — key may already be absent)
         "2.13.3":    "defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null; true",
         // 4.1      Bonjour multicast advertising off
